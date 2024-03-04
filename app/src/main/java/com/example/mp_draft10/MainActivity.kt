@@ -5,11 +5,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
-import androidx.compose.material3.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -17,22 +14,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.BlendMode.Companion.Screen
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.mp_draft10.auth.SignUpScreen
-import com.example.mp_draft10.auth.SignInScreen
-import com.example.mp_draft10.screens.ChatScreen
-import com.example.mp_draft10.screens.InsightsScreen
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.mp_draft10.auth.SignInViewModel
+import com.example.mp_draft10.auth.SignUpViewModel
 import com.example.mp_draft10.screens.TodayScreen
 import com.example.mp_draft10.ui.theme.MP_draft10Theme
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -42,18 +35,27 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MP_draft10Theme {
+                val db = Firebase.firestore
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    val signUpViewModel: SignUpViewModel = hiltViewModel()
+                    val signInViewModel: SignInViewModel = hiltViewModel()
+                    val navController = rememberNavController()
+                    NavigationAuthentication(
+                        navController = navController,
+                        signUpViewModel = signUpViewModel,
+                        signInViewModel = signInViewModel
+                    )
 //                    MainScreen()
-                    Navigation()
                 }
             }
         }
     }
 }
+
 
 //@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 //@Composable
@@ -85,16 +87,17 @@ class MainActivity : ComponentActivity() {
 //    }
 //}
 
-@Composable
-fun Navigation( navController: NavHostController = rememberNavController()){
-    NavHost(navController, startDestination = AppRoutes.SignUp.route ){
-        composable(route = AppRoutes.SignIn.route){
-            SignInScreen() }
-        composable(route = AppRoutes.SignUp.route){
-            SignUpScreen() }
-    }
-}
-
+//@Composable
+//fun Navigation(navController: NavHostController = rememberNavController()) {
+//    NavHost(navController, startDestination = AppRoutes.SignUp.route) {
+//        composable(route = AppRoutes.SignIn.route) {
+//            SignInScreen()
+//        }
+//        composable(route = AppRoutes.SignUp.route) {
+//            SignUpScreen()
+//        }
+//    }
+//}
 
 @Composable
 fun BottomNavigationBar(navController: NavController) {

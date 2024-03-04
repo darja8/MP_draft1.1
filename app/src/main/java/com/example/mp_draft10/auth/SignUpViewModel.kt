@@ -3,7 +3,6 @@ package com.example.mp_draft10.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mp_draft10.auth.util.Resource
-import dagger.hilt.android.HiltAndroidApp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -17,10 +16,10 @@ class SignUpViewModel @Inject constructor(private val repository: AuthRepository
     val signUpState = _signUpState.receiveAsFlow()
 
     fun registerUser(email: String, password: String) = viewModelScope.launch {
-        repository.loginUser(email,password).collect{result ->
+        repository.registerUser(email,password).collect{result ->
             when(result){
                 is Resource.Success ->{
-                    _signUpState.send(SignInState(isSuccess = "Sign in success"))
+                    _signUpState.send(SignInState(isSuccess = "Sign up success"))
                 }
                 is Resource.Loading ->{
                     _signUpState.send(SignInState(isLoading = true))

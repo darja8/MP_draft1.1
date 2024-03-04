@@ -3,13 +3,17 @@ package com.example.mp_draft10.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mp_draft10.auth.util.Resource
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SignInViewModel(private val repository: AuthRepository) : ViewModel() {
 
-    private val _signInState = Channel<SignInState>()
+@HiltViewModel
+class SignInViewModel @Inject constructor(private val repository: AuthRepository): ViewModel() {
+
+    val _signInState = Channel<SignInState>()
     val signInState = _signInState.receiveAsFlow()
 
     fun loginUser(email: String, password: String) = viewModelScope.launch {
