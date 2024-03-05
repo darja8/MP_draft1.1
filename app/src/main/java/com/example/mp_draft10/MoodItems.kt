@@ -2,19 +2,18 @@ package com.example.mp_draft10
 import androidx.annotation.DrawableRes
 
 val moodItems = mutableListOf(
-    MoodItem("Anxious", R.drawable.circle_outline),
-    MoodItem("Happy", R.drawable.circle_outline),
-    MoodItem("Sad", R.drawable.circle_outline),
-    MoodItem("Confused", R.drawable.circle_outline),
-    MoodItem("Depressed", R.drawable.circle_outline),
-    MoodItem("Irritated", R.drawable.circle_outline),
-    MoodItem("Lonely", R.drawable.circle_outline),
-    MoodItem("Stressed", R.drawable.circle_outline),
-    MoodItem("Worried", R.drawable.circle_outline),
-    MoodItem("Uncomfortable", R.drawable.circle_outline),
-    MoodItem("Satisfied", R.drawable.circle_outline),
-    MoodItem("Loved", R.drawable.circle_outline),
-    MoodItem("Excited", R.drawable.circle_outline)
+    MoodItem("Anxious", R.drawable.anxious),
+    MoodItem("Happy", R.drawable.happy),
+    MoodItem("Sad", R.drawable.sad),
+    MoodItem("Confused", R.drawable.confused),
+    MoodItem("Depressed", R.drawable.depressed),
+    MoodItem("Irritated", R.drawable.irritated),
+    MoodItem("Lonely", R.drawable.lonely),
+    MoodItem("Stressed", R.drawable.stressed),
+    MoodItem("Worried", R.drawable.worried),
+    MoodItem("Upset", R.drawable.upset),
+    MoodItem("Loved", R.drawable.loved),
+    MoodItem("Excited", R.drawable.excited)
 )
 
 

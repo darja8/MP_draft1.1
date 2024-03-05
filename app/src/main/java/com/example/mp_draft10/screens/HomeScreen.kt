@@ -3,6 +3,7 @@ package com.example.mp_draft10.screens
 import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -143,7 +145,7 @@ fun MoodRatingSquareView(onMoodSelected: (Int) -> Unit) {
             .fillMaxWidth()
             .padding(16.dp)
             .background(
-                color = MaterialTheme.colorScheme.primaryContainer,
+                color = MaterialTheme.colorScheme.tertiaryContainer,
                 shape = RoundedCornerShape(16.dp)
             )
             .height(110.dp) // Adjusted height for horizontal layout
@@ -225,10 +227,10 @@ fun MoodAndSymptomSquareView(
             .fillMaxWidth()
             .padding(16.dp)
             .background(
-                color = MaterialTheme.colorScheme.primaryContainer,
+                color = MaterialTheme.colorScheme.tertiaryContainer,
                 shape = RoundedCornerShape(16.dp)
             )
-            .height(370.dp)
+            .height(380.dp)
             .padding(start = 4.dp, end = 4.dp)
     ) {
         Column(
@@ -285,20 +287,22 @@ fun MoodItemView(moodItem: MoodItem) {
             .clickable {}
             .padding(horizontal = 1.dp, vertical = 3.dp)
             .background(
-                color = MaterialTheme.colorScheme.secondaryContainer,
+                color = MaterialTheme.colorScheme.onSecondary,
                 shape = RoundedCornerShape(20.dp)
             )
             .padding(horizontal = 1.dp, vertical = 1.dp)
-    ) {Row(
+    ) {
+        Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .clickable {}
             .padding(horizontal = 8.dp, vertical = 5.dp)
     ) {
-        Icon(
+        Image(
             painter = painterResource(id = moodItem.icon),
             contentDescription = null,
-            modifier = Modifier.size(20.dp) // Adjust size as needed
+            modifier = Modifier.size(20.dp),
+            contentScale = ContentScale.Fit
         )
         Spacer(modifier = Modifier.width(2.dp)) // Add spacing between icon and text
         Text(
@@ -318,7 +322,7 @@ fun SymptomItemView(symptomItem: SymptomItem) {
             .clickable {}
             .padding(horizontal = 1.dp, vertical = 1.dp)
             .background(
-                color = MaterialTheme.colorScheme.secondaryContainer,
+                color = MaterialTheme.colorScheme.onSecondary,
                 shape = RoundedCornerShape(20.dp)
             )
             .padding(horizontal = 1.dp, vertical = 1.dp)
@@ -329,10 +333,11 @@ fun SymptomItemView(symptomItem: SymptomItem) {
             .clickable {}
             .padding(horizontal = 8.dp, vertical = 5.dp)
     ) {
-        Icon(
+        Image(
             painter = painterResource(id = symptomItem.icon),
             contentDescription = null,
-            modifier = Modifier.size(20.dp)
+            modifier = Modifier.size(20.dp),
+            contentScale = ContentScale.Fit
         )
         Spacer(modifier = Modifier.width(2.dp)) // Add spacing between icon and text
         Text(
@@ -340,12 +345,10 @@ fun SymptomItemView(symptomItem: SymptomItem) {
             fontSize = 13.sp,
             color = MaterialTheme.colorScheme.onSecondaryContainer
         )
-    }}
+        }
+    }
 
 }
-
-
-
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Preview(showBackground = true)
