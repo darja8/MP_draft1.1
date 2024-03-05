@@ -6,7 +6,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.*
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -18,11 +19,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.example.mp_draft10.auth.SignInViewModel
 import com.example.mp_draft10.auth.SignUpViewModel
-import com.example.mp_draft10.screens.TodayScreen
 import com.example.mp_draft10.ui.theme.MP_draft10Theme
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
@@ -149,11 +149,3 @@ fun BottomNavigationBar(navController: NavController) {
         }
     }
 }
-
-
-
-//@Preview(showBackground = true)
-//@Composable
-//fun BottomNavigationBarPreview() {
-//
-//}
