@@ -1,4 +1,4 @@
-package com.example.mp_draft10
+package com.example.mp_draft10.ui
 
 import java.time.LocalDate
 

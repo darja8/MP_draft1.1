@@ -1,4 +1,4 @@
-package com.example.mp_draft10.screens
+package com.example.mp_draft10.ui.screens
 
 import android.annotation.SuppressLint
 import android.os.Build
@@ -11,6 +11,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,14 +23,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.mp_draft10.MoodItem
 import com.example.mp_draft10.R
-import com.example.mp_draft10.SymptomItem
-import com.example.mp_draft10.moodItems
-import com.example.mp_draft10.symptomItems
+import com.example.mp_draft10.ui.MoodItem
+import com.example.mp_draft10.ui.SymptomItem
+import com.example.mp_draft10.ui.moodItems
+import com.example.mp_draft10.ui.symptomItems
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -48,14 +51,6 @@ fun TodayScreen() {
             .padding(top = 10.dp)
     ) {
         HorizontalCalendar()
-//        Text(
-//            text = "Today View",
-//            fontWeight = FontWeight.Bold,
-//            color = MaterialTheme.colorScheme.onBackground,
-//            modifier = Modifier.align(Alignment.CenterHorizontally),
-//            textAlign = TextAlign.Center,
-//            fontSize = 25.sp
-//        )
         MoodRatingSquareView(
             onMoodSelected = { mood ->
                 // Handle the selected mood here, such as assigning it to the selected day on the calendar
@@ -161,24 +156,25 @@ fun MoodRatingSquareView(onMoodSelected: (Int) -> Unit) {
         ) {
             Text(
                 text = "How do you feel today?",
-                fontSize = 20.sp)
+                fontSize = 20.sp,
+                color = MaterialTheme.colorScheme.onSecondaryContainer)
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.thumb_up_outline),
+                    painter = painterResource(id = R.drawable.thumb_down_outline),
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onBackground,
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
                     modifier = Modifier
                         .size(24.dp)
                         .padding(start = 8.dp)
                 )
                 Icon(
-                    painter = painterResource(id = R.drawable.thumb_down_outline),
+                    painter = painterResource(id = R.drawable.thumb_up_outline),
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onBackground,
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
                     modifier = Modifier
                         .size(24.dp)
                         .padding(end = 8.dp)
@@ -230,7 +226,7 @@ fun MoodAndSymptomSquareView(
                 color = MaterialTheme.colorScheme.tertiaryContainer,
                 shape = RoundedCornerShape(16.dp)
             )
-            .height(380.dp)
+            .height(400.dp)
             .padding(start = 4.dp, end = 4.dp)
     ) {
         Column(
@@ -279,76 +275,56 @@ fun MoodAndSymptomSquareView(
 
 
 
-
 @Composable
 fun MoodItemView(moodItem: MoodItem) {
-    Box(
+    Button(
+        onClick = {},
         modifier = Modifier
-            .clickable {}
-            .padding(horizontal = 1.dp, vertical = 3.dp)
-            .background(
-                color = MaterialTheme.colorScheme.onSecondary,
-                shape = RoundedCornerShape(20.dp)
-            )
             .padding(horizontal = 1.dp, vertical = 1.dp)
-    ) {
-        Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .clickable {}
-            .padding(horizontal = 8.dp, vertical = 5.dp)
+            .height(40.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onSecondary)
     ) {
         Image(
             painter = painterResource(id = moodItem.icon),
             contentDescription = null,
-            modifier = Modifier.size(20.dp),
-            contentScale = ContentScale.Fit
+            modifier = Modifier.size(25.dp),
+            contentScale = ContentScale.FillWidth
         )
         Spacer(modifier = Modifier.width(2.dp)) // Add spacing between icon and text
         Text(
             text = moodItem.title,
             fontSize = 13.sp,
-            color = MaterialTheme.colorScheme.onSecondaryContainer
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            textAlign = TextAlign.Start
         )
-        }
     }
-
 }
 
 @Composable
 fun SymptomItemView(symptomItem: SymptomItem) {
-    Box(
+    Button(
+        onClick = {},
         modifier = Modifier
-            .clickable {}
             .padding(horizontal = 1.dp, vertical = 1.dp)
-            .background(
-                color = MaterialTheme.colorScheme.onSecondary,
-                shape = RoundedCornerShape(20.dp)
-            )
-            .padding(horizontal = 1.dp, vertical = 1.dp)
-    ) {
-        Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .clickable {}
-            .padding(horizontal = 8.dp, vertical = 5.dp)
+            .height(40.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onSecondary)
     ) {
         Image(
             painter = painterResource(id = symptomItem.icon),
             contentDescription = null,
-            modifier = Modifier.size(20.dp),
-            contentScale = ContentScale.Fit
+            modifier = Modifier.size(25.dp),
+            contentScale = ContentScale.FillWidth
         )
         Spacer(modifier = Modifier.width(2.dp)) // Add spacing between icon and text
         Text(
             text = symptomItem.title,
             fontSize = 13.sp,
-            color = MaterialTheme.colorScheme.onSecondaryContainer
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            textAlign = TextAlign.Start
         )
-        }
-    }
-
 }
+}
+
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Preview(showBackground = true)

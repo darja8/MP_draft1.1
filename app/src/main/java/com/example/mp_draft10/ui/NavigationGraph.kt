@@ -1,4 +1,4 @@
-package com.example.mp_draft10
+package com.example.mp_draft10.ui
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -11,9 +11,11 @@ import com.example.mp_draft10.auth.SignInScreen
 import com.example.mp_draft10.auth.SignInViewModel
 import com.example.mp_draft10.auth.SignUpScreen
 import com.example.mp_draft10.auth.SignUpViewModel
-import com.example.mp_draft10.screens.ChatScreen
-import com.example.mp_draft10.screens.InsightsScreen
-import com.example.mp_draft10.screens.TodayScreen
+import com.example.mp_draft10.ui.components.NavigationItem
+import com.example.mp_draft10.ui.screens.ChatScreen
+import com.example.mp_draft10.ui.screens.InsightsScreen
+import com.example.mp_draft10.ui.screens.TodayScreen
+
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun NavigationAuthentication(
@@ -34,9 +36,15 @@ fun NavigationAuthentication(
         composable(route = AppRoutes.Main.route) {
             MainScreen()
         }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+@Composable
+fun NavBarNavigation(navController: NavHostController) {
+    NavHost(navController, startDestination = NavigationItem.Today.route) {
         composable(NavigationItem.Today.route) { TodayScreen() }
         composable(NavigationItem.Insights.route) { InsightsScreen() }
         composable(NavigationItem.Chat.route) { ChatScreen() }
-
     }
 }

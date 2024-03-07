@@ -1,4 +1,4 @@
-package com.example.mp_draft10.screens
+package com.example.mp_draft10.ui.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.sp
 
 @SuppressLint("ResourceType")
 @Composable
-fun ChatScreen() {
+fun InsightsScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -26,7 +26,7 @@ fun ChatScreen() {
             .wrapContentSize(Alignment.Center)
     ) {
         Text(
-            text = "Chat View",
+            text = "Insights View",
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -38,6 +38,6 @@ fun ChatScreen() {
 
 @Preview(showBackground = true)
 @Composable
-fun ChatScreenPreview() {
-    ChatScreen()
+fun InsightsScreenPreview() {
+    InsightsScreen()
 }

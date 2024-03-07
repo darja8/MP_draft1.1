@@ -1,4 +1,4 @@
-package com.example.mp_draft10
+package com.example.mp_draft10.ui
 
 sealed class AppRoutes(val route: String) {
     data object SignIn : AppRoutes("sign_in")

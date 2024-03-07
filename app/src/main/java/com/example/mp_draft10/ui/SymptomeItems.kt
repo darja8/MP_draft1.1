@@ -1,6 +1,7 @@
-package com.example.mp_draft10
+package com.example.mp_draft10.ui
 
 import androidx.annotation.DrawableRes
+import com.example.mp_draft10.R
 
 val symptomItems = mutableListOf<SymptomItem>(
     SymptomItem("Sweating", R.drawable.circle_outline),
@@ -9,7 +10,6 @@ val symptomItems = mutableListOf<SymptomItem>(
     SymptomItem("Nausea", R.drawable.nausea),
     SymptomItem("Fatigue", R.drawable.fatigue),
     SymptomItem("Dizziness", R.drawable.dizziness),
-    SymptomItem("Shaking", R.drawable.shaking),
     )
 
 class SymptomItem (
