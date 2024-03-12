@@ -30,22 +30,24 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.example.mp_draft10.database.AddNewUserViewModel
 import com.example.mp_draft10.ui.AppRoutes
 import kotlinx.coroutines.launch
 
+val email: String = ""
 
 @Composable
 fun SignUpScreen(
     navController: NavHostController,
-    viewModel: SignUpViewModel = hiltViewModel()
+    viewModel: SignUpViewModel = hiltViewModel(),
+    addNewUserViewModel: AddNewUserViewModel = hiltViewModel()
 ){
+    var username by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val state = viewModel.signUpState.collectAsState(initial = null)
-//    val navController = rememberNavController()
-
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -57,6 +59,14 @@ fun SignUpScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(text = "Enter your credentials to register")
+            TextField(
+                value = username, // Bind TextField value to username
+                onValueChange = { username = it }, // Update username on value change
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                singleLine = true,
+                label = { Text(text = "Username") } // Label for username field
+            )
             TextField(
                 value = email,
                 onValueChange = { email = it },
@@ -99,10 +109,12 @@ fun SignUpScreen(
         }
 
         LaunchedEffect(key1 = state.value?.isSuccess) {
-            scope.launch {}
-            if (state.value?.isSuccess?.isNotEmpty() == true) {
-                val success = state.value?.isSuccess
-                Toast.makeText(context, "${success}", Toast.LENGTH_LONG).show()
+            scope.launch {
+                if (state.value?.isSuccess?.isNotEmpty() == true) {
+                    addNewUserViewModel.addUserDetails(email)
+                    val success = state.value?.isSuccess
+                    Toast.makeText(context, "$success", Toast.LENGTH_LONG).show()
+                }
             }
         }
 
@@ -115,9 +127,3 @@ fun SignUpScreen(
         }
     }
 }
-
-//@Composable
-//@Preview
-//fun SignUpPreview(){
-//    SignUpScreen()
-//}

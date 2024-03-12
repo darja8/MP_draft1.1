@@ -43,7 +43,7 @@ fun NavigationAuthentication(
 @Composable
 fun NavBarNavigation(navController: NavHostController) {
     NavHost(navController, startDestination = NavigationItem.Today.route) {
-        composable(NavigationItem.Today.route) { TodayScreen() }
+        composable(NavigationItem.Today.route) { TodayScreen(navController = navController) }
         composable(NavigationItem.Insights.route) { InsightsScreen() }
         composable(NavigationItem.Chat.route) { ChatScreen() }
     }

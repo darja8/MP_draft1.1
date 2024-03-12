@@ -37,15 +37,14 @@ import kotlinx.coroutines.launch
 @Composable
 fun SignInScreen(
     navController: NavHostController,
-    viewModel: SignInViewModel = hiltViewModel()
+    viewModel: SignInViewModel = hiltViewModel(),
+    onSignInSuccess: (String) -> Unit = {}// Callback to return user email upon successful sign-in
 ){
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val state = viewModel.signInState.collectAsState(initial = null)
-//    val navController = rememberNavController()
-
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -103,6 +102,7 @@ fun SignInScreen(
                 if (state.value?.isSuccess?.isNotEmpty() == true) {
                     val success = state.value?.isSuccess
                     Toast.makeText(context, "${success}", Toast.LENGTH_LONG).show()
+//                    onSignInSuccess(email) // Return user email upon successful sign-in
                     navController.navigate(AppRoutes.Main.route) // Navigate to the main route
                 }
             }

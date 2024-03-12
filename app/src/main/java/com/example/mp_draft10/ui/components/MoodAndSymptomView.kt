@@ -23,6 +23,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -40,9 +45,12 @@ import com.example.mp_draft10.ui.symptomItems
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MoodAndSymptomSquareView(
-    onMoodSelected: (String) -> Unit,
-    onSymptomSelected: (String) -> Unit
+    onMoodsSelected: (List<String>) -> Unit,
+    onSymptomsSelected: (List<String>) -> Unit
 ) {
+    val selectedMoods = remember { mutableStateListOf<String>() }
+    val selectedSymptoms = remember { mutableStateListOf<String>() }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -60,44 +68,66 @@ fun MoodAndSymptomSquareView(
             Text(
                 text = "Mood",
                 color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier
-                    .padding(start = 13.dp, top = 16.dp),
+                modifier = Modifier.padding(start = 13.dp, top = 16.dp),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold
             )
             FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(1.dp), // Increased spacing between items
-                verticalArrangement = Arrangement.spacedBy(1.dp), // Increased spacing between rows
+                horizontalArrangement = Arrangement.spacedBy(1.dp),
+                verticalArrangement = Arrangement.spacedBy(1.dp),
                 modifier = Modifier.padding(horizontal = 1.dp)
             ) {
                 moodItems.forEach { moodItem ->
-                    MoodItemView(moodItem = moodItem)
+                    MoodItemView(
+                        moodItem = moodItem,
+                        isSelected = selectedMoods.contains(moodItem.title),
+                        onMoodSelected = { mood ->
+                            if (selectedMoods.contains(mood)) {
+                                selectedMoods.remove(mood)
+                            } else {
+                                selectedMoods.add(mood)
+                            }
+                            onMoodsSelected(selectedMoods) // Notify the listener with the updated list
+                        }
+                    )
                 }
             }
-//            Spacer(modifier = Modifier.height(1.dp)) // Add Spacer to separate Mood and Symptoms
             Text(
                 text = "Symptoms",
                 color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier
-                    .padding(start = 13.dp, top = 16.dp),
+                modifier = Modifier.padding(start = 13.dp, top = 16.dp),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold
             )
             FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(1.dp), // Increased spacing between items
-                verticalArrangement = Arrangement.spacedBy(1.dp), // Increased spacing between rows
+                horizontalArrangement = Arrangement.spacedBy(1.dp),
+                verticalArrangement = Arrangement.spacedBy(1.dp),
                 modifier = Modifier.padding(horizontal = 1.dp)
             ) {
                 symptomItems.forEach { symptomItem ->
-                    SymptomItemView(symptomItem = symptomItem)
+                    SymptomItemView(
+                        symptomItem = symptomItem,
+                        isSelected = selectedSymptoms.contains(symptomItem.title),
+                        onSymptomSelected = { symptom ->
+                            if (selectedSymptoms.contains(symptom)) {
+                                selectedSymptoms.remove(symptom)
+                            } else {
+                                selectedSymptoms.add(symptom)
+                            }
+                            onSymptomsSelected(selectedSymptoms) // Notify the listener with the updated list
+                        }
+                    )
                 }
             }
         }
     }
 }
 
+
 @Composable
 fun MoodRatingSquareView(onMoodSelected: (Int) -> Unit) {
+    var selectedMood by remember { mutableStateOf(0) } // State variable to track selected mood rating
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -114,13 +144,13 @@ fun MoodRatingSquareView(onMoodSelected: (Int) -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = 15.dp),
-//            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "How do you feel today?",
                 fontSize = 20.sp,
-                color = MaterialTheme.colorScheme.onSecondaryContainer)
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -133,6 +163,11 @@ fun MoodRatingSquareView(onMoodSelected: (Int) -> Unit) {
                     modifier = Modifier
                         .size(24.dp)
                         .padding(start = 8.dp)
+                        .clickable {
+                            // Update selected mood and notify the listener
+                            selectedMood = 0
+                            onMoodSelected(selectedMood)
+                        }
                 )
                 Icon(
                     painter = painterResource(id = R.drawable.thumb_up_outline),
@@ -141,6 +176,11 @@ fun MoodRatingSquareView(onMoodSelected: (Int) -> Unit) {
                     modifier = Modifier
                         .size(24.dp)
                         .padding(end = 8.dp)
+                        .clickable {
+                            // Update selected mood and notify the listener
+                            selectedMood = 11
+                            onMoodSelected(selectedMood)
+                        }
                 )
             }
             Row(
@@ -148,7 +188,6 @@ fun MoodRatingSquareView(onMoodSelected: (Int) -> Unit) {
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-
                 (1..10).forEach { mood ->
                     Box(
                         modifier = Modifier
@@ -158,14 +197,20 @@ fun MoodRatingSquareView(onMoodSelected: (Int) -> Unit) {
                                 shape = RoundedCornerShape(8.dp)
                             ) // Gray background for each square
                             .clickable {
-                                onMoodSelected(mood)
+                                // Update selected mood and notify the listener
+                                selectedMood = mood
+                                onMoodSelected(selectedMood)
                             } // Handle mood selection
                             .padding(4.dp), // Add padding around each square
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = mood.toString(),
-                            color = MaterialTheme.colorScheme.onBackground,
+                            color = if (selectedMood == mood) {
+                                MaterialTheme.colorScheme.onErrorContainer //selected rating from 1 to 10
+                            } else {
+                                MaterialTheme.colorScheme.onSecondaryContainer // Change color of selected mood
+                            },
                             fontSize = 16.sp
                         )
                     }
@@ -176,14 +221,21 @@ fun MoodRatingSquareView(onMoodSelected: (Int) -> Unit) {
 }
 
 
+
 @Composable
-fun MoodItemView(moodItem: MoodItem) {
+fun MoodItemView(
+    moodItem: MoodItem,
+    isSelected: Boolean,
+    onMoodSelected: (String) -> Unit
+) {
     Button(
-        onClick = {},
+        onClick = { onMoodSelected(moodItem.title) },
         modifier = Modifier
             .padding(horizontal = 1.dp, vertical = 1.dp)
             .height(40.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onSecondary)
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (isSelected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.onSecondary
+        )
     ) {
         Image(
             painter = painterResource(id = moodItem.icon),
@@ -202,13 +254,19 @@ fun MoodItemView(moodItem: MoodItem) {
 }
 
 @Composable
-fun SymptomItemView(symptomItem: SymptomItem) {
+fun SymptomItemView(
+    symptomItem: SymptomItem,
+    isSelected: Boolean,
+    onSymptomSelected: (String) -> Unit
+) {
     Button(
-        onClick = {},
+        onClick = { onSymptomSelected(symptomItem.title) },
         modifier = Modifier
             .padding(horizontal = 1.dp, vertical = 1.dp)
             .height(40.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onSecondary)
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (isSelected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.onSecondary
+        )
     ) {
         Image(
             painter = painterResource(id = symptomItem.icon),
