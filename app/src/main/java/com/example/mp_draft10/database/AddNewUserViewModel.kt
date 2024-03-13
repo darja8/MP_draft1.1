@@ -13,6 +13,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -46,7 +47,7 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
     }
 
 
-    fun saveMoodToFirestore(date: LocalDate, moodObjects: List<String>, symptomObjects: List<String>) {
+    fun saveMoodToFirestore(date: LocalDate, moodObjects: List<String>, symptomObjects: List<String>, moodRating: Int) {
         val dB: FirebaseFirestore = FirebaseFirestore.getInstance()
         val dbUsers: CollectionReference = dB.collection("Users")
 
@@ -60,6 +61,7 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
             // Create a data object to save
             val data = hashMapOf<String, Any>(
                 "date" to date.toString(),  // Convert LocalDate to String
+                "moodRating" to moodRating, // Include mood rating
                 "moodObjects" to moodObjects,
                 "symptomObjects" to symptomObjects
             )
@@ -83,5 +85,66 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
             Toast.makeText(application, "User email is null or empty!", Toast.LENGTH_SHORT).show()
         }
     }
+    // Function to fetch mood ratings for the past 7 days from Firestore
+    suspend fun fetchMoodDataForPast7Days(): List<Pair<LocalDate, Int>> {
+        val dB: FirebaseFirestore = FirebaseFirestore.getInstance()
+        val currentUserEmail = /* fetch current user email */ ""
 
+        // Assuming the data is stored in a collection named "MoodData" under the user's document
+        val moodDataCollection = dB.collection("Users").document(currentUserEmail)
+            .collection("MoodData")
+
+        val endDate = LocalDate.now()
+        val startDate = endDate.minusDays(6) // Get the date 7 days ago
+
+        val moodDataList = mutableListOf<Pair<LocalDate, Int>>()
+
+        // Query Firestore for mood data for the past 7 days
+        moodDataCollection
+            .whereGreaterThanOrEqualTo("date", startDate.toString())
+            .whereLessThanOrEqualTo("date", endDate.toString())
+            .get()
+            .addOnSuccessListener { documents ->
+                for (document in documents) {
+                    val date = LocalDate.parse(document["date"] as String)
+                    val moodRating = (document["moodRating"] as Long).toInt()
+                    moodDataList.add(date to moodRating)
+                }
+            }
+            .await() // Await for the asynchronous task to complete
+
+        return moodDataList
+    }
+
+    // Function to fetch symptom data for the past 30 days from Firestore
+    suspend fun fetchSymptomDataForPast30Days(): Map<String, Int> {
+        val dB: FirebaseFirestore = FirebaseFirestore.getInstance()
+        val currentUserEmail = /* fetch current user email */ ""
+
+        // Assuming the data is stored in a collection named "SymptomData" under the user's document
+        val symptomDataCollection = dB.collection("Users").document(currentUserEmail)
+            .collection("SymptomData")
+
+        val endDate = LocalDate.now()
+        val startDate = endDate.minusDays(29) // Get the date 30 days ago
+
+        val symptomDataMap = mutableMapOf<String, Int>()
+
+        // Query Firestore for symptom data for the past 30 days
+        symptomDataCollection
+            .whereGreaterThanOrEqualTo("date", startDate.toString())
+            .whereLessThanOrEqualTo("date", endDate.toString())
+            .get()
+            .addOnSuccessListener { documents ->
+                for (document in documents) {
+                    val symptoms = document["symptoms"] as List<String>
+                    symptoms.forEach { symptom ->
+                        symptomDataMap[symptom] = (symptomDataMap[symptom] ?: 0) + 1
+                    }
+                }
+            }
+            .await() // Await for the asynchronous task to complete
+
+        return symptomDataMap
+    }
 }

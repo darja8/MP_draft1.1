@@ -101,7 +101,7 @@ fun SignUpScreen(
         Spacer(modifier = Modifier.height(16.dp))
         Text(text = "Already have an account? Sign in",
             modifier = Modifier.clickable { navController.navigate(AppRoutes.SignIn.route)})
-        Text(text = "or connect with")
+//        Text(text = "or connect with")
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             IconButton(onClick = { /*TODO*/ }) {
 

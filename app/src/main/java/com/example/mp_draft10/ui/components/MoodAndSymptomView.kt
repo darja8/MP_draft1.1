@@ -123,10 +123,9 @@ fun MoodAndSymptomSquareView(
     }
 }
 
-
 @Composable
 fun MoodRatingSquareView(onMoodSelected: (Int) -> Unit) {
-    var selectedMood by remember { mutableStateOf(0) } // State variable to track selected mood rating
+    var selectedMood by remember { mutableStateOf(0)} // State variable to track selected mood rating
 
     Box(
         modifier = Modifier

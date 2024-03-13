@@ -14,6 +14,7 @@ import com.example.mp_draft10.auth.SignUpViewModel
 import com.example.mp_draft10.ui.components.NavigationItem
 import com.example.mp_draft10.ui.screens.ChatScreen
 import com.example.mp_draft10.ui.screens.InsightsScreen
+import com.example.mp_draft10.ui.screens.SettingsScreen
 import com.example.mp_draft10.ui.screens.TodayScreen
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
@@ -46,5 +47,8 @@ fun NavBarNavigation(navController: NavHostController) {
         composable(NavigationItem.Today.route) { TodayScreen(navController = navController) }
         composable(NavigationItem.Insights.route) { InsightsScreen() }
         composable(NavigationItem.Chat.route) { ChatScreen() }
+        composable(AppRoutes.Settings.route) {
+            SettingsScreen(navController)
+        }
     }
 }

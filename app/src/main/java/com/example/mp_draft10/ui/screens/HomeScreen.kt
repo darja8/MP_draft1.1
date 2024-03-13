@@ -10,8 +10,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,8 +31,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.mp_draft10.database.AddNewUserViewModel
-import com.example.mp_draft10.database.HomeViewModel
-import com.example.mp_draft10.model.DayData
 import com.example.mp_draft10.ui.components.MoodAndSymptomSquareView
 import com.example.mp_draft10.ui.components.MoodRatingSquareView
 import com.example.mp_draft10.ui.components.calendar.WeekCalendar
@@ -37,21 +42,19 @@ import com.kizitonwose.calendar.compose.weekcalendar.rememberWeekCalendarState
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @SuppressLint("ResourceType")
 fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUserViewModel = hiltViewModel()) {
 
-    val homeViewModel: HomeViewModel = hiltViewModel()
-
     val auth = FirebaseAuth.getInstance()
-    val user = auth.currentUser.toString()
 
     // Store selected moods and symptoms
     var selectedMoods by remember { mutableStateOf<List<String>>(emptyList()) }
     var selectedSymptoms by remember { mutableStateOf<List<String>>(emptyList()) }
     var selectedDay by remember { mutableStateOf(LocalDate.now()) }
-    val dataByDate by remember { mutableStateOf(mutableMapOf<LocalDate, DayData>()) }
+    var selectedMoodRating by remember { mutableStateOf(0) }
 
     fun handleDaySelected(day: LocalDate) {
         selectedDay = day // Update the selected day
@@ -59,44 +62,58 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
 
     val listState = rememberLazyListState()
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        state = listState
-    ) {
-        item {
-            CalendarSlide(
-                onDaySelected = { day ->
-                    handleDaySelected(day)
-                },
-                close = {}
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text("Today") },
+                actions = {
+                    IconButton(onClick = { navController.navigate("settings") }) {
+                        Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                    }
+                }
             )
         }
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+                .padding(paddingValues),
+            state = listState
+        ) {
+            item {
+                CalendarSlide(
+                    onDaySelected = { day ->
+                        handleDaySelected(day)
+                    },
+                    close = {}
+                )
+            }
 
-        item {
-            MoodRatingSquareView(
-                onMoodSelected = { mood ->
-                    // Handle the selected mood here
+            item {
+                MoodRatingSquareView(
+                    onMoodSelected = { moodRating ->
+                        selectedMoodRating = moodRating
+                    }
+                )
+            }
+            item {
+                MoodAndSymptomSquareView(
+                    onMoodsSelected = { moods ->
+                        selectedMoods = moods
+                    },
+                    onSymptomsSelected = { symptoms ->
+                        selectedSymptoms = symptoms
+                    }
+                )
+            }
+            item {
+                Button(
+                    onClick = {
+                        addNewUserViewModel.saveMoodToFirestore(selectedDay, selectedMoods, selectedSymptoms, selectedMoodRating)
+                    },
+                    modifier = Modifier.fillMaxWidth().padding(16.dp)
+                ) {
+                    Text(text = "Save Mood and Symptoms", color = MaterialTheme.colorScheme.onPrimary)
                 }
-            )
-        }
-        item {
-            MoodAndSymptomSquareView(
-                onMoodsSelected = { moods ->
-                    selectedMoods = moods
-                },
-                onSymptomsSelected = { symptoms ->
-                    selectedSymptoms = symptoms
-                }
-            )
-        }
-        item {
-            Button(
-                onClick = {
-                    addNewUserViewModel.saveMoodToFirestore(selectedDay, selectedMoods, selectedSymptoms)
-                },
-                modifier = Modifier.fillMaxWidth().padding(16.dp)
-            ) {
-                Text(text = "Save Mood and Symptoms", color = MaterialTheme.colorScheme.onPrimary)
             }
         }
     }
@@ -104,8 +121,10 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
 
 
 @Composable
-fun CalendarSlide(onDaySelected: (LocalDate) -> Unit,
-                  close: () -> Unit = {}) {
+fun CalendarSlide(
+    onDaySelected: (LocalDate) -> Unit,
+    close: () -> Unit = {}
+){
     val currentDate = remember { LocalDate.now() }
     val startDate = remember { currentDate.minusDays(500) }
     val endDate = remember { currentDate.plusDays(500) }
@@ -125,7 +144,6 @@ fun CalendarSlide(onDaySelected: (LocalDate) -> Unit,
             elevation = 0.dp,
             title = { Text(text = getWeekPageTitle(visibleWeek)) },
             backgroundColor = MaterialTheme.colorScheme.background
-//            navigationIcon = { NavigationIcon(onBackClick = close) },
         )
         WeekCalendar(
             modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
@@ -183,6 +201,8 @@ private fun Day(date: LocalDate, isSelected: Boolean, onClick: (LocalDate) -> Un
         }
     }
 }
+
+
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Preview
