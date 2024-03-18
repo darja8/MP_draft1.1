@@ -1,4 +1,4 @@
-package com.example.mp_draft10.ui.screens
+package drawable
 
 import android.annotation.SuppressLint
 import android.os.Build
@@ -13,7 +13,6 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,8 +36,8 @@ import com.example.mp_draft10.ui.components.calendar.WeekCalendar
 import com.example.mp_draft10.ui.components.calendar.displayText
 import com.example.mp_draft10.ui.components.calendar.getWeekPageTitle
 import com.example.mp_draft10.ui.components.calendar.rememberFirstVisibleWeekAfterScroll
-import com.google.firebase.auth.FirebaseAuth
 import com.kizitonwose.calendar.compose.weekcalendar.rememberWeekCalendarState
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -48,7 +47,7 @@ import java.time.format.DateTimeFormatter
 @SuppressLint("ResourceType")
 fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUserViewModel = hiltViewModel()) {
 
-    val auth = FirebaseAuth.getInstance()
+    val scope = rememberCoroutineScope()
 
     // Store selected moods and symptoms
     var selectedMoods by remember { mutableStateOf<List<String>>(emptyList()) }
@@ -62,17 +61,15 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
 
     val listState = rememberLazyListState()
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Today") },
-                actions = {
-                    IconButton(onClick = { navController.navigate("settings") }) {
-                        Icon(Icons.Filled.Settings, contentDescription = "Settings")
-                    }
-                }
-            )
+    LaunchedEffect(selectedDay) {
+        scope.launch {
+            val moodData = addNewUserViewModel.fetchMoodDataFromSpecificDay(selectedDay)
+            selectedMoods = moodData?.moodObjects ?: emptyList()
+            selectedSymptoms = moodData?.symptomObjects ?: emptyList()
+            selectedMoodRating = moodData?.moodRating ?: 0
         }
+    }
+    Scaffold(
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier.fillMaxSize()
@@ -82,7 +79,10 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
             item {
                 CalendarSlide(
                     onDaySelected = { day ->
-                        handleDaySelected(day)
+                        handleDaySelected(day) // Update selected day and fetch mood data
+                    },
+                    onSettingsClicked = {
+                        navController.navigate("settings") // Navigate to settings screen
                     },
                     close = {}
                 )
@@ -90,18 +90,24 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
 
             item {
                 MoodRatingSquareView(
-                    onMoodSelected = { moodRating ->
-                        selectedMoodRating = moodRating
+                    selectedMoodRating = selectedMoodRating,
+                    onMoodSelected = { rating ->
+                        selectedMoodRating = rating
+                        // Potentially save this selection
                     }
                 )
             }
             item {
                 MoodAndSymptomSquareView(
+                    selectedMoods = selectedMoods,
+                    selectedSymptoms = selectedSymptoms,
                     onMoodsSelected = { moods ->
                         selectedMoods = moods
+                        // Potentially save these selections
                     },
                     onSymptomsSelected = { symptoms ->
                         selectedSymptoms = symptoms
+                        // Potentially save these selections
                     }
                 )
             }
@@ -119,31 +125,38 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
     }
 }
 
-
 @Composable
 fun CalendarSlide(
     onDaySelected: (LocalDate) -> Unit,
+    onSettingsClicked: () -> Unit, // Callback for when the settings icon is clicked
     close: () -> Unit = {}
-){
+) {
     val currentDate = remember { LocalDate.now() }
     val startDate = remember { currentDate.minusDays(500) }
     val endDate = remember { currentDate.plusDays(500) }
     var selection by remember { mutableStateOf(currentDate) }
+    val state = rememberWeekCalendarState(
+        startDate = startDate,
+        endDate = endDate,
+        firstVisibleWeekDate = currentDate,
+    )
+    val visibleWeek = rememberFirstVisibleWeekAfterScroll(state)
+
     Column(
         modifier = Modifier
             .height(140.dp)
             .background(MaterialTheme.colorScheme.background),
     ) {
-        val state = rememberWeekCalendarState(
-            startDate = startDate,
-            endDate = endDate,
-            firstVisibleWeekDate = currentDate,
-        )
-        val visibleWeek = rememberFirstVisibleWeekAfterScroll(state)
         TopAppBar(
             elevation = 0.dp,
             title = { Text(text = getWeekPageTitle(visibleWeek)) },
-            backgroundColor = MaterialTheme.colorScheme.background
+            backgroundColor = MaterialTheme.colorScheme.background,
+            actions = {
+                // Place the settings IconButton here, inside the TopAppBar of the CalendarSlide
+                IconButton(onClick = onSettingsClicked) {
+                    Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                }
+            }
         )
         WeekCalendar(
             modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
@@ -158,7 +171,6 @@ fun CalendarSlide(
             },
         )
     }
-
 }
 
 private val dateFormatter = DateTimeFormatter.ofPattern("dd")

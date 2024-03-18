@@ -1,89 +1,99 @@
 package com.example.mp_draft10.ui.screens
-
-import android.annotation.SuppressLint
-import androidx.compose.foundation.background
+//import androidx.compose.material.Icon
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Divider
-import androidx.compose.material.TextField
-import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-
-
-
-@SuppressLint("ResourceType")
+import androidx.navigation.NavController
+import com.example.mp_draft10.AppRoutes
+import com.example.mp_draft10.R
+import com.example.mp_draft10.database.PostViewModel
 @Composable
-fun ChatScreen(viewModel: HubViewModel = viewModel()) {
-    val comments = viewModel.comments.collectAsState().value
-    var inputText by remember { mutableStateOf("") }
+fun ChatScreen(navController: NavController, postViewModel: PostViewModel = viewModel()) {
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.background)
-            .padding(16.dp)
+    val posts by postViewModel.posts.collectAsState()
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        PostSection()
-        Spacer(modifier = Modifier.height(16.dp))
-        LazyColumn(modifier = Modifier.weight(1f)) {
-            items(comments) { comment ->
-                Text(text = comment.text, style = MaterialTheme.typography.bodyMedium)
-                Divider()
-            }
-        }
-        Row(
-            modifier = Modifier.padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TextField(
-                value = inputText,
-                onValueChange = { inputText = it },
-                modifier = Modifier.weight(1f),
-                placeholder = { Text("Add a comment...") }
-            )
-            Button(onClick = {
-                viewModel.postComment(inputText)
-                inputText = "" // Reset input field after submitting
-            }) {
-                Text("Post")
-            }
+        items(posts) { post ->
+            PostCard(post = post, navController)
         }
     }
 }
 
 @Composable
-fun PostSection() {
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text(
-            text = "How do you deal with stress?",
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        // You can add more details about the post here if needed
+fun PostCard(post: Post, navController: NavController) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .height(150.dp)
+    ) {
+        Box(modifier = Modifier.padding(16.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .align(Alignment.TopCenter),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Ensure you're using the correct property from your Post class
+                Text(
+                    text = post.content, // This line might need to be updated
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.comment_text_outline),
+                    contentDescription = "Comments",
+                    modifier = Modifier.clickable {
+                        navController.navigate(AppRoutes.PostDetail.createRoute(post.id))
+                    }
+                )
+                Spacer(modifier = Modifier.width(24.dp))
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.heart),
+                    contentDescription = "Likes",
+                    modifier = Modifier.clickable { /* Handle like icon click */ }
+                )
+            }
+        }
     }
-    Divider(thickness = 2.dp, modifier = Modifier.padding(vertical = 8.dp))
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ChatScreenPreview() {
-    ChatScreen()
-}
+
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewChatScreen() {
+//    ChatScreen()
+//}

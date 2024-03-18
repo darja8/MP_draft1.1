@@ -19,15 +19,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -36,7 +30,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.mp_draft10.R
 import com.example.mp_draft10.ui.MoodItem
 import com.example.mp_draft10.ui.SymptomItem
 import com.example.mp_draft10.ui.moodItems
@@ -45,12 +38,11 @@ import com.example.mp_draft10.ui.symptomItems
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MoodAndSymptomSquareView(
+    selectedMoods: List<String>,
+    selectedSymptoms: List<String>,
     onMoodsSelected: (List<String>) -> Unit,
     onSymptomsSelected: (List<String>) -> Unit
 ) {
-    val selectedMoods = remember { mutableStateListOf<String>() }
-    val selectedSymptoms = remember { mutableStateListOf<String>() }
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -82,12 +74,12 @@ fun MoodAndSymptomSquareView(
                         moodItem = moodItem,
                         isSelected = selectedMoods.contains(moodItem.title),
                         onMoodSelected = { mood ->
-                            if (selectedMoods.contains(mood)) {
-                                selectedMoods.remove(mood)
+                            val updatedMoods = if (selectedMoods.contains(mood)) {
+                                selectedMoods.toMutableList().also { it.remove(mood) }
                             } else {
-                                selectedMoods.add(mood)
+                                selectedMoods.toMutableList().also { it.add(mood) }
                             }
-                            onMoodsSelected(selectedMoods) // Notify the listener with the updated list
+                            onMoodsSelected(updatedMoods)
                         }
                     )
                 }
@@ -109,12 +101,12 @@ fun MoodAndSymptomSquareView(
                         symptomItem = symptomItem,
                         isSelected = selectedSymptoms.contains(symptomItem.title),
                         onSymptomSelected = { symptom ->
-                            if (selectedSymptoms.contains(symptom)) {
-                                selectedSymptoms.remove(symptom)
+                            val updatedSymptoms = if (selectedSymptoms.contains(symptom)) {
+                                selectedSymptoms.toMutableList().also { it.remove(symptom) }
                             } else {
-                                selectedSymptoms.add(symptom)
+                                selectedSymptoms.toMutableList().also { it.add(symptom) }
                             }
-                            onSymptomsSelected(selectedSymptoms) // Notify the listener with the updated list
+                            onSymptomsSelected(updatedSymptoms)
                         }
                     )
                 }
@@ -123,10 +115,12 @@ fun MoodAndSymptomSquareView(
     }
 }
 
-@Composable
-fun MoodRatingSquareView(onMoodSelected: (Int) -> Unit) {
-    var selectedMood by remember { mutableStateOf(0)} // State variable to track selected mood rating
 
+@Composable
+fun MoodRatingSquareView(
+    selectedMoodRating: Int,
+    onMoodSelected: (Int) -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -135,10 +129,9 @@ fun MoodRatingSquareView(onMoodSelected: (Int) -> Unit) {
                 color = MaterialTheme.colorScheme.tertiaryContainer,
                 shape = RoundedCornerShape(16.dp)
             )
-            .height(110.dp) // Adjusted height for horizontal layout
+            .height(110.dp)
             .padding(start = 4.dp, end = 4.dp)
     ) {
-        // Add content inside the Box to display within the rounded square
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -155,32 +148,6 @@ fun MoodRatingSquareView(onMoodSelected: (Int) -> Unit) {
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.thumb_down_outline),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .padding(start = 8.dp)
-                        .clickable {
-                            // Update selected mood and notify the listener
-                            selectedMood = 0
-                            onMoodSelected(selectedMood)
-                        }
-                )
-                Icon(
-                    painter = painterResource(id = R.drawable.thumb_up_outline),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .padding(end = 8.dp)
-                        .clickable {
-                            // Update selected mood and notify the listener
-                            selectedMood = 11
-                            onMoodSelected(selectedMood)
-                        }
-                )
             }
             Row(
                 modifier = Modifier
@@ -190,26 +157,20 @@ fun MoodRatingSquareView(onMoodSelected: (Int) -> Unit) {
                 (1..10).forEach { mood ->
                     Box(
                         modifier = Modifier
-                            .size(30.dp) // Adjust size of colored square
+                            .size(30.dp)
                             .background(
-                                MaterialTheme.colorScheme.onSecondary,
+                                color = if (selectedMoodRating == mood) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.onSecondary,
                                 shape = RoundedCornerShape(8.dp)
-                            ) // Gray background for each square
+                            )
                             .clickable {
-                                // Update selected mood and notify the listener
-                                selectedMood = mood
-                                onMoodSelected(selectedMood)
-                            } // Handle mood selection
-                            .padding(4.dp), // Add padding around each square
+                                onMoodSelected(mood)
+                            }
+                            .padding(4.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = mood.toString(),
-                            color = if (selectedMood == mood) {
-                                MaterialTheme.colorScheme.onErrorContainer //selected rating from 1 to 10
-                            } else {
-                                MaterialTheme.colorScheme.onSecondaryContainer // Change color of selected mood
-                            },
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
                             fontSize = 16.sp
                         )
                     }
@@ -218,6 +179,7 @@ fun MoodRatingSquareView(onMoodSelected: (Int) -> Unit) {
         }
     }
 }
+
 
 
 

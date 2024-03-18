@@ -1,7 +1,5 @@
 package com.example.mp_draft10.auth
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mp_draft10.auth.util.Resource
@@ -17,9 +15,6 @@ class SignInViewModel @Inject constructor(private val repository: AuthRepository
 
     private val _signInState = Channel<SignInState>()
     val signInState = _signInState.receiveAsFlow()
-
-    val email: MutableState<String> = mutableStateOf("")
-
 
     fun loginUser(email: String, password: String) {
         viewModelScope.launch {

@@ -30,8 +30,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.example.mp_draft10.AppRoutes
 import com.example.mp_draft10.database.AddNewUserViewModel
-import com.example.mp_draft10.ui.AppRoutes
+//import com.example.mp_draft10.ui.AppRoutes
 import kotlinx.coroutines.launch
 
 val email: String = ""

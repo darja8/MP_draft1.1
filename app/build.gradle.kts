@@ -105,7 +105,19 @@ dependencies {
     // Declare the dependency for the Cloud Firestore library
     // When using the BoM, you don't specify versions in Firebase library dependencies
     implementation("com.google.firebase:firebase-firestore")
+    implementation ("androidx.compose.runtime:runtime-livedata")
 
+    implementation ("com.google.firebase:firebase-auth:latest_version")
+
+// JUnit
+    testImplementation ("junit:junit:4.13.2")
+// Mockito
+    testImplementation ("org.mockito:mockito-core:3.11.2")
+    testImplementation ("org.mockito:mockito-inline:3.11.2") // For final classes
+// Coroutines Test
+    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+// Architecture Components
+    testImplementation ("androidx.arch.core:core-testing:2.2.0")
 
 
 }

@@ -5,7 +5,7 @@ import java.time.LocalDate
 // Define the data model
 data class DayData(
     val date: LocalDate,
-    val moodRating: MoodRating,
+    val moodRatingScale: MoodRatingScale,
     val mood: List<Mood>,
     val symptoms: List<Symptom>
 )
@@ -33,7 +33,7 @@ enum class Symptom {
     DIZZY
 }
 
-enum class MoodRating(val rating: Int) {
+enum class MoodRatingScale(val rating: Int) {
     ONE(1),
     TWO(2),
     THREE(3),

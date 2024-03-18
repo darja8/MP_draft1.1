@@ -1,5 +1,6 @@
 package com.example.mp_draft10.auth
 
+import androidx.lifecycle.MutableLiveData
 import com.example.mp_draft10.auth.util.Resource
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
@@ -14,6 +15,7 @@ class AuthRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth
 ): AuthRepository {
     private val _email = MutableStateFlow<String>("")
+    val isAuthenticated = MutableLiveData(false)
 
     // Function to retrieve email
     fun getEmail(): Flow<String> = _email
@@ -43,5 +45,4 @@ class AuthRepositoryImpl @Inject constructor(
     override fun getCurrentEmail(): String {
         TODO("Not yet implemented")
     }
-
 }
