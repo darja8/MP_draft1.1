@@ -28,8 +28,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mp_draft10.R
 import com.example.mp_draft10.ui.MoodItem
 import com.example.mp_draft10.ui.SymptomItem
 import com.example.mp_draft10.ui.moodItems
@@ -48,14 +50,16 @@ fun MoodAndSymptomSquareView(
             .fillMaxWidth()
             .padding(16.dp)
             .background(
-                color = MaterialTheme.colorScheme.tertiaryContainer,
+                color = MaterialTheme.colorScheme.surfaceVariant,
                 shape = RoundedCornerShape(16.dp)
             )
-            .height(400.dp)
-            .padding(start = 4.dp, end = 4.dp)
+//            .height()
+//            .padding(start = 4.dp, end = 4.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                    .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 8.dp)
+
         ) {
             Text(
                 text = "Mood",
@@ -126,10 +130,10 @@ fun MoodRatingSquareView(
             .fillMaxWidth()
             .padding(16.dp)
             .background(
-                color = MaterialTheme.colorScheme.tertiaryContainer,
+                color = MaterialTheme.colorScheme.surfaceVariant,
                 shape = RoundedCornerShape(16.dp)
             )
-            .height(110.dp)
+            .height(90.dp)
             .padding(start = 4.dp, end = 4.dp)
     ) {
         Column(
@@ -143,6 +147,7 @@ fun MoodRatingSquareView(
                 fontSize = 20.sp,
                 color = MaterialTheme.colorScheme.onSecondaryContainer
             )
+            Spacer(modifier = Modifier.height(5.dp))
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -159,7 +164,7 @@ fun MoodRatingSquareView(
                         modifier = Modifier
                             .size(30.dp)
                             .background(
-                                color = if (selectedMoodRating == mood) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.onSecondary,
+                                color = if (selectedMoodRating == mood) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.background,
                                 shape = RoundedCornerShape(8.dp)
                             )
                             .clickable {
@@ -195,7 +200,7 @@ fun MoodItemView(
             .padding(horizontal = 1.dp, vertical = 1.dp)
             .height(40.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.onSecondary
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.background
         )
     ) {
         Image(
@@ -208,7 +213,7 @@ fun MoodItemView(
         Text(
             text = moodItem.title,
             fontSize = 13.sp,
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
             textAlign = TextAlign.Start
         )
     }
@@ -226,7 +231,7 @@ fun SymptomItemView(
             .padding(horizontal = 1.dp, vertical = 1.dp)
             .height(40.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.onSecondary
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.background
         )
     ) {
         Image(
@@ -241,6 +246,51 @@ fun SymptomItemView(
             fontSize = 13.sp,
             color = MaterialTheme.colorScheme.onSecondaryContainer,
             textAlign = TextAlign.Start
+        )
+    }
+}
+
+// Mock data for previews
+private val previewSelectedMoods = listOf("Happy", "Energetic")
+private val previewSelectedSymptoms = listOf("Headache", "Nausea")
+private val previewMoodRating = 5
+
+private val previewMoodItems = listOf(
+    MoodItem("Happy", R.drawable.happy,1),
+    MoodItem("Sad", R.drawable.sad,1)
+    // Add more items as needed
+)
+//
+//private val previewSymptomItems = listOf(
+//    SymptomItem("Headache", R.drawable.ic_headache),
+//    SymptomItem("Nausea", R.drawable.ic_nausea)
+//    // Add more items as needed
+//)
+
+// Ensure these resources (e.g., R.drawable.ic_happy) are available in your project
+// or replace them with existing ones for the preview to work.
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewMoodAndSymptomSquareView() {
+    // Applying a MaterialTheme wrapper for theme consistency
+    MaterialTheme {
+        MoodAndSymptomSquareView(
+            selectedMoods = previewSelectedMoods,
+            selectedSymptoms = previewSelectedSymptoms,
+            onMoodsSelected = {},
+            onSymptomsSelected = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewMoodRatingSquareView() {
+    MaterialTheme {
+        MoodRatingSquareView(
+            selectedMoodRating = previewMoodRating,
+            onMoodSelected = {}
         )
     }
 }

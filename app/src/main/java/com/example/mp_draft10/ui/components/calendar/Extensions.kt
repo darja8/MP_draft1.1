@@ -6,14 +6,6 @@ import java.time.YearMonth
 import java.time.temporal.WeekFields
 import java.util.Locale
 
-@OptIn(ExperimentalStdlibApi::class)
-@JvmOverloads
-fun daysOfWeek(firstDayOfWeek: DayOfWeek = firstDayOfWeekFromLocale()): List<DayOfWeek> {
-    val pivot = 7 - firstDayOfWeek.ordinal
-    val daysOfWeek = DayOfWeek.entries
-    // Order `daysOfWeek` array so that firstDayOfWeek is at the start position.
-    return (daysOfWeek.takeLast(pivot) + daysOfWeek.dropLast(pivot))
-}
 
 /**
  * Returns the first day of the week from the default locale.
@@ -29,11 +21,5 @@ fun YearMonth.atStartOfMonth(): LocalDate = this.atDay(1)
 
 val LocalDate.yearMonth: YearMonth
     get() = YearMonth.of(year, month)
-
-val YearMonth.nextMonth: YearMonth
-    get() = this.plusMonths(1)
-
-val YearMonth.previousMonth: YearMonth
-    get() = this.minusMonths(1)
 
 fun DayOfWeek.daysUntil(other: DayOfWeek) = (7 + (other.value - value)) % 7

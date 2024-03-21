@@ -79,8 +79,9 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-    implementation ("androidx.compose.material:material:1.6.1")
-    implementation ("androidx.compose.material3:material3:1.2.0")
+    implementation ("androidx.compose.material:material:1.6.3")
+    implementation ("androidx.compose.material3:material3:1.2.1")
+    implementation ("androidx.compose.material:material-icons-extended:1.6.3")
     implementation ("androidx.compose.runtime:runtime")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
 
@@ -110,16 +111,19 @@ dependencies {
     implementation ("com.google.firebase:firebase-auth:latest_version")
 
 // JUnit
-    testImplementation ("junit:junit:4.13.2")
-// Mockito
-    testImplementation ("org.mockito:mockito-core:3.11.2")
     testImplementation ("org.mockito:mockito-inline:3.11.2") // For final classes
 // Coroutines Test
-    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
 // Architecture Components
     testImplementation ("androidx.arch.core:core-testing:2.2.0")
 
+    //Android UI testing
+    androidTestImplementation ("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation ("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation ("dagger.hilt.android.testing:hilt-android-test:2.38.1")
+    kaptAndroidTest ("dagger.hilt.android.compiler:hilt-compiler:2.38.1")
 
+    implementation("co.yml:ycharts:2.1.0")
 }
 
 kapt {

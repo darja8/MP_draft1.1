@@ -17,6 +17,7 @@ class SignInViewModel @Inject constructor(private val repository: AuthRepository
     val signInState = _signInState.receiveAsFlow()
 
     fun loginUser(email: String, password: String) {
+
         viewModelScope.launch {
             repository.loginUser(email, password).collect { result ->
                 when (result) {

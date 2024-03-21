@@ -10,6 +10,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.example.mp_draft10.di.AppModule
 import com.example.mp_draft10.ui.screens.MoodData
 import com.google.firebase.auth.FirebaseAuth
@@ -26,7 +28,15 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
     val repository = AppModule.providesDatabaseRepositoryImpl()
     var userName by  mutableStateOf("")
     var userEmail by mutableStateOf("")
+    var moodCounts = mutableStateOf<Map<String, Int>>(mapOf())
+    var symptomCounts = mutableStateOf<Map<String, Int>>(mapOf())
 
+    private val _moodAndSymptoms = MutableLiveData<List<String>>()
+    val moodAndSymptoms: LiveData<List<String>> = _moodAndSymptoms
+
+//    init {
+//        fetchMoodAndSymptomsForPast30Days()
+//    }
     fun addUserDetails(userEmail: String) {
         val dB: FirebaseFirestore = FirebaseFirestore.getInstance()
         val dbUsers: CollectionReference = dB.collection("Users")
@@ -48,7 +58,6 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
                 Toast.makeText(application, "Exception: $e", Toast.LENGTH_SHORT).show()
             }
     }
-
 
     fun saveMoodToFirestore(date: LocalDate, moodObjects: List<String>, symptomObjects: List<String>, moodRating: Int) {
         val dB: FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -115,6 +124,38 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
         }
     }
 
+    suspend fun fetchMoodAndSymptomsForPast30Days(): List<String> {
+        val moodAndSymptomsForPast30Days = mutableListOf<String>()
+
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val userEmail = currentUser?.email ?: return emptyList() // Early return if no user
+
+        val db = FirebaseFirestore.getInstance()
+        val endDate = LocalDate.now()
+        val startDate = endDate.minusDays(29)
+
+        try {
+            val snapshot = db.collection("Users").document(userEmail)
+                .collection("Dates")
+                .whereGreaterThanOrEqualTo("date", startDate.toString())
+                .whereLessThanOrEqualTo("date", endDate.toString())
+                .get()
+                .await()
+
+            for (document in snapshot.documents) {
+                val moodObjects = document.get("moodObjects") as? List<String> ?: emptyList()
+                val symptomObjects = document.get("symptomObjects") as? List<String> ?: emptyList()
+                moodAndSymptomsForPast30Days.addAll(moodObjects)
+                moodAndSymptomsForPast30Days.addAll(symptomObjects)
+            }
+        } catch (e: Exception) {
+            // Handle your error: log it, show a message to the user, etc.
+            e.printStackTrace()
+        }
+
+        return moodAndSymptomsForPast30Days
+    }
+
     suspend fun fetchMoodRatingsForPast7Days(): Map<LocalDate, Int> {
         val currentUser = FirebaseAuth.getInstance().currentUser ?: return emptyMap()
         val userEmail = currentUser.email ?: return emptyMap()
@@ -143,7 +184,6 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
 
         return moodRatingsMap
     }
-
-
-
 }
+
+data class MoodSymptomCount(val moodCounts: Map<String, Int>, val symptomCounts: Map<String, Int>)

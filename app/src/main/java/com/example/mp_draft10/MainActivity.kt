@@ -13,6 +13,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -31,8 +34,7 @@ import com.example.mp_draft10.ui.screens.InsightsScreen
 import com.example.mp_draft10.ui.screens.PostDetailScreen
 import com.example.mp_draft10.ui.screens.SettingsScreen
 import com.example.mp_draft10.ui.theme.MP_draft10Theme
-import com.google.firebase.Firebase
-import com.google.firebase.firestore.firestore
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
 import drawable.TodayScreen
 
@@ -43,14 +45,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MP_draft10Theme {
-                val db = Firebase.firestore
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+
                     BuildNavigationGraph()
                 }
             }
+
+
         }
     }
 
@@ -89,29 +93,47 @@ fun MainScreen() {
 sealed class NavigationItem(var route: String, var icon: Int, var title: String) {
     data object Today : NavigationItem("today", R.drawable.calendar, "Today")
     data object Insights : NavigationItem("insights", R.drawable.chart, "Insights")
-    data object Chat : NavigationItem("chat", R.drawable.chat, "Chat")
+    data object Chat : NavigationItem("chat", R.drawable.chat, "Community")
 }
 
 fun NavController.navigateTo(route: AppRoutes) {
     navigate(route.route)
 }
 
-@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavigationAuthentication(
     navController: NavHostController = rememberNavController(),
     signUpViewModel: SignUpViewModel,
     signInViewModel: SignInViewModel
 ) {
+    // Determine if the user is already authenticated
+    val isAuthenticated = remember { mutableStateOf(FirebaseAuth.getInstance().currentUser != null) }
+    val startDestination = if (isAuthenticated.value) AppRoutes.Main.route else AppRoutes.SignIn.route
+
+    // Remember navController to prevent recomposition issues
+    val navControllerState = rememberNavController()
+
+    LaunchedEffect(key1 = isAuthenticated.value) {
+        // If already authenticated, navigate to the main screen and clear back stack
+        if (isAuthenticated.value) {
+            navControllerState.navigate(AppRoutes.Main.route) {
+                popUpTo(navControllerState.graph.startDestinationId) {
+                    inclusive = true
+                }
+            }
+        }
+    }
+
     NavHost(
-        navController = navController,
-        startDestination = AppRoutes.SignUp.route // Start with SignUpScreen by default
+        navController = navControllerState,
+        startDestination = startDestination
     ) {
         composable(route = AppRoutes.SignIn.route) {
-            SignInScreen(navController = navController, viewModel = signInViewModel)
+            SignInScreen(navController = navControllerState, viewModel = signInViewModel)
         }
         composable(route = AppRoutes.SignUp.route) {
-            SignUpScreen(navController = navController, viewModel = signUpViewModel)
+            SignUpScreen(navController = navControllerState, viewModel = signUpViewModel)
         }
         composable(route = AppRoutes.Main.route) {
             MainScreen()

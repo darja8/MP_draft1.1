@@ -8,12 +8,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -21,7 +21,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -41,7 +40,6 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @SuppressLint("ResourceType")
@@ -116,7 +114,8 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
                     onClick = {
                         addNewUserViewModel.saveMoodToFirestore(selectedDay, selectedMoods, selectedSymptoms, selectedMoodRating)
                     },
-                    modifier = Modifier.fillMaxWidth().padding(16.dp)
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(16.dp)
                 ) {
                     Text(text = "Save Mood and Symptoms", color = MaterialTheme.colorScheme.onPrimary)
                 }
@@ -144,12 +143,12 @@ fun CalendarSlide(
 
     Column(
         modifier = Modifier
-            .height(140.dp)
+            .height(120.dp)
             .background(MaterialTheme.colorScheme.background),
     ) {
         TopAppBar(
             elevation = 0.dp,
-            title = { Text(text = getWeekPageTitle(visibleWeek)) },
+            title = { Text(text = getWeekPageTitle(visibleWeek), color = MaterialTheme.colorScheme.onBackground) },
             backgroundColor = MaterialTheme.colorScheme.background,
             actions = {
                 // Place the settings IconButton here, inside the TopAppBar of the CalendarSlide
@@ -177,6 +176,7 @@ private val dateFormatter = DateTimeFormatter.ofPattern("dd")
 
 @Composable
 private fun Day(date: LocalDate, isSelected: Boolean, onClick: (LocalDate) -> Unit) {
+    val today = LocalDate.now()
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -192,15 +192,34 @@ private fun Day(date: LocalDate, isSelected: Boolean, onClick: (LocalDate) -> Un
             Text(
                 text = date.dayOfWeek.displayText(),
                 fontSize = 12.sp,
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Light,
             )
-            Text(
-                text = dateFormatter.format(date),
-                fontSize = 14.sp,
-                color = if (isSelected) Color.Black else Color.Black,
-                fontWeight = FontWeight.Bold,
-            )
+            // Check if the date is today to draw a circle around it
+            if (date == today) {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp) // Adjust the size of the circle as needed
+                        .background(MaterialTheme.colorScheme.primaryContainer, shape = CircleShape)
+                        .padding(2.dp), // Adjust padding to fit the circle
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = dateFormatter.format(date),
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onBackground, // Ensure text color contrasts with the circle's background
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            } else {
+                // Regular day text without the circle
+                Text(
+                    text = dateFormatter.format(date),
+                    fontSize = 14.sp,
+                    color = if (isSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
         }
         if (isSelected) {
             Box(
@@ -215,6 +234,15 @@ private fun Day(date: LocalDate, isSelected: Boolean, onClick: (LocalDate) -> Un
 }
 
 
+//if (isSelected) {
+//    Box(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .height(5.dp)
+//            .background(MaterialTheme.colorScheme.primary)
+//            .align(Alignment.BottomCenter),
+//    )
+//}
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Preview
@@ -222,5 +250,22 @@ private fun Day(date: LocalDate, isSelected: Boolean, onClick: (LocalDate) -> Un
 fun TodayScreenPreview() {
     MaterialTheme {
         TodayScreen(navController = rememberNavController())
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
+fun CalendarSlidePreview() {
+    // Wrapping the preview in your app's theme, if you have one
+    MaterialTheme {
+        // Assuming your calendar needs a NavController, even though it won't be functional in the preview
+        val navController = rememberNavController()
+
+        // Providing dummy implementations for required callbacks
+        CalendarSlide(
+            onDaySelected = {},
+            onSettingsClicked = {},
+            close = {}
+        )
     }
 }
