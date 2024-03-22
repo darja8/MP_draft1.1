@@ -120,10 +120,9 @@ dependencies {
     //Android UI testing
     androidTestImplementation ("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation ("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation ("dagger.hilt.android.testing:hilt-android-test:2.38.1")
-    kaptAndroidTest ("dagger.hilt.android.compiler:hilt-compiler:2.38.1")
+//    androidTestImplementation ("dagger.hilt.android.testing:hilt-android-test:2.38.1")
+//    kaptAndroidTest ("dagger.hilt.android.compiler:hilt-compiler:2.38.1")
 
-    implementation("co.yml:ycharts:2.1.0")
 }
 
 kapt {

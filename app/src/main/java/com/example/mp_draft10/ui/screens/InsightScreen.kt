@@ -1,10 +1,10 @@
 package com.example.mp_draft10.ui.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,6 +26,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -44,21 +45,17 @@ data class MoodData(
 @Composable
 fun InsightsScreen(addNewUserViewModel: AddNewUserViewModel = viewModel()) {
     var moodRatingsMap by remember { mutableStateOf<Map<LocalDate, Int>>(emptyMap()) }
-//    var moodObjects by remember { mutableListOf<String>(emptyList<>()) }
-//    val moodAndSymptoms = addNewUserViewModel.moodAndSymptoms.observeAsState(initial = emptyList())
     var moodAndSymptomsList by remember { mutableStateOf<List<String>>(emptyList()) }
 
     LaunchedEffect(key1 = "moodRatings") {
         moodRatingsMap = addNewUserViewModel.fetchMoodRatingsForPast7Days()
-//        moodObjects = addNewUserViewModel.fetchMoodAndSymptomsForPast30Days()
     }
-
 
     LaunchedEffect(Unit) {
         moodAndSymptomsList = addNewUserViewModel.fetchMoodAndSymptomsForPast30Days()
     }
 
-    var listForChart = countOccurrencesInList(moodAndSymptomsList)
+    val listForChart = countOccurrencesInList(moodAndSymptomsList)
 
     MaterialTheme {
         Column(
@@ -72,7 +69,7 @@ fun InsightsScreen(addNewUserViewModel: AddNewUserViewModel = viewModel()) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight()
+//                    .fillMaxHeight()
                     .padding(vertical = 4.dp),
                 shape = RoundedCornerShape(16.dp) // This applies rounded corners to the Card
             ) {
@@ -82,21 +79,23 @@ fun InsightsScreen(addNewUserViewModel: AddNewUserViewModel = viewModel()) {
                         .fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+
                     Text(
                         text = "Mood Ratings for Past 7 Days",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+
+                    MoodChart(moodRatingsMap)
+
+                    Text(
+                        text = "5 most logged Moods and Symptoms for past 30 days",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.padding(bottom = 16.dp) // Adds some space between the text and the chart or "no data" message
                     )
 
-//                    if (moodRatingsMap.isNotEmpty()) {
-                        MoodChart(moodRatingsMap)
-//                    } else {
-//                        Text(text = "No data", style = MaterialTheme.typography.bodyMedium)
-//                    }
-
                     MoodAndSymptomsChart(listForChart)
-
                 }
             }
         }
@@ -105,13 +104,18 @@ fun InsightsScreen(addNewUserViewModel: AddNewUserViewModel = viewModel()) {
 
 @Composable
 fun MoodAndSymptomsChart(moodAndSymptomsCounts: Map<String, Int>) {
-    val fixedBarCount = 5 // Always display 5 bars for the top 5 moods and symptoms
+    val fixedBarCount = 5
+    val primaryColor = MaterialTheme.colorScheme.primary // This ensures it adapts to theme changes
+    val onBackground = MaterialTheme.colorScheme.onBackground
+
     val maxCount = moodAndSymptomsCounts.values.maxOrNull() ?: 1
 
     Column(modifier = Modifier.padding(16.dp)) {
-        Text(text = "Top 5 Mood and Symptoms Count", modifier = Modifier.padding(bottom = 8.dp))
 
-        Canvas(modifier = Modifier.fillMaxWidth().height(250.dp)) {
+
+        Canvas(modifier = Modifier
+            .fillMaxWidth()
+            .height(250.dp)) {
             val chartWidth = size.width
             val steps = moodAndSymptomsCounts.size
             val drawableHeight = size.height - 30.dp.toPx()
@@ -120,17 +124,17 @@ fun MoodAndSymptomsChart(moodAndSymptomsCounts: Map<String, Int>) {
 
             // Use a fixed bar width and calculate the spacing based on the fixed number of bars
             val barWidth = chartWidth / (fixedBarCount * 2).toFloat()
-            val spaceBetweenBars = barWidth / 2
+            val spaceBetweenBars = barWidth / 1.5
             var startingPoint = spaceBetweenBars
 
             val labelPaint = android.graphics.Paint().apply {
-                color = android.graphics.Color.BLACK
+                color = onBackground.toArgb()
                 textSize = 30f
                 textAlign = android.graphics.Paint.Align.CENTER
             }
 
             val countPaint = android.graphics.Paint().apply {
-                color = android.graphics.Color.BLACK
+                color = onBackground.toArgb()
                 textSize = 24f
                 textAlign = android.graphics.Paint.Align.CENTER
             }
@@ -171,28 +175,27 @@ fun MoodAndSymptomsChart(moodAndSymptomsCounts: Map<String, Int>) {
                         val barHeight = (count.toFloat() / maxCount) * (size.height - 60.dp.toPx())
 
                         drawRect(
-                            color = Color.Blue,
-                            topLeft = Offset(startingPoint, size.height - barHeight - 30.dp.toPx()),
+                            color = primaryColor,
+                            topLeft = Offset(startingPoint.toFloat(), size.height - barHeight - 30.dp.toPx()),
                             size = Size(barWidth, barHeight)
                         )
 
                         drawContext.canvas.nativeCanvas.drawText(
                             mood,
-                            startingPoint + barWidth / 2,
+                            (startingPoint + barWidth / 2).toFloat(),
                             size.height - 5.dp.toPx(),
                             labelPaint
                         )
 
                         drawContext.canvas.nativeCanvas.drawText(
                             count.toString(),
-                            startingPoint + barWidth / 2,
+                            (startingPoint + barWidth / 2).toFloat(),
                             size.height - barHeight - 35.dp.toPx(),
                             countPaint
                         )
                         startingPoint += barWidth + spaceBetweenBars
                     }
             }
-
         }
     }
 }
@@ -202,8 +205,10 @@ fun MoodAndSymptomsChart(moodAndSymptomsCounts: Map<String, Int>) {
 fun MoodChart(moodRatings: Map<LocalDate, Int>) {
     val sortedRatings = moodRatings.entries.sortedBy { it.key }
     val dates = sortedRatings.map { it.key }
-    val ratings = sortedRatings.map { it.value }
     val minValue = 1
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val secondaryColor = MaterialTheme.colorScheme.secondary
+    val onBackground = MaterialTheme.colorScheme.onBackground
 
     Canvas(
         modifier = Modifier
@@ -246,24 +251,11 @@ fun MoodChart(moodRatings: Map<LocalDate, Int>) {
             strokeWidth = 1.dp.toPx()
         )
 
-        drawYAxisLabels(1, 10, chartHeight)
-        drawXAxisLabels(dates, chartWidth, chartHeight + 10.dp.toPx(), this)
+        drawYAxisLabels(1, 10, chartHeight, onBackground)
+        drawXAxisLabels(dates, chartWidth, chartHeight + 10.dp.toPx(), this, onBackground)
 
         if (moodRatings.isNotEmpty()) {
-
-            // Draw Data Points and Lines
-            for (i in 1 until dates.size) {
-                val prev = sortedRatings[i - 1]
-                val current = sortedRatings[i]
-                val x1 = xStep * (i - 1)
-                val y1 = (chartHeight - 32.dp.toPx()) - (prev.value.toFloat() - minValue) * yStep
-                val x2 = xStep * i
-                val y2 = (chartHeight - 32.dp.toPx()) - (current.value.toFloat() - minValue) * yStep
-
-
-            }
             sortedRatings.forEachIndexed { index, entry ->
-                val date = entry.key
                 val rating = entry.value
                 val x = xStep * index
                 val y = chartHeight - 32.dp.toPx() - ((rating - minValue) * yStep)
@@ -272,7 +264,7 @@ fun MoodChart(moodRatings: Map<LocalDate, Int>) {
                     val nextRating = sortedRatings[index + 1].value
                     val nextY = chartHeight - 32.dp.toPx() - ((nextRating - minValue) * yStep)
                     drawLine(
-                        color = Color.Blue,
+                        color = primaryColor,
                         start = Offset(x, y),
                         end = Offset(x + xStep, nextY),
                         strokeWidth = 2.dp.toPx()
@@ -281,7 +273,7 @@ fun MoodChart(moodRatings: Map<LocalDate, Int>) {
 
                 // Draw a dot for each data point
                 drawCircle(
-                    color = Color.Red,
+                    color = secondaryColor,
                     center = Offset(x, y),
                     radius = 5f // Adjust the size of the dot as needed
                 )
@@ -290,9 +282,11 @@ fun MoodChart(moodRatings: Map<LocalDate, Int>) {
     }
 }
 
-fun DrawScope.drawYAxisLabels(start: Int, end: Int, chartHeight: Float) {
+
+fun DrawScope.drawYAxisLabels(start: Int, end: Int, chartHeight: Float, themeColor: Color) {
+
     val yAxisPaint = android.graphics.Paint().apply {
-        color = android.graphics.Color.BLACK
+        color = themeColor.toArgb()
         textSize = 30f // Consider adjusting the text size if necessary
         textAlign = android.graphics.Paint.Align.RIGHT // Text is right-aligned to the x-coordinate
         typeface = android.graphics.Typeface.create(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.BOLD)
@@ -315,44 +309,46 @@ fun DrawScope.drawYAxisLabels(start: Int, end: Int, chartHeight: Float) {
     }
 }
 
-fun drawXAxisLabels(dates: List<LocalDate>, chartWidth: Float, startY: Float, scope: DrawScope) {
+fun drawXAxisLabels(dates: List<LocalDate>, chartWidth: Float, startY: Float, scope: DrawScope, themeColor: Color) {
     val dateFormatter = DateTimeFormatter.ofPattern("E", Locale.getDefault())
-    val xStep = chartWidth / (dates.size.coerceAtLeast(1).toFloat())
+    // Calculate the space available for each data point, considering one less gap than the number of points
+    val xStep = if (dates.size > 1) chartWidth / (dates.size - 1) else chartWidth
+    val labelPaint = android.graphics.Paint().apply {
+        color = themeColor.toArgb()
+        textSize = 30f
+        textAlign = android.graphics.Paint.Align.CENTER // This ensures the text is centered at the calculated X position
+    }
 
     dates.forEachIndexed { index, date ->
-        val x = 230f * index
-        // Draw the day labels under the X Axis
+        // Calculate the center position for each label based on its index
+        val x = xStep * index
         scope.drawContext.canvas.nativeCanvas.drawText(
             dateFormatter.format(date).uppercase(Locale.getDefault()),
             x,
             startY,
-            android.graphics.Paint().apply {
-                color = android.graphics.Color.BLACK
-                textSize = 30f
-                textAlign = android.graphics.Paint.Align.CENTER
-            }
+            labelPaint
         )
     }
 }
+
 
 fun countOccurrencesInList(moodAndSymptomsList: List<String>): Map<String, Int> {
     return moodAndSymptomsList.groupingBy { it }.eachCount()
 }
 
+@SuppressLint("SuspiciousIndentation")
 @Preview(showBackground = true)
 @Composable
 fun InsightsScreenPreview() {
-    // Mock data for preview
     val mockData = mapOf(
         LocalDate.now().minusDays(6) to 7,
         LocalDate.now().minusDays(5) to 5,
 //        LocalDate.now().minusDays(4) to 4,
 //        LocalDate.now().minusDays(3) to 3,
-//        LocalDate.now().minusDays(2) to 7,
+        LocalDate.now().minusDays(2) to 7,
 //        LocalDate.now().minusDays(1) to 10,
         LocalDate.now() to 6
     )
-    // Use the mock data for the MoodChart in the preview
         Column(
             modifier = Modifier
 //                .fillMaxSize()
@@ -361,11 +357,7 @@ fun InsightsScreenPreview() {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "Mood Ratings for Past 7 Days (Preview)",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground
-            )
+
             MoodChart(moodRatings = mockData)
         }
 }
@@ -373,7 +365,6 @@ fun InsightsScreenPreview() {
 @Preview(showBackground = true)
 @Composable
 fun PreviewMoodAndSymptomsChart() {
-    // Example data for preview
     val exampleData = mapOf(
         "Happy" to 7,
         "Sad" to 2,

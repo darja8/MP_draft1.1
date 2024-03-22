@@ -10,8 +10,8 @@ import androidx.compose.material.Divider
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -55,7 +55,8 @@ fun SettingsScreen(navController: NavHostController, authViewModel: AuthViewMode
             verticalArrangement = Arrangement.Top
         ) {
             ListItem(
-                modifier = Modifier.clickable { /* TODO: Implement avatar setting action */ },
+                modifier = Modifier.clickable {
+                    navController.navigate(AppRoutes.AvatarSetting.route)  },
                 headlineContent = { Text("Set Avatar") },
                 trailingContent = {
                     Icon(
@@ -78,7 +79,7 @@ fun SettingsScreen(navController: NavHostController, authViewModel: AuthViewMode
                 headlineContent = { Text("Log Out", color = MaterialTheme.colorScheme.error) },
                 trailingContent = {
                     Icon(
-                        imageVector = Icons.Filled.ExitToApp,
+                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                         contentDescription = "Log Out",
                         tint = MaterialTheme.colorScheme.error // Sets the icon color to red. Replace with MaterialTheme.colorScheme.error or a custom red as needed.
                     )
@@ -90,6 +91,7 @@ fun SettingsScreen(navController: NavHostController, authViewModel: AuthViewMode
 }
 
 private fun restartApp(context: android.content.Context) {
+    FirebaseAuth.getInstance().signOut()
     val packageManager = context.packageManager
     val intent = packageManager.getLaunchIntentForPackage(context.packageName)
     val componentName = intent?.component

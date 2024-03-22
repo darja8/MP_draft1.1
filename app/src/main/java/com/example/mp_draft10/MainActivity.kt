@@ -13,9 +13,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -30,6 +33,7 @@ import com.example.mp_draft10.auth.SignUpScreen
 import com.example.mp_draft10.auth.SignUpViewModel
 import com.example.mp_draft10.ui.components.BottomNavigationBar
 import com.example.mp_draft10.ui.screens.ChatScreen
+import com.example.mp_draft10.ui.screens.CreateAvatarScreen
 import com.example.mp_draft10.ui.screens.InsightsScreen
 import com.example.mp_draft10.ui.screens.PostDetailScreen
 import com.example.mp_draft10.ui.screens.SettingsScreen
@@ -100,24 +104,69 @@ fun NavController.navigateTo(route: AppRoutes) {
     navigate(route.route)
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+//@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+//@Composable
+//fun NavigationAuthentication(
+//    navController: NavHostController = rememberNavController(),
+//    signUpViewModel: SignUpViewModel,
+//    signInViewModel: SignInViewModel
+//) {
+//    NavHost(
+//        navController = navController,
+//        startDestination = AppRoutes.SignIn.route // Start with SignUpScreen by default
+//    ) {
+//        composable(route = AppRoutes.SignIn.route) {
+//            SignInScreen(navController = navController, viewModel = signInViewModel)
+//        }
+//        composable(route = AppRoutes.SignUp.route) {
+//            SignUpScreen(navController = navController, viewModel = signUpViewModel)
+//        }
+//        composable(route = AppRoutes.Main.route) {
+//            MainScreen()
+//        }
+//    }
+//}
+
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun NavigationAuthentication(
     navController: NavHostController = rememberNavController(),
     signUpViewModel: SignUpViewModel,
     signInViewModel: SignInViewModel
 ) {
-    // Determine if the user is already authenticated
-    val isAuthenticated = remember { mutableStateOf(FirebaseAuth.getInstance().currentUser != null) }
-    val startDestination = if (isAuthenticated.value) AppRoutes.Main.route else AppRoutes.SignIn.route
+    // State to keep track of user authentication status
+    var isAuthenticated by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser != null) }
+    val authStateListener = remember {
+        FirebaseAuth.AuthStateListener { firebaseAuth ->
+            isAuthenticated = firebaseAuth.currentUser != null
+        }
+    }
 
     // Remember navController to prevent recomposition issues
     val navControllerState = rememberNavController()
 
-    LaunchedEffect(key1 = isAuthenticated.value) {
-        // If already authenticated, navigate to the main screen and clear back stack
-        if (isAuthenticated.value) {
+    DisposableEffect(key1 = Unit) {
+        // Add the auth state listener when the composable enters the composition
+        FirebaseAuth.getInstance().addAuthStateListener(authStateListener)
+
+        // Remove the auth state listener when the composable leaves the composition
+        onDispose {
+            FirebaseAuth.getInstance().removeAuthStateListener(authStateListener)
+        }
+    }
+
+    val startDestination = if (isAuthenticated) AppRoutes.Main.route else AppRoutes.SignUp.route
+
+    LaunchedEffect(key1 = isAuthenticated) {
+        // Navigate based on authentication status and clear back stack appropriately
+        if (isAuthenticated) {
             navControllerState.navigate(AppRoutes.Main.route) {
+                popUpTo(navControllerState.graph.startDestinationId) {
+                    inclusive = true
+                }
+            }
+        } else {
+            navControllerState.navigate(AppRoutes.SignUp.route) {
                 popUpTo(navControllerState.graph.startDestinationId) {
                     inclusive = true
                 }
@@ -141,6 +190,7 @@ fun NavigationAuthentication(
     }
 }
 
+
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun NavBarNavigation(navController: NavHostController) {
@@ -157,8 +207,9 @@ fun NavBarNavigation(navController: NavHostController) {
                 PostDetailScreen(postId = postId, navController = navController, postViewModel = viewModel())
             }
         }
-
-
+        composable("avatarSetting"){
+            CreateAvatarScreen()
+        }
     }
 }
 
@@ -170,4 +221,5 @@ sealed class AppRoutes(val route: String) {
     data object PostDetail : AppRoutes("postDetail/{postId}") {
         fun createRoute(postId: String) = "postDetail/$postId"
     }
+    data object AvatarSetting : AppRoutes("avatarSetting")
 }

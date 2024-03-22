@@ -86,7 +86,8 @@ fun PostCard(post: Post, navController: NavController) {
                 Icon(
                     imageVector = ImageVector.vectorResource(id = R.drawable.heart),
                     contentDescription = "Likes",
-                    modifier = Modifier.clickable { /* Handle like icon click */ }
+                    modifier = Modifier.clickable { /* Handle like icon click */ },
+                    tint = MaterialTheme.colorScheme.tertiary
                 )
             }
         }
