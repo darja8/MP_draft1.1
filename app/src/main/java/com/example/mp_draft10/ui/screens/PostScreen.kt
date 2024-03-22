@@ -1,8 +1,10 @@
 package com.example.mp_draft10.ui.screens
+import android.app.Application
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,7 +21,6 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -40,7 +41,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.mp_draft10.database.AddNewUserViewModel
 import com.example.mp_draft10.database.PostViewModel
+import com.example.mp_draft10.ui.DisplaySavedAvatarAndColor
 import com.google.firebase.auth.FirebaseAuth
 
 
@@ -60,18 +63,24 @@ fun CommentTextField(
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Send),
         singleLine = true,
         colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.Transparent),
-        modifier = modifier.fillMaxWidth().padding(16.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp),
         trailingIcon = {
             IconButton(onClick = {
                 if (!commentText.isBlank() && currentUser != null && postId != null) {
                     // Construct the comment with the current text, user ID, and a timestamp
-                    val newComment = Comment(
-                        userId = currentUser.uid,
-                        text = commentText,
-                        timestamp = System.currentTimeMillis()
-                    )
+                    val newComment = currentUser.email?.let {
+                        Comment(
+                            userId = it,
+                            text = commentText,
+                            timestamp = System.currentTimeMillis()
+                        )
+                    }
                     // Pass the new comment to the ViewModel to be added to the post
-                    postViewModel.addCommentToPost(postId, newComment)
+                    if (newComment != null) {
+                        postViewModel.addCommentToPost(postId, newComment)
+                    }
                     commentText = "" // Clear the input field after submitting
                 }
             }) {
@@ -103,7 +112,9 @@ fun PostDetailScreen(postId: String, navController: NavController, postViewModel
         }
     } else if (post != null) {
         Box(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.fillMaxSize().padding(bottom = 60.dp)) {
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 60.dp)) {
                 post?.let {
                     PostDisplay(it, modifier = Modifier.padding(8.dp))
                 }
@@ -115,13 +126,17 @@ fun PostDetailScreen(postId: String, navController: NavController, postViewModel
                 )
                 LazyColumn {
                     items(comments) { comment ->
-                        CommentBubble(comment = comment)
+                        CommentBubble(comment = comment,
+                            AddNewUserViewModel(Application())
+                        )
                     }
                 }
             }
 
             CommentTextField(
-                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth(),
                 postViewModel = postViewModel,
                 postId = post?.id
             )
@@ -132,28 +147,47 @@ fun PostDetailScreen(postId: String, navController: NavController, postViewModel
 }
 
 @Composable
-fun CommentBubble(comment: Comment) {
+fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel) {
+    var avatarImageIndex by remember { mutableStateOf<Int?>(null) }
+    var backgroundColorIndex by remember { mutableStateOf<Int?>(null) }
+
+    // Fetch avatar indices based on the user email associated with the comment
+    LaunchedEffect(comment.userId) {
+        viewModel.fetchAvatarIndicesByEmail(comment.userId) { bgIndex, avatarIndex ->
+            backgroundColorIndex = bgIndex
+            avatarImageIndex = avatarIndex
+        }
+    }
+
     Card(
-        colors = CardColors(
-            MaterialTheme.colorScheme.secondaryContainer,
-            MaterialTheme.colorScheme.onSecondaryContainer,
-            Color.Gray,Color.Gray
-        ),
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-        shape = MaterialTheme.shapes.medium // This provides the rounded corners
+        shape = MaterialTheme.shapes.medium, // This provides the rounded corners
+//        backgroundColor = MaterialTheme.colorScheme.secondaryContainer // Adjust the background color as needed
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = comment.text,
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Justify
-            )
+        Row(
+            modifier = Modifier.fillMaxWidth(), // Ensures the Row takes up the full width
+            verticalAlignment = Alignment.CenterVertically // Centers children vertically within the Row
+        ) {
+            Spacer(modifier = Modifier.padding(5.dp))
+            if (avatarImageIndex != null && backgroundColorIndex != null) {
+                DisplaySavedAvatarAndColor(avatarImageIndex.toString(), backgroundColorIndex.toString(), 35)
+            }
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = comment.text,
+                    style = MaterialTheme.typography.bodyMedium,
+                    // Make sure the text color contrasts well with the Card's background color
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    textAlign = TextAlign.Justify
+                )
+            }
         }
     }
 }
+
+
 
 @Composable
 fun PostDisplay(post: Post, modifier: Modifier = Modifier) {

@@ -30,41 +30,6 @@ class PostViewModel : ViewModel() {
         fetchPostsFromFirestore()
     }
 
-//    fun fetchCommentsForPost(postId: String) {
-//        db.collection("posts").document(postId).get()
-//            .addOnSuccessListener { documentSnapshot ->
-//                val post = documentSnapshot.toObject(Post::class.java)
-//                post?.comments?.let { comments ->
-//                    _comments.value = comments
-//                }
-//            }
-//            .addOnFailureListener { e ->
-//                Log.w("ViewModel", "Fetching post failed.", e)
-//            }
-//    }
-
-    fun listenForComments(postId: String) {
-        db.collection("posts").document(postId).collection("comments")
-            .orderBy("timestamp") // Assuming there's a 'timestamp' field to sort comments
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    // Log the error or handle it appropriately
-                    return@addSnapshotListener
-                }
-
-                val commentsList = mutableListOf<Comment>()
-                if (snapshot != null) {
-                    for (doc in snapshot.documents) {
-                        doc.toObject(Comment::class.java)?.let { comment ->
-                            commentsList.add(comment)
-                        }
-                    }
-                }
-                // Update the StateFlow with the latest list of comments
-                _comments.value = commentsList
-            }
-    }
-
     fun fetchCommentsForPost(postId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {

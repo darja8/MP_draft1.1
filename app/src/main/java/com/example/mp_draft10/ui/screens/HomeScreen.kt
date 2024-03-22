@@ -11,10 +11,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -29,6 +26,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.mp_draft10.database.AddNewUserViewModel
+import com.example.mp_draft10.ui.DisplaySavedAvatarAndColor
 import com.example.mp_draft10.ui.components.MoodAndSymptomSquareView
 import com.example.mp_draft10.ui.components.MoodRatingSquareView
 import com.example.mp_draft10.ui.components.calendar.WeekCalendar
@@ -128,7 +126,8 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
 fun CalendarSlide(
     onDaySelected: (LocalDate) -> Unit,
     onSettingsClicked: () -> Unit, // Callback for when the settings icon is clicked
-    close: () -> Unit = {}
+    close: () -> Unit = {},
+    addNewUserViewModel: AddNewUserViewModel = hiltViewModel()
 ) {
     val currentDate = remember { LocalDate.now() }
     val startDate = remember { currentDate.minusDays(500) }
@@ -141,6 +140,17 @@ fun CalendarSlide(
     )
     val visibleWeek = rememberFirstVisibleWeekAfterScroll(state)
 
+    var avatarIndex by remember { mutableStateOf<String?>(null) }
+    var backgroundColorIndex by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(key1 = true) {
+        val avatarImageString = addNewUserViewModel.fetchAvatarImageString() // This function now returns a String?
+        val backgroundColorString = addNewUserViewModel.fetchAvatarBackgroundString() // This function now returns a String?
+
+        // Convert the fetched strings to integers. Use null if conversion is not possible
+        avatarIndex = avatarImageString
+        backgroundColorIndex = backgroundColorString
+    }
     Column(
         modifier = Modifier
             .height(120.dp)
@@ -153,7 +163,8 @@ fun CalendarSlide(
             actions = {
                 // Place the settings IconButton here, inside the TopAppBar of the CalendarSlide
                 IconButton(onClick = onSettingsClicked) {
-                    Icon(Icons.Filled.Settings, contentDescription = "Settings")
+
+                    DisplaySavedAvatarAndColor(avatarIndex,backgroundColorIndex,500)
                 }
             }
         )

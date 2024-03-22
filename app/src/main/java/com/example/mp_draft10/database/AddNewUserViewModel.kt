@@ -10,13 +10,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.mp_draft10.di.AppModule
 import com.example.mp_draft10.ui.screens.MoodData
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
@@ -31,12 +31,10 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
     var moodCounts = mutableStateOf<Map<String, Int>>(mapOf())
     var symptomCounts = mutableStateOf<Map<String, Int>>(mapOf())
 
-    private val _moodAndSymptoms = MutableLiveData<List<String>>()
-    val moodAndSymptoms: LiveData<List<String>> = _moodAndSymptoms
 
-//    init {
-//        fetchMoodAndSymptomsForPast30Days()
-//    }
+
+    private val _moodAndSymptoms = MutableLiveData<List<String>>()
+
     fun addUserDetails(userEmail: String) {
         val dB: FirebaseFirestore = FirebaseFirestore.getInstance()
         val dbUsers: CollectionReference = dB.collection("Users")
@@ -181,9 +179,88 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
             }
             currentDate = currentDate.plusDays(1)
         }
-
         return moodRatingsMap
     }
+
+    fun saveUserAvatar(backgroundColorIndex: Int, avatarImageIndex: Int) {
+        val db = FirebaseFirestore.getInstance()
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val userEmail = currentUser?.email ?: return
+
+        // Convert the indices to strings
+        val avatarDetails = hashMapOf(
+            "backgroundColor" to backgroundColorIndex.toString(),
+            "avatarImage" to avatarImageIndex.toString()
+        )
+
+        // Directly set (or update) the avatar details in the user's document
+        db.collection("Users").document(userEmail)
+            .set(mapOf("avatar" to avatarDetails), SetOptions.merge())
+            .addOnSuccessListener {
+                Log.d("saveUserAvatar", "Avatar details saved successfully!")
+                // Handle success, e.g., show a success message
+            }
+            .addOnFailureListener { e ->
+                Log.e("saveUserAvatar", "Error saving avatar details", e)
+                // Handle failure, e.g., show an error message
+            }
+    }
+
+    suspend fun fetchAvatarImageString(): String? {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val userEmail = currentUser?.email ?: return null
+        val db = FirebaseFirestore.getInstance()
+
+        try {
+            val userDoc = db.collection("Users").document(userEmail).get().await()
+            if (userDoc.exists()) {
+                val avatarDetails = userDoc.data?.get("avatar") as? Map<String, Any?>
+                return avatarDetails?.get("avatarImage") as? String
+            }
+        } catch (e: Exception) {
+            Log.e("fetchAvatarImageString", "Error fetching avatar image string", e)
+        }
+
+        return null // Return null if user document doesn't exist or on failure
+    }
+
+    suspend fun fetchAvatarBackgroundString(): String? {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val userEmail = currentUser?.email ?: return null
+        val db = FirebaseFirestore.getInstance()
+
+        try {
+            val userDoc = db.collection("Users").document(userEmail).get().await()
+            if (userDoc.exists()) {
+                val avatarDetails = userDoc.data?.get("avatar") as? Map<String, Any?>
+                return avatarDetails?.get("backgroundColor") as? String
+            }
+        } catch (e: Exception) {
+            Log.e("fetchAvatarBackgroundString", "Error fetching avatar background string", e)
+        }
+
+        return null // Return null if user document doesn't exist or on failure
+    }
+
+    // In AddNewUserViewModel
+    fun fetchAvatarIndicesByEmail(userEmail: String, onResult: (Int?, Int?) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("Users").document(userEmail).get()
+            .addOnSuccessListener { documentSnapshot ->
+                if (documentSnapshot.exists()) {
+                    val avatarDetails = documentSnapshot.data?.get("avatar") as? Map<String, Any?>
+                    val backgroundColorIndex = avatarDetails?.get("backgroundColor") as? String
+                    val avatarImageIndex = avatarDetails?.get("avatarImage") as? String
+                    // Assuming the stored indices are strings, convert them to Int
+                    onResult(backgroundColorIndex?.toIntOrNull(), avatarImageIndex?.toIntOrNull())
+                } else {
+                    onResult(null, null)
+                }
+            }
+            .addOnFailureListener {
+                onResult(null, null)
+            }
+    }
+
 }
 
-data class MoodSymptomCount(val moodCounts: Map<String, Int>, val symptomCounts: Map<String, Int>)
