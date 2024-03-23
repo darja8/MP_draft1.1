@@ -70,11 +70,18 @@ fun SettingsScreen(navController: NavHostController, authViewModel: AuthViewMode
 
             ListItem(
                 modifier = Modifier.clickable {
+                    // Sign out from Firebase Auth
                     FirebaseAuth.getInstance().signOut()
-                    restartApp(context)
+
+                    // Navigate to Sign In screen immediately after signing out
                     navController.navigate(AppRoutes.SignIn.route) {
+                        // Clear back stack to prevent going back to authenticated screens
                         popUpTo(AppRoutes.SignIn.route) { inclusive = true }
                     }
+
+                    // Consider calling restartApp(context) here only if necessary
+                    // You might delay this operation or ensure it navigates to SignIn route upon restart
+                    // Example: restartApp(context)
                 },
                 headlineContent = { Text("Log Out", color = MaterialTheme.colorScheme.error) },
                 trailingContent = {
@@ -85,7 +92,6 @@ fun SettingsScreen(navController: NavHostController, authViewModel: AuthViewMode
                     )
                 }
             )
-
         }
     }
 }

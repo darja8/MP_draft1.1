@@ -11,50 +11,40 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.mp_draft10.NavigationItem
+import com.example.mp_draft10.AppRoutes
+import com.example.mp_draft10.BottomNavItem
+import com.example.mp_draft10.R
 
 
 @Composable
 fun BottomNavigationBar(navController: NavController) {
-    val items = listOf(
-        NavigationItem.Today,
-        NavigationItem.Insights,
-        NavigationItem.Chat,
+
+    val bottomNavItems = listOf(
+        BottomNavItem(AppRoutes.TodayScreen.route, R.drawable.calendar, "Today"),
+        BottomNavItem(AppRoutes.InsightsScreen.route, R.drawable.chart, "Insights"),
+        BottomNavItem(AppRoutes.HubScreen.route, R.drawable.comment_text_outline, "Hub")
     )
     BottomNavigation(
         backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
     ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
-        items.forEach { item ->
+        bottomNavItems.forEach { item ->
             val isSelected = currentRoute == item.route
             BottomNavigationItem(
                 icon = {
-                    val iconColor = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer
-                    else Color.Gray
                     Icon(
                         painter = painterResource(id = item.icon),
                         contentDescription = item.title,
-                        tint = iconColor
+                        tint = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer else Color.Gray
                     )
                 },
-                label = {
-                    val textColor = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer
-                    else Color.Gray // Manually setting the color for unselected labels
-                    Text(
-                        text = item.title,
-                        color = textColor
-                    )
-                },
-                selectedContentColor = Color.Transparent,
-                unselectedContentColor = Color.Transparent,
+                label = { Text(text = item.title) },
                 selected = isSelected,
                 onClick = {
                     navController.navigate(item.route) {
-                        navController.graph.startDestinationRoute?.let { route ->
-                            popUpTo(route) {
-                                saveState = true
-                            }
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
                         }
                         launchSingleTop = true
                         restoreState = true

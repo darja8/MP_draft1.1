@@ -1,5 +1,4 @@
 package com.example.mp_draft10.ui.screens
-import android.app.Application
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,15 +10,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -34,7 +37,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -52,6 +54,7 @@ fun CommentTextField(
     modifier: Modifier = Modifier,
     postViewModel: PostViewModel,
     postId: String?,
+    parentId: String? = null,
 ) {
     var commentText by remember { mutableStateOf("") }
     val currentUser = FirebaseAuth.getInstance().currentUser
@@ -69,18 +72,14 @@ fun CommentTextField(
         trailingIcon = {
             IconButton(onClick = {
                 if (!commentText.isBlank() && currentUser != null && postId != null) {
-                    // Construct the comment with the current text, user ID, and a timestamp
-                    val newComment = currentUser.email?.let {
-                        Comment(
-                            userId = it,
-                            text = commentText,
-                            timestamp = System.currentTimeMillis()
-                        )
-                    }
+                    val newComment = Comment(
+                        userId = currentUser.uid,
+                        text = commentText,
+                        timestamp = System.currentTimeMillis(),
+                        parentId = parentId // Include the parentId
+                    )
                     // Pass the new comment to the ViewModel to be added to the post
-                    if (newComment != null) {
-                        postViewModel.addCommentToPost(postId, newComment)
-                    }
+                    postViewModel.addCommentToPost(postId, newComment)
                     commentText = "" // Clear the input field after submitting
                 }
             }) {
@@ -95,7 +94,8 @@ fun PostDetailScreen(postId: String, navController: NavController, postViewModel
     var post by remember { mutableStateOf<Post?>(null) }
     val comments by postViewModel.comments.collectAsState()
     var isLoading by remember { mutableStateOf(true) }
-    val context = LocalContext.current
+    var showReplyDialog by remember { mutableStateOf(false) }
+    var replyToCommentId by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(postId) {
         isLoading = true
@@ -124,10 +124,30 @@ fun PostDetailScreen(postId: String, navController: NavController, postViewModel
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
                 )
+                if (showReplyDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showReplyDialog = false },
+                        title = { Text("Reply to Comment") },
+                        text = {
+                            CommentTextField(
+                                postViewModel = postViewModel,
+                                postId = postId,
+                                parentId = replyToCommentId,
+                            )
+                        },
+                        confirmButton = {},
+                        dismissButton = { Button(onClick = { showReplyDialog = false }) { Text("Cancel") } }
+                    )
+                }
                 LazyColumn {
                     items(comments) { comment ->
-                        CommentBubble(comment = comment,
-                            AddNewUserViewModel(Application())
+                        CommentBubble(
+                            comment = comment,
+                            viewModel = viewModel(),
+                            onReplyClick = {
+                                replyToCommentId = comment.commentId
+                                showReplyDialog = true // Show the reply dialog
+                            }
                         )
                     }
                 }
@@ -138,8 +158,17 @@ fun PostDetailScreen(postId: String, navController: NavController, postViewModel
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth(),
                 postViewModel = postViewModel,
-                postId = post?.id
+                postId = post?.id,
+                parentId = replyToCommentId // Pass the parentId for replies
             )
+
+            // Reset replyToCommentId when the comment is posted
+            if (replyToCommentId != null) {
+                LaunchedEffect(key1 = replyToCommentId) {
+                    // Reset after posting or canceling reply
+                    replyToCommentId = null
+                }
+            }
         }
     } else {
         Text("Post not found", modifier = Modifier.padding(16.dp))
@@ -147,13 +176,13 @@ fun PostDetailScreen(postId: String, navController: NavController, postViewModel
 }
 
 @Composable
-fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel) {
+fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel, onReplyClick: () -> Unit) {
     var avatarImageIndex by remember { mutableStateOf<Int?>(null) }
     var backgroundColorIndex by remember { mutableStateOf<Int?>(null) }
 
     // Fetch avatar indices based on the user email associated with the comment
     LaunchedEffect(comment.userId) {
-        viewModel.fetchAvatarIndicesByEmail(comment.userId) { bgIndex, avatarIndex ->
+        viewModel.fetchAvatarIndicesById(comment.userId) { bgIndex, avatarIndex ->
             backgroundColorIndex = bgIndex
             avatarImageIndex = avatarIndex
         }
@@ -164,17 +193,19 @@ fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel) {
             .fillMaxWidth()
             .padding(8.dp),
         shape = MaterialTheme.shapes.medium, // This provides the rounded corners
-//        backgroundColor = MaterialTheme.colorScheme.secondaryContainer // Adjust the background color as needed
+        // backgroundColor = MaterialTheme.colorScheme.secondaryContainer // Adjust the background color as needed
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(), // Ensures the Row takes up the full width
+            modifier = Modifier
+                .fillMaxWidth() // Ensures the Row takes up the full width
+                .padding(vertical = 8.dp, horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically // Centers children vertically within the Row
         ) {
-            Spacer(modifier = Modifier.padding(5.dp))
             if (avatarImageIndex != null && backgroundColorIndex != null) {
                 DisplaySavedAvatarAndColor(avatarImageIndex.toString(), backgroundColorIndex.toString(), 35)
+                Spacer(modifier = Modifier.width(8.dp))
             }
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = comment.text,
                     style = MaterialTheme.typography.bodyMedium,
@@ -183,11 +214,17 @@ fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel) {
                     textAlign = TextAlign.Justify
                 )
             }
+            IconButton(onClick = onReplyClick) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Reply,
+                    contentDescription = "Reply to Comment",
+                    // Adjust the icon color to match your theme or to indicate interactability
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
 }
-
-
 
 @Composable
 fun PostDisplay(post: Post, modifier: Modifier = Modifier) {

@@ -128,9 +128,7 @@ fun SignInScreen(
                 if (state.value?.isSuccess?.isNotEmpty() == true) {
                     val success = state.value?.isSuccess
                     Toast.makeText(context, "${success}", Toast.LENGTH_LONG).show()
-//                    onSignInSuccess(email) // Return user email upon successful sign-in
-
-                    navController.navigate(AppRoutes.Main.route) // Navigate to the main route
+                    navController.navigate(AppRoutes.TodayScreen.route)
                 }
             }
         }

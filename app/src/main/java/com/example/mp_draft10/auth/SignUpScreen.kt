@@ -137,9 +137,10 @@ fun SignUpScreen(
         LaunchedEffect(key1 = state.value?.isSuccess) {
             scope.launch {
                 if (state.value?.isSuccess?.isNotEmpty() == true) {
-                    addNewUserViewModel.addUserDetails(email)
+                    addNewUserViewModel.addUserDetails(username, email)
                     val success = state.value?.isSuccess
                     Toast.makeText(context, "$success", Toast.LENGTH_LONG).show()
+                    navController.navigate(AppRoutes.TodayScreen.route) // Navigate to the main route
                 }
             }
         }

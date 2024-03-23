@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -62,7 +63,16 @@ fun CreateAvatarScreen( addNewUserViewModel: AddNewUserViewModel = hiltViewModel
         R.drawable.ham,
         R.drawable.mango,
         R.drawable.experiment,
-        R.drawable.tea
+        R.drawable.tea,
+        R.drawable.bavarian,
+        R.drawable.cactus,
+        R.drawable.camel,
+        R.drawable.cow,
+        R.drawable.garlic,
+        R.drawable.juice,
+        R.drawable.meditation,
+        R.drawable.pumpkin,
+        R.drawable.reindeer
     )
     val colors = mutableListOf(
         Color(0xFFF0EEBB),
@@ -105,6 +115,22 @@ fun CreateAvatarScreen( addNewUserViewModel: AddNewUserViewModel = hiltViewModel
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Avatar preview with selected background color
+        Row {
+            Button(
+                onClick = {
+                    // Now, pass the selected indices or directly pass the selected items depending on what your save function requires
+                    addNewUserViewModel.saveUserAvatar(
+                        selectedColorIndex,
+                        selectedAvatarIndex
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp)
+            ) {
+                Text("Save Avatar")
+            }
+        }
         Box(
             modifier = Modifier
                 .size(130.dp)
@@ -129,22 +155,16 @@ fun CreateAvatarScreen( addNewUserViewModel: AddNewUserViewModel = hiltViewModel
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 8.dp)
         )
-
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
             // Avatar preview and other UI elements remain unchanged
 
             // When displaying avatar options
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 60.dp),
+                columns = GridCells.Adaptive(minSize = 60.dp), // Choose an appropriate minSize for your items
                 contentPadding = PaddingValues(all = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                // Display avatar options
                 itemsIndexed(avatarImages) { index, avatar ->
                     Box(
                         modifier = Modifier
@@ -155,28 +175,28 @@ fun CreateAvatarScreen( addNewUserViewModel: AddNewUserViewModel = hiltViewModel
                                 shape = CircleShape
                             )
                             .aspectRatio(1f)
-                            .clickable {
-                                selectedAvatarIndex = index
-                            } // Update the selectedAvatarIndex on click
+                            .clickable { selectedAvatarIndex = index }
                             .padding(2.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Image(
                             painter = painterResource(id = avatar),
                             contentDescription = "Avatar",
-                            modifier = Modifier.fillMaxSize().padding(6.dp)
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(6.dp)
                         )
                     }
                 }
-            }
 
-            // Color selection logic remains the same, just use itemsIndexed for consistency
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 36.dp),
-                contentPadding = PaddingValues(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+                // Insert a spacer item between the avatars and colors
+                item {
+                    Spacer(modifier = Modifier
+                        .fillMaxWidth()
+                        .height(32.dp)) // Adjust the height as needed to create space
+                }
+
+                // Display color options
                 itemsIndexed(colors) { index, color ->
                     Box(
                         modifier = Modifier
@@ -193,20 +213,6 @@ fun CreateAvatarScreen( addNewUserViewModel: AddNewUserViewModel = hiltViewModel
                     )
                 }
             }
-
-            Button(
-                onClick = {
-                    // Now, pass the selected indices or directly pass the selected items depending on what your save function requires
-                    addNewUserViewModel.saveUserAvatar(
-                        selectedColorIndex,
-                        selectedAvatarIndex
-                    )
-                },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
-            ) {
-                Text("Save Avatar")
-            }
-        }
     }
 }
 
@@ -234,8 +240,5 @@ fun ColorBox(
 @Preview(showBackground = true, name = "Create Avatar Screen Preview")
 @Composable
 fun CreateAvatarScreenPreview() {
-    // Since your original Composable doesn't require any parameters,
-    // you can directly call CreateAvatarScreen here.
-    // If your Composable required parameters, you'd have to mock them here.
     CreateAvatarScreen()
 }

@@ -1,6 +1,8 @@
 package com.example.mp_draft10.ui.screens
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -30,7 +32,9 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.example.mp_draft10.database.AddNewUserViewModel
+import com.example.mp_draft10.ui.components.MainScreenScaffold
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -42,8 +46,12 @@ data class MoodData(
     val symptomObjects: List<String>
 )
 
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
-fun InsightsScreen(addNewUserViewModel: AddNewUserViewModel = viewModel()) {
+fun InsightsScreen(
+    addNewUserViewModel: AddNewUserViewModel = viewModel(),
+    navController: NavHostController
+) {
     var moodRatingsMap by remember { mutableStateOf<Map<LocalDate, Int>>(emptyMap()) }
     var moodAndSymptomsList by remember { mutableStateOf<List<String>>(emptyList()) }
 
@@ -57,7 +65,8 @@ fun InsightsScreen(addNewUserViewModel: AddNewUserViewModel = viewModel()) {
 
     val listForChart = countOccurrencesInList(moodAndSymptomsList)
 
-    MaterialTheme {
+    MainScreenScaffold(navController = navController)
+    {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -69,7 +78,6 @@ fun InsightsScreen(addNewUserViewModel: AddNewUserViewModel = viewModel()) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-//                    .fillMaxHeight()
                     .padding(vertical = 4.dp),
                 shape = RoundedCornerShape(16.dp) // This applies rounded corners to the Card
             ) {
@@ -94,7 +102,6 @@ fun InsightsScreen(addNewUserViewModel: AddNewUserViewModel = viewModel()) {
                         color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.padding(bottom = 16.dp) // Adds some space between the text and the chart or "no data" message
                     )
-
                     MoodAndSymptomsChart(listForChart)
                 }
             }
@@ -149,7 +156,6 @@ fun MoodAndSymptomsChart(moodAndSymptomsCounts: Map<String, Int>) {
                     strokeWidth = 1.dp.toPx()
                 )
             }
-
             // Draw Y Axis
             drawLine(
                 color = Color.Gray,
@@ -157,7 +163,6 @@ fun MoodAndSymptomsChart(moodAndSymptomsCounts: Map<String, Int>) {
                 end = Offset(x = 0f, y = chartHeight),
                 strokeWidth = 1.dp.toPx()
             )
-
             // Draw X Axis
             drawLine(
                 color = Color.Gray,

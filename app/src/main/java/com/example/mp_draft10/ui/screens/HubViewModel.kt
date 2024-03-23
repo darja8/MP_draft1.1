@@ -79,6 +79,8 @@ data class Comment(
     val text: String = "",
     val userId: String = "",
     val timestamp: Long = 0L,
+    val commentId: String = "",
+    val parentId: String? = null
 )
 
 data class Post(

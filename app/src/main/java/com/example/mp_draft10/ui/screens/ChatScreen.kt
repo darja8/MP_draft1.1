@@ -1,5 +1,7 @@
 package com.example.mp_draft10.ui.screens
 //import androidx.compose.material.Icon
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,21 +31,27 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.example.mp_draft10.AppRoutes
 import com.example.mp_draft10.R
 import com.example.mp_draft10.database.PostViewModel
+import com.example.mp_draft10.ui.components.MainScreenScaffold
+
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
-fun ChatScreen(navController: NavController, postViewModel: PostViewModel = viewModel()) {
+fun ChatScreen(navController: NavHostController, postViewModel: PostViewModel = viewModel()) {
 
     val posts by postViewModel.posts.collectAsState()
-
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(posts) { post ->
-            PostCard(post = post, navController)
+    MainScreenScaffold(navController = navController)
+    {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(posts) { post ->
+                PostCard(post = post, navController)
+            }
         }
     }
 }

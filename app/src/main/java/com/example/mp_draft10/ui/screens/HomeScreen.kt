@@ -7,14 +7,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +26,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.mp_draft10.database.AddNewUserViewModel
 import com.example.mp_draft10.ui.DisplaySavedAvatarAndColor
+import com.example.mp_draft10.ui.components.MainScreenScaffold
 import com.example.mp_draft10.ui.components.MoodAndSymptomSquareView
 import com.example.mp_draft10.ui.components.MoodRatingSquareView
 import com.example.mp_draft10.ui.components.calendar.WeekCalendar
@@ -42,7 +42,6 @@ import java.time.format.DateTimeFormatter
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @SuppressLint("ResourceType")
 fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUserViewModel = hiltViewModel()) {
-
     val scope = rememberCoroutineScope()
 
     // Store selected moods and symptoms
@@ -50,28 +49,36 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
     var selectedSymptoms by remember { mutableStateOf<List<String>>(emptyList()) }
     var selectedDay by remember { mutableStateOf(LocalDate.now()) }
     var selectedMoodRating by remember { mutableStateOf(0) }
+    var isLoading by remember { mutableStateOf(true) } // Loading state
 
     fun handleDaySelected(day: LocalDate) {
         selectedDay = day // Update the selected day
     }
 
-    val listState = rememberLazyListState()
-
+    // Update LaunchedEffect to manage the loading state
     LaunchedEffect(selectedDay) {
+        isLoading = true // Start loading
         scope.launch {
             val moodData = addNewUserViewModel.fetchMoodDataFromSpecificDay(selectedDay)
             selectedMoods = moodData?.moodObjects ?: emptyList()
             selectedSymptoms = moodData?.symptomObjects ?: emptyList()
             selectedMoodRating = moodData?.moodRating ?: 0
+            isLoading = false // Data fetched, stop loading
         }
     }
-    Scaffold(
-    ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize()
-                .padding(paddingValues),
-            state = listState
-        ) {
+
+    MainScreenScaffold(navController = navController) {
+        if (isLoading) {
+            // Display the loading indicator
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else {
+            // Your existing LazyColumn and other UI elements
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
             item {
                 CalendarSlide(
                     onDaySelected = { day ->
@@ -80,7 +87,6 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
                     onSettingsClicked = {
                         navController.navigate("settings") // Navigate to settings screen
                     },
-                    close = {}
                 )
             }
 
@@ -112,11 +118,13 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
                     onClick = {
                         addNewUserViewModel.saveMoodToFirestore(selectedDay, selectedMoods, selectedSymptoms, selectedMoodRating)
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .padding(16.dp)
                 ) {
                     Text(text = "Save Mood and Symptoms", color = MaterialTheme.colorScheme.onPrimary)
                 }
+            }
             }
         }
     }
@@ -126,7 +134,6 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
 fun CalendarSlide(
     onDaySelected: (LocalDate) -> Unit,
     onSettingsClicked: () -> Unit, // Callback for when the settings icon is clicked
-    close: () -> Unit = {},
     addNewUserViewModel: AddNewUserViewModel = hiltViewModel()
 ) {
     val currentDate = remember { LocalDate.now() }
@@ -276,7 +283,6 @@ fun CalendarSlidePreview() {
         CalendarSlide(
             onDaySelected = {},
             onSettingsClicked = {},
-            close = {}
         )
     }
 }

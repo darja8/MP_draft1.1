@@ -21,6 +21,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
 import javax.inject.Inject
+import kotlin.random.Random
 
 @HiltViewModel
 class AddNewUserViewModel @Inject constructor(private val application: Application): AndroidViewModel(application = application) {
@@ -31,28 +32,44 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
     var moodCounts = mutableStateOf<Map<String, Int>>(mapOf())
     var symptomCounts = mutableStateOf<Map<String, Int>>(mapOf())
 
-
-
     private val _moodAndSymptoms = MutableLiveData<List<String>>()
 
-    fun addUserDetails(userEmail: String) {
-        val dB: FirebaseFirestore = FirebaseFirestore.getInstance()
-        val dbUsers: CollectionReference = dB.collection("Users")
+    fun addUserDetails(userName: String, userEmail: String) {
+        val db = FirebaseFirestore.getInstance()
+        val usersCollection = db.collection("Users")
+
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val userId = currentUser?.uid
+
+        if (userId == null) {
+            Log.e("AddUserDetails", "Error: No authenticated user found.")
+            Toast.makeText(application, "Error: No authenticated user found.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val avatarIndexRange = 0..28
+        val colorIndexRange = 0..23
+
+        val randomAvatarIndex = Random.nextInt(avatarIndexRange.first, avatarIndexRange.last + 1)
+        val randomColorIndex = Random.nextInt(colorIndexRange.first, colorIndexRange.last + 1)
+
+        // Now, call saveUserAvatar with the randomly generated indices
+        saveUserAvatar(randomColorIndex, randomAvatarIndex)
 
         val user = hashMapOf(
-            "username" to userName, // Assuming userName is a global variable or accessible in this context
+            "username" to userName,
             "userEmail" to userEmail
         )
 
-        // Set document ID to user's email
-        dbUsers.document(userEmail)
+        // Set the document ID to the user's UID
+        usersCollection.document(userId)
             .set(user)
             .addOnSuccessListener {
-                Log.d(TAG, "User details added successfully!")
+                Log.d("AddUserDetails", "User details added for user ID: $userId")
                 Toast.makeText(application, "User added successfully!", Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener { e ->
-                Log.w(TAG, "Error adding user details", e)
+                Log.w("AddUserDetails", "Error adding user details", e)
                 Toast.makeText(application, "Exception: $e", Toast.LENGTH_SHORT).show()
             }
     }
@@ -62,11 +79,11 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
         val dbUsers: CollectionReference = dB.collection("Users")
 
         val currentUser = FirebaseAuth.getInstance().currentUser
-        val userEmail = currentUser?.email
+        val userId = currentUser?.uid
 
         // Check if userEmail is empty before proceeding
-        if (!userEmail.isNullOrEmpty()) {
-            val userDocRef = dbUsers.document(userEmail)
+        if (!userId.isNullOrEmpty()) {
+            val userDocRef = dbUsers.document(userId)
 
             // Create a data object to save
             val data = hashMapOf<String, Any>(
@@ -98,10 +115,10 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
 
     suspend fun fetchMoodDataFromSpecificDay(date: LocalDate): MoodData? {
         val currentUser = FirebaseAuth.getInstance().currentUser ?: return null
-        val userEmail = currentUser.email ?: return null
+        val userId = currentUser.uid ?: return null
         val db = FirebaseFirestore.getInstance()
 
-        val docRef = db.collection("Users").document(userEmail)
+        val docRef = db.collection("Users").document(userId)
             .collection("Dates").document(date.toString())
 
         return try {
@@ -126,14 +143,14 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
         val moodAndSymptomsForPast30Days = mutableListOf<String>()
 
         val currentUser = FirebaseAuth.getInstance().currentUser
-        val userEmail = currentUser?.email ?: return emptyList() // Early return if no user
+        val userId = currentUser?.uid ?: return emptyList() // Early return if no user
 
         val db = FirebaseFirestore.getInstance()
         val endDate = LocalDate.now()
         val startDate = endDate.minusDays(29)
 
         try {
-            val snapshot = db.collection("Users").document(userEmail)
+            val snapshot = db.collection("Users").document(userId)
                 .collection("Dates")
                 .whereGreaterThanOrEqualTo("date", startDate.toString())
                 .whereLessThanOrEqualTo("date", endDate.toString())
@@ -156,7 +173,7 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
 
     suspend fun fetchMoodRatingsForPast7Days(): Map<LocalDate, Int> {
         val currentUser = FirebaseAuth.getInstance().currentUser ?: return emptyMap()
-        val userEmail = currentUser.email ?: return emptyMap()
+        val userId = currentUser.uid ?: return emptyMap()
         val db = FirebaseFirestore.getInstance()
         val endDate = LocalDate.now()
         val startDate = endDate.minusDays(6)
@@ -165,7 +182,7 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
         var currentDate = startDate
         while (!currentDate.isAfter(endDate)) {
             val dateString = currentDate.toString()
-            val docRef = db.collection("Users").document(userEmail)
+            val docRef = db.collection("Users").document(userId)
                 .collection("Dates").document(dateString)
 
             try {
@@ -185,7 +202,7 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
     fun saveUserAvatar(backgroundColorIndex: Int, avatarImageIndex: Int) {
         val db = FirebaseFirestore.getInstance()
         val currentUser = FirebaseAuth.getInstance().currentUser
-        val userEmail = currentUser?.email ?: return
+        val userId = currentUser?.uid ?: return
 
         // Convert the indices to strings
         val avatarDetails = hashMapOf(
@@ -194,7 +211,7 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
         )
 
         // Directly set (or update) the avatar details in the user's document
-        db.collection("Users").document(userEmail)
+        db.collection("Users").document(userId)
             .set(mapOf("avatar" to avatarDetails), SetOptions.merge())
             .addOnSuccessListener {
                 Log.d("saveUserAvatar", "Avatar details saved successfully!")
@@ -208,11 +225,11 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
 
     suspend fun fetchAvatarImageString(): String? {
         val currentUser = FirebaseAuth.getInstance().currentUser
-        val userEmail = currentUser?.email ?: return null
+        val userId = currentUser?.uid ?: return null
         val db = FirebaseFirestore.getInstance()
 
         try {
-            val userDoc = db.collection("Users").document(userEmail).get().await()
+            val userDoc = db.collection("Users").document(userId).get().await()
             if (userDoc.exists()) {
                 val avatarDetails = userDoc.data?.get("avatar") as? Map<String, Any?>
                 return avatarDetails?.get("avatarImage") as? String
@@ -220,17 +237,16 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
         } catch (e: Exception) {
             Log.e("fetchAvatarImageString", "Error fetching avatar image string", e)
         }
-
         return null // Return null if user document doesn't exist or on failure
     }
 
     suspend fun fetchAvatarBackgroundString(): String? {
         val currentUser = FirebaseAuth.getInstance().currentUser
-        val userEmail = currentUser?.email ?: return null
+        val userId = currentUser?.uid ?: return null
         val db = FirebaseFirestore.getInstance()
 
         try {
-            val userDoc = db.collection("Users").document(userEmail).get().await()
+            val userDoc = db.collection("Users").document(userId).get().await()
             if (userDoc.exists()) {
                 val avatarDetails = userDoc.data?.get("avatar") as? Map<String, Any?>
                 return avatarDetails?.get("backgroundColor") as? String
@@ -243,9 +259,9 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
     }
 
     // In AddNewUserViewModel
-    fun fetchAvatarIndicesByEmail(userEmail: String, onResult: (Int?, Int?) -> Unit) {
+    fun fetchAvatarIndicesById(userId: String, onResult: (Int?, Int?) -> Unit) {
         val db = FirebaseFirestore.getInstance()
-        db.collection("Users").document(userEmail).get()
+        db.collection("Users").document(userId).get()
             .addOnSuccessListener { documentSnapshot ->
                 if (documentSnapshot.exists()) {
                     val avatarDetails = documentSnapshot.data?.get("avatar") as? Map<String, Any?>
