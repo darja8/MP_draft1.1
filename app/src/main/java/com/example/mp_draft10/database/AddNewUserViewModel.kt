@@ -115,7 +115,7 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
 
     suspend fun fetchMoodDataFromSpecificDay(date: LocalDate): MoodData? {
         val currentUser = FirebaseAuth.getInstance().currentUser ?: return null
-        val userId = currentUser.uid ?: return null
+        val userId = currentUser.uid
         val db = FirebaseFirestore.getInstance()
 
         val docRef = db.collection("Users").document(userId)
@@ -254,7 +254,6 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
         } catch (e: Exception) {
             Log.e("fetchAvatarBackgroundString", "Error fetching avatar background string", e)
         }
-
         return null // Return null if user document doesn't exist or on failure
     }
 

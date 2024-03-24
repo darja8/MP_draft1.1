@@ -11,10 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.TextField
@@ -22,7 +22,6 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,10 +32,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,14 +50,15 @@ import com.example.mp_draft10.database.AddNewUserViewModel
 import com.example.mp_draft10.database.PostViewModel
 import com.example.mp_draft10.ui.DisplaySavedAvatarAndColor
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 @Composable
 fun CommentTextField(
     modifier: Modifier = Modifier,
     postViewModel: PostViewModel,
-    postId: String?,
-    parentId: String? = null,
+    postId: String?
 ) {
     var commentText by remember { mutableStateOf("") }
     val currentUser = FirebaseAuth.getInstance().currentUser
@@ -75,12 +79,10 @@ fun CommentTextField(
                     val newComment = Comment(
                         userId = currentUser.uid,
                         text = commentText,
-                        timestamp = System.currentTimeMillis(),
-                        parentId = parentId // Include the parentId
+                        timestamp = System.currentTimeMillis()
                     )
-                    // Pass the new comment to the ViewModel to be added to the post
                     postViewModel.addCommentToPost(postId, newComment)
-                    commentText = "" // Clear the input field after submitting
+                    commentText = ""
                 }
             }) {
                 Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "Send Comment")
@@ -94,8 +96,6 @@ fun PostDetailScreen(postId: String, navController: NavController, postViewModel
     var post by remember { mutableStateOf<Post?>(null) }
     val comments by postViewModel.comments.collectAsState()
     var isLoading by remember { mutableStateOf(true) }
-    var showReplyDialog by remember { mutableStateOf(false) }
-    var replyToCommentId by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(postId) {
         isLoading = true
@@ -124,51 +124,33 @@ fun PostDetailScreen(postId: String, navController: NavController, postViewModel
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
                 )
-                if (showReplyDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showReplyDialog = false },
-                        title = { Text("Reply to Comment") },
-                        text = {
-                            CommentTextField(
-                                postViewModel = postViewModel,
-                                postId = postId,
-                                parentId = replyToCommentId,
-                            )
-                        },
-                        confirmButton = {},
-                        dismissButton = { Button(onClick = { showReplyDialog = false }) { Text("Cancel") } }
-                    )
-                }
+
                 LazyColumn {
                     items(comments) { comment ->
                         CommentBubble(
                             comment = comment,
                             viewModel = viewModel(),
-                            onReplyClick = {
-                                replyToCommentId = comment.commentId
-                                showReplyDialog = true // Show the reply dialog
-                            }
+                            postViewModel = postViewModel,
+                            postId = postId
                         )
+                        Column (modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentWidth(Alignment.End)){
+                            comment.replies.forEach { reply ->
+                                ReplyBubble(reply = reply, viewModel = viewModel())
+                            }
+                        }
+
                     }
                 }
             }
-
             CommentTextField(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth(),
                 postViewModel = postViewModel,
                 postId = post?.id,
-                parentId = replyToCommentId // Pass the parentId for replies
             )
-
-            // Reset replyToCommentId when the comment is posted
-            if (replyToCommentId != null) {
-                LaunchedEffect(key1 = replyToCommentId) {
-                    // Reset after posting or canceling reply
-                    replyToCommentId = null
-                }
-            }
         }
     } else {
         Text("Post not found", modifier = Modifier.padding(16.dp))
@@ -176,11 +158,18 @@ fun PostDetailScreen(postId: String, navController: NavController, postViewModel
 }
 
 @Composable
-fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel, onReplyClick: () -> Unit) {
+fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel, postViewModel: PostViewModel, postId: String) {
     var avatarImageIndex by remember { mutableStateOf<Int?>(null) }
     var backgroundColorIndex by remember { mutableStateOf<Int?>(null) }
+    var isReplying by remember { mutableStateOf(false) } // State to manage reply mode
+    var replyText by remember { mutableStateOf("") } // State to hold the reply text
+    val focusManager = LocalFocusManager.current // To manage focus
+    val currentUser = FirebaseAuth.getInstance().currentUser
 
-    // Fetch avatar indices based on the user email associated with the comment
+    // This state and coroutine scope are used to request focus on the TextField when it becomes visible.
+    val textFieldFocusRequester = remember { FocusRequester() }
+    val coroutineScope = rememberCoroutineScope()
+
     LaunchedEffect(comment.userId) {
         viewModel.fetchAvatarIndicesById(comment.userId) { bgIndex, avatarIndex ->
             backgroundColorIndex = bgIndex
@@ -192,34 +181,117 @@ fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel, onReplyClick
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-        shape = MaterialTheme.shapes.medium, // This provides the rounded corners
-        // backgroundColor = MaterialTheme.colorScheme.secondaryContainer // Adjust the background color as needed
+        shape = MaterialTheme.shapes.medium,
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth() // Ensures the Row takes up the full width
-                .padding(vertical = 8.dp, horizontal = 12.dp),
-            verticalAlignment = Alignment.CenterVertically // Centers children vertically within the Row
-        ) {
-            if (avatarImageIndex != null && backgroundColorIndex != null) {
-                DisplaySavedAvatarAndColor(avatarImageIndex.toString(), backgroundColorIndex.toString(), 35)
-                Spacer(modifier = Modifier.width(8.dp))
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp, horizontal = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (avatarImageIndex != null && backgroundColorIndex != null) {
+                    DisplaySavedAvatarAndColor(avatarImageIndex.toString(), backgroundColorIndex.toString(), 35)
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = comment.text,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        textAlign = TextAlign.Justify
+                    )
+                }
+
+                IconButton(onClick = {
+                    isReplying = !isReplying
+                    // Reset reply text when opening the TextField
+                    if (isReplying) replyText = ""
+                    coroutineScope.launch {
+                        if (isReplying) {
+                            delay(100) // Small delay to ensure everything is ready
+                            textFieldFocusRequester.requestFocus()
+                        }
+                    }
+                }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Reply,
+                        contentDescription = "Reply to Comment",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = comment.text,
-                    style = MaterialTheme.typography.bodyMedium,
-                    // Make sure the text color contrasts well with the Card's background color
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    textAlign = TextAlign.Justify
+            // Conditionally display the TextField for reply
+            if (isReplying) {
+                TextField(
+                    value = replyText,
+                    onValueChange = { newText ->
+                        replyText = newText // Update the reply text state with each change
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                        .focusRequester(textFieldFocusRequester),
+                    placeholder = { Text("Write a reply...") },
+                    singleLine = true,
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            if (!replyText.isBlank() && currentUser != null) {
+                                val newReplyComment = ReplyComment(
+                                    userId = currentUser.uid,
+                                    text = replyText.trim(),
+                                    timestamp = System.currentTimeMillis(),
+                                    // Ensure `commentId` is initialized correctly in `ReplyComment` if needed.
+                                )
+                                postViewModel.addReplyToComment(postId, comment.commentId, newReplyComment)
+                                replyText = "" // Resetting reply text
+                                focusManager.clearFocus() // Clearing focus to hide the keyboard
+                                // Optionally, show a toast or feedback message here
+                            }
+                        }) {
+                            Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "Send Reply")
+                        }
+
+                    }
                 )
             }
-            IconButton(onClick = onReplyClick) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Reply,
-                    contentDescription = "Reply to Comment",
-                    // Adjust the icon color to match your theme or to indicate interactability
-                    tint = MaterialTheme.colorScheme.primary
+        }
+    }
+}
+
+@Composable
+fun ReplyBubble(reply: ReplyComment, viewModel: AddNewUserViewModel) {
+    var avatarImageIndex by remember { mutableStateOf<Int?>(null) }
+    var backgroundColorIndex by remember { mutableStateOf<Int?>(null) }
+
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    LaunchedEffect(reply.userId) {
+        viewModel.fetchAvatarIndicesById(reply.userId) { bgIndex, avatarIndex ->
+            backgroundColorIndex = bgIndex
+            avatarImageIndex = avatarIndex
+        }
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth(0.9f) // Fill 90% of the width
+            .padding(8.dp),
+        shape = MaterialTheme.shapes.medium,
+    ) {
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp, horizontal = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if ((avatarImageIndex != null) && (backgroundColorIndex != null)) {
+                    DisplaySavedAvatarAndColor(avatarImageIndex.toString(), backgroundColorIndex.toString(), 30)
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+                Text(
+                    text = reply.text,
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         }
@@ -256,7 +328,6 @@ fun PreviewPostDisplay() {
         content = "Break up. How to deal with emotions"
     )
 
-    // Apply MaterialTheme for consistent styling
     MaterialTheme {
         PostDisplay(post = samplePost, modifier = Modifier.padding(1.dp))
     }

@@ -52,6 +52,9 @@ fun ChatScreen(navController: NavHostController, postViewModel: PostViewModel = 
             items(posts) { post ->
                 PostCard(post = post, navController)
             }
+            item{
+                Spacer(modifier = Modifier.padding(20.dp))
+            }
         }
     }
 }

@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mp_draft10.ui.screens.Comment
 import com.example.mp_draft10.ui.screens.Post
+import com.example.mp_draft10.ui.screens.ReplyComment
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.CoroutineScope
@@ -39,18 +41,21 @@ class PostViewModel : ViewModel() {
                     .get()
                     .await()
 
-                val commentsWithUsernames = commentsSnapshot.documents.mapNotNull { doc ->
-                    doc.toObject(Comment::class.java)?.also { comment ->
-                        val userDoc = FirebaseFirestore.getInstance().collection("Users").document(comment.userId).get().await()
+                val commentsWithUsernamesAndReplies = commentsSnapshot.documents.mapNotNull { doc ->
+                    val comment = doc.toObject(Comment::class.java)
+                    comment?.let {
+                        val userDoc = FirebaseFirestore.getInstance().collection("Users").document(it.userId).get().await()
+                        val username = userDoc.toObject(User::class.java)?.username
+
                     }
+                    comment // Return the comment, now potentially with added username or processed replies
                 }
-                _comments.value = commentsWithUsernames
+                _comments.value = commentsWithUsernamesAndReplies
             } catch (e: Exception) {
                 Log.e("PostDetailScreen", "Error fetching comments: ", e)
             }
         }
     }
-
 
     private fun fetchPostsFromFirestore() {
         db.collection("posts")
@@ -73,19 +78,28 @@ class PostViewModel : ViewModel() {
     fun addCommentToPost(postId: String, newComment: Comment) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val addedCommentRef = db.collection("posts").document(postId)
-                    .collection("comments").add(newComment).await()
-                if (addedCommentRef.id.isNotEmpty()) {
-                    val updatedComments = comments.value.toMutableList().apply {
-                        add(newComment)
-                    }
-                    _comments.value = updatedComments
+                // Generate a new document reference with an auto-generated ID within the "comments" collection
+                val newCommentRef = db.collection("posts").document(postId)
+                    .collection("comments").document() // This creates a new document reference with a unique ID
+
+                // Include the auto-generated ID in your comment object
+                val commentWithId = newComment.copy(commentId = newCommentRef.id)
+
+                // Set the comment data on this new document reference, including the auto-generated ID
+                newCommentRef.set(commentWithId).await()
+
+                // Assuming you have a way to update your UI or local data structure after successfully adding a comment
+                val updatedComments = comments.value.toMutableList().apply {
+                    add(commentWithId)
                 }
+                _comments.value = updatedComments
+
             } catch (e: Exception) {
                 Log.e("AddComment", "Failed to add comment: $e")
             }
         }
     }
+
 
     suspend fun fetchPostById(postId: String): Post? {
         // Fetch the post from Firestore and convert it to a Post object
@@ -94,6 +108,22 @@ class PostViewModel : ViewModel() {
             docSnapshot.toObject(Post::class.java)
         } catch (e: Exception) {
             null // Handle exception appropriately
+        }
+    }
+
+    fun addReplyToComment(postId: String, commentId: String, newReply: ReplyComment) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+
+                val commentRef = db.collection("posts").document(postId)
+                    .collection("comments").document(commentId)
+
+                commentRef.update("replies", FieldValue.arrayUnion(newReply))
+                    .await()
+
+            } catch (e: Exception) {
+                Log.e("AddReply", "Failed to add reply to comment: $e")
+            }
         }
     }
 }

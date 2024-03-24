@@ -80,7 +80,14 @@ data class Comment(
     val userId: String = "",
     val timestamp: Long = 0L,
     val commentId: String = "",
-    val parentId: String? = null
+    val replies: List<ReplyComment> = emptyList()
+)
+
+data class ReplyComment(
+    val text: String = "",
+    val userId: String = "",
+    val timestamp: Long = 0L,
+    val commentId: String = "",
 )
 
 data class Post(

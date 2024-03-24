@@ -7,23 +7,20 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.mp_draft10.database.AddNewUserViewModel
 import com.example.mp_draft10.ui.DisplaySavedAvatarAndColor
 import com.example.mp_draft10.ui.components.MainScreenScaffold
@@ -49,7 +46,7 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
     var selectedSymptoms by remember { mutableStateOf<List<String>>(emptyList()) }
     var selectedDay by remember { mutableStateOf(LocalDate.now()) }
     var selectedMoodRating by remember { mutableStateOf(0) }
-    var isLoading by remember { mutableStateOf(true) } // Loading state
+//    var isLoading by remember { mutableStateOf(true) } // Loading state
 
     fun handleDaySelected(day: LocalDate) {
         selectedDay = day // Update the selected day
@@ -57,23 +54,23 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
 
     // Update LaunchedEffect to manage the loading state
     LaunchedEffect(selectedDay) {
-        isLoading = true // Start loading
+//        isLoading = true // Start loading
         scope.launch {
             val moodData = addNewUserViewModel.fetchMoodDataFromSpecificDay(selectedDay)
             selectedMoods = moodData?.moodObjects ?: emptyList()
             selectedSymptoms = moodData?.symptomObjects ?: emptyList()
             selectedMoodRating = moodData?.moodRating ?: 0
-            isLoading = false // Data fetched, stop loading
+//            isLoading = false // Data fetched, stop loading
         }
     }
 
     MainScreenScaffold(navController = navController) {
-        if (isLoading) {
+//        if (isLoading) {
             // Display the loading indicator
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else {
+//            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+//                CircularProgressIndicator()
+//            }
+//        } else {
             // Your existing LazyColumn and other UI elements
             LazyColumn(
                 modifier = Modifier
@@ -87,6 +84,7 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
                     onSettingsClicked = {
                         navController.navigate("settings") // Navigate to settings screen
                     },
+                    navController = navController
                 )
             }
 
@@ -125,7 +123,7 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
                     Text(text = "Save Mood and Symptoms", color = MaterialTheme.colorScheme.onPrimary)
                 }
             }
-            }
+//            }
         }
     }
 }
@@ -134,7 +132,8 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
 fun CalendarSlide(
     onDaySelected: (LocalDate) -> Unit,
     onSettingsClicked: () -> Unit, // Callback for when the settings icon is clicked
-    addNewUserViewModel: AddNewUserViewModel = hiltViewModel()
+    addNewUserViewModel: AddNewUserViewModel = hiltViewModel(),
+    navController: NavHostController
 ) {
     val currentDate = remember { LocalDate.now() }
     val startDate = remember { currentDate.minusDays(500) }
@@ -147,34 +146,15 @@ fun CalendarSlide(
     )
     val visibleWeek = rememberFirstVisibleWeekAfterScroll(state)
 
-    var avatarIndex by remember { mutableStateOf<String?>(null) }
-    var backgroundColorIndex by remember { mutableStateOf<String?>(null) }
-
-    LaunchedEffect(key1 = true) {
-        val avatarImageString = addNewUserViewModel.fetchAvatarImageString() // This function now returns a String?
-        val backgroundColorString = addNewUserViewModel.fetchAvatarBackgroundString() // This function now returns a String?
-
-        // Convert the fetched strings to integers. Use null if conversion is not possible
-        avatarIndex = avatarImageString
-        backgroundColorIndex = backgroundColorString
-    }
     Column(
         modifier = Modifier
             .height(120.dp)
             .background(MaterialTheme.colorScheme.background),
     ) {
-        TopAppBar(
-            elevation = 0.dp,
-            title = { Text(text = getWeekPageTitle(visibleWeek), color = MaterialTheme.colorScheme.onBackground) },
-            backgroundColor = MaterialTheme.colorScheme.background,
-            actions = {
-                // Place the settings IconButton here, inside the TopAppBar of the CalendarSlide
-                IconButton(onClick = onSettingsClicked) {
 
-                    DisplaySavedAvatarAndColor(avatarIndex,backgroundColorIndex,500)
-                }
-            }
-        )
+        CustomTopAppBar(titleText = getWeekPageTitle(visibleWeek), onSettingsClicked = {
+            navController.navigate("settings") // Navigate to settings screen
+        },)
         WeekCalendar(
             modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
             state = state,
@@ -192,9 +172,9 @@ fun CalendarSlide(
 
 private val dateFormatter = DateTimeFormatter.ofPattern("dd")
 
+
 @Composable
 private fun Day(date: LocalDate, isSelected: Boolean, onClick: (LocalDate) -> Unit) {
-    val today = LocalDate.now()
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -210,34 +190,15 @@ private fun Day(date: LocalDate, isSelected: Boolean, onClick: (LocalDate) -> Un
             Text(
                 text = date.dayOfWeek.displayText(),
                 fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = Color.Black,
                 fontWeight = FontWeight.Light,
             )
-            // Check if the date is today to draw a circle around it
-            if (date == today) {
-                Box(
-                    modifier = Modifier
-                        .size(24.dp) // Adjust the size of the circle as needed
-                        .background(MaterialTheme.colorScheme.primaryContainer, shape = CircleShape)
-                        .padding(2.dp), // Adjust padding to fit the circle
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = dateFormatter.format(date),
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onBackground, // Ensure text color contrasts with the circle's background
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-            } else {
-                // Regular day text without the circle
-                Text(
-                    text = dateFormatter.format(date),
-                    fontSize = 14.sp,
-                    color = if (isSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
+            Text(
+                text = dateFormatter.format(date),
+                fontSize = 14.sp,
+                color = if (isSelected) Color.Black else Color.Black,
+                fontWeight = FontWeight.Bold,
+            )
         }
         if (isSelected) {
             Box(
@@ -250,39 +211,33 @@ private fun Day(date: LocalDate, isSelected: Boolean, onClick: (LocalDate) -> Un
         }
     }
 }
-
-
-//if (isSelected) {
-//    Box(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .height(5.dp)
-//            .background(MaterialTheme.colorScheme.primary)
-//            .align(Alignment.BottomCenter),
-//    )
-//}
-
-@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-@Preview
 @Composable
-fun TodayScreenPreview() {
-    MaterialTheme {
-        TodayScreen(navController = rememberNavController())
+fun CustomTopAppBar(
+    titleText: String,
+    onSettingsClicked: () -> Unit,
+    addNewUserViewModel: AddNewUserViewModel = hiltViewModel()
+) {
+    var avatarIndex by remember { mutableStateOf<String?>(null) }
+    var backgroundColorIndex by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(key1 = true) {
+        val avatarImageString = addNewUserViewModel.fetchAvatarImageString() // This function now returns a String?
+        val backgroundColorString = addNewUserViewModel.fetchAvatarBackgroundString() // This function now returns a String?
+
+        // Convert the fetched strings to integers. Use null if conversion is not possible
+        avatarIndex = avatarImageString
+        backgroundColorIndex = backgroundColorString
     }
+    TopAppBar(
+        elevation = 0.dp,
+        title = { Text(text = titleText, color = MaterialTheme.colorScheme.onBackground) },
+        backgroundColor = MaterialTheme.colorScheme.background,
+        actions = {
+            // Place the settings IconButton here, inside the TopAppBar of the CalendarSlide
+            IconButton(onClick = onSettingsClicked) {
+
+                DisplaySavedAvatarAndColor(avatarIndex,backgroundColorIndex,500)
+            }
+        }
+    )
 }
 
-@Composable
-@Preview(showBackground = true)
-fun CalendarSlidePreview() {
-    // Wrapping the preview in your app's theme, if you have one
-    MaterialTheme {
-        // Assuming your calendar needs a NavController, even though it won't be functional in the preview
-        val navController = rememberNavController()
-
-        // Providing dummy implementations for required callbacks
-        CalendarSlide(
-            onDaySelected = {},
-            onSettingsClicked = {},
-        )
-    }
-}
