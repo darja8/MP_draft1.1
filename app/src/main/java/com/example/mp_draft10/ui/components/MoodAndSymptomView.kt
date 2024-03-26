@@ -2,7 +2,6 @@ package com.example.mp_draft10.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -153,28 +153,25 @@ fun MoodRatingSquareView(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 (1..10).forEach { mood ->
-                    Box(
-                        modifier = Modifier
-                            .size(30.dp)
-                            .background(
-                                color = if (selectedMoodRating == mood) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.background,
-                                shape = RoundedCornerShape(8.dp)
-                            )
-                            .clickable {
-                                // If the currently selected mood rating is clicked again, unselect it; otherwise, select the new mood rating.
-                                if (selectedMoodRating == mood) {
-                                    onMoodSelected(0) // Or use any value that indicates no selection
-                                } else {
-                                    onMoodSelected(mood)
-                                }
+                    FloatingActionButton(
+                        onClick = {
+                            // If the currently selected mood rating is clicked again, unselect it; otherwise, select the new mood rating.
+                            if (selectedMoodRating == mood) {
+                                onMoodSelected(0) // Or use any value that indicates no selection
+                            } else {
+                                onMoodSelected(mood)
                             }
-                            .padding(4.dp),
-                        contentAlignment = Alignment.Center
+                        },
+                        modifier = Modifier
+                            .size(37.dp)
+                            .padding(2.dp), // Adjust padding as needed
+                        shape = RoundedCornerShape(8.dp),
+                        containerColor = if (selectedMoodRating == mood) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.background,
                     ) {
                         Text(
                             text = mood.toString(),
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                            fontSize = 16.sp
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
                 }
@@ -280,6 +277,28 @@ fun PreviewMoodRatingSquareView() {
         MoodRatingSquareView(
             selectedMoodRating = previewMoodRating,
             onMoodSelected = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PreviewTest(){
+    FloatingActionButton(
+        onClick = {
+            // If the currently selected mood rating is clicked again, unselect it; otherwise, select the new mood rating.
+
+        },
+        modifier = Modifier
+            .size(37.dp)
+            .padding(2.dp), // Adjust padding as needed
+        shape = RoundedCornerShape(8.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
+    ) {
+        Text(
+            text ="5",
+            fontSize = 16.sp,
+            color = MaterialTheme.colorScheme.onPrimaryContainer
         )
     }
 }

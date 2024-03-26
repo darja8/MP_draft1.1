@@ -1,4 +1,5 @@
 package com.example.mp_draft10.ui.screens
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -40,7 +42,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -179,7 +184,9 @@ fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel, postViewMode
             .fillMaxWidth()
             .padding(8.dp),
         shape = MaterialTheme.shapes.medium,
-    ) {
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+
+        ) {
         Column {
             Row(
                 modifier = Modifier
@@ -271,8 +278,9 @@ fun ReplyBubble(reply: ReplyComment, viewModel: AddNewUserViewModel) {
 
     Card(
         modifier = Modifier
-            .fillMaxWidth(0.9f) // Fill 90% of the width
+            .fillMaxWidth(0.9f)
             .padding(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         shape = MaterialTheme.shapes.medium,
     ) {
         Column {
@@ -298,12 +306,30 @@ fun ReplyBubble(reply: ReplyComment, viewModel: AddNewUserViewModel) {
 
 @Composable
 fun PostDisplay(post: Post, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val imageName = "backgroundpost${post.id}"
+    val imageResId = context.resources.getIdentifier(imageName, "drawable", context.packageName)
+
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(150.dp)
-            .background(color = MaterialTheme.colorScheme.secondaryContainer)
+            .background(color = MaterialTheme.colorScheme.secondaryContainer),
+        contentAlignment = Alignment.Center
     ) {
+        if (post.id != "0") {
+            Image(
+                painter = painterResource(id = imageResId),
+                contentDescription = null, // Description not needed for background images
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop // Scale the image to fill the size of the Box, cropping if necessary
+            )
+        }
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(Color.White.copy(alpha = 0.8f))
+        )
         Column(modifier = Modifier
             .padding(16.dp)
             .fillMaxHeight(),

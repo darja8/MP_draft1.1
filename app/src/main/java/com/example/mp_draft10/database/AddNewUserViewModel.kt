@@ -139,7 +139,7 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
                 .addOnSuccessListener {
                     // Handle success
                     Log.d(TAG, "Mood saved successfully!")
-                    Toast.makeText(application, "Mood saved!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(application, "Saved successfully!", Toast.LENGTH_SHORT).show()
                 }.addOnFailureListener { e ->
                     // Handle failure
                     Log.e(TAG, "Error saving mood", e)
@@ -166,6 +166,7 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
         // Attempt to delete the document
         dateDocRef.delete().addOnSuccessListener {
             Log.d("DeleteDateDocument", "Document successfully deleted!")
+            Toast.makeText(application, "Saved successfully!", Toast.LENGTH_SHORT).show()
         }.addOnFailureListener { e ->
             Log.e("DeleteDateDocument", "Error deleting document", e)
         }
@@ -296,10 +297,12 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
             .set(mapOf("avatar" to avatarDetails), SetOptions.merge())
             .addOnSuccessListener {
                 Log.d("saveUserAvatar", "Avatar details saved successfully!")
-                // Handle success, e.g., show a success message
+                Toast.makeText(application, "Saved successfully!", Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener { e ->
                 Log.e("saveUserAvatar", "Error saving avatar details", e)
+                Toast.makeText(application, "Failed to save avatar.", Toast.LENGTH_SHORT).show()
+
                 // Handle failure, e.g., show an error message
             }
     }
