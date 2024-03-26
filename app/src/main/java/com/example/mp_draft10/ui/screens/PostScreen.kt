@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
@@ -85,7 +86,7 @@ fun CommentTextField(
                     commentText = ""
                 }
             }) {
-                Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "Send Comment")
+                Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "Send Comment", tint = MaterialTheme.colorScheme.onBackground)
             }
         }
     )
@@ -119,11 +120,7 @@ fun PostDetailScreen(postId: String, navController: NavController, postViewModel
                     PostDisplay(it, modifier = Modifier.padding(8.dp))
                 }
 
-                Text(
-                    text = "Comments",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
-                )
+                Divider()
 
                 LazyColumn {
                     items(comments) { comment ->
@@ -199,7 +196,7 @@ fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel, postViewMode
                         text = comment.text,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        textAlign = TextAlign.Justify
+                        textAlign = TextAlign.Start
                     )
                 }
 
@@ -246,12 +243,12 @@ fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel, postViewMode
                                 postViewModel.addReplyToComment(postId, comment.commentId, newReplyComment)
                                 replyText = "" // Resetting reply text
                                 focusManager.clearFocus() // Clearing focus to hide the keyboard
+                                isReplying = false // Hide the TextField by toggling `isReplying` to false
                                 // Optionally, show a toast or feedback message here
                             }
                         }) {
-                            Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "Send Reply")
+                            Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "Send Reply",tint = MaterialTheme.colorScheme.onBackground)
                         }
-
                     }
                 )
             }
@@ -291,7 +288,8 @@ fun ReplyBubble(reply: ReplyComment, viewModel: AddNewUserViewModel) {
                 }
                 Text(
                     text = reply.text,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Start
                 )
             }
         }

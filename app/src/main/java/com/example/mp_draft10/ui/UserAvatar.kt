@@ -3,6 +3,7 @@ package com.example.mp_draft10.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -90,15 +91,14 @@ fun DisplaySavedAvatarAndColor(
         modifier = Modifier
             .size(iconSize.dp)
             .clip(CircleShape)
-            .background(colors.getOrElse(safeBackgroundColorIndex) { colors.first() })
-            .padding(8.dp),
+            .background(colors.getOrElse(safeBackgroundColorIndex) { colors.first() }) ,
         contentAlignment = Alignment.Center
     ) {
         Image(
             painter = painterResource(id = avatarImages.getOrElse(safeAvatarImageIndex) { avatarImages.first() }),
             contentDescription = "Selected Avatar",
             modifier = Modifier
-                .size(150.dp)
+                .fillMaxSize(0.7f)
                 .padding(1.dp)
         )
     }

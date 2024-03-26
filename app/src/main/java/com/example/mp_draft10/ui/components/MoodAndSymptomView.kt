@@ -119,7 +119,6 @@ fun MoodAndSymptomSquareView(
     }
 }
 
-
 @Composable
 fun MoodRatingSquareView(
     selectedMoodRating: Int,
@@ -153,12 +152,6 @@ fun MoodRatingSquareView(
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
                 (1..10).forEach { mood ->
                     Box(
                         modifier = Modifier
@@ -168,7 +161,12 @@ fun MoodRatingSquareView(
                                 shape = RoundedCornerShape(8.dp)
                             )
                             .clickable {
-                                onMoodSelected(mood)
+                                // If the currently selected mood rating is clicked again, unselect it; otherwise, select the new mood rating.
+                                if (selectedMoodRating == mood) {
+                                    onMoodSelected(0) // Or use any value that indicates no selection
+                                } else {
+                                    onMoodSelected(mood)
+                                }
                             }
                             .padding(4.dp),
                         contentAlignment = Alignment.Center
@@ -209,7 +207,7 @@ fun MoodItemView(
             modifier = Modifier.size(25.dp),
             contentScale = ContentScale.FillWidth
         )
-        Spacer(modifier = Modifier.width(2.dp)) // Add spacing between icon and text
+        Spacer(modifier = Modifier.width(4.dp)) // Add spacing between icon and text
         Text(
             text = moodItem.title,
             fontSize = 13.sp,
@@ -240,7 +238,7 @@ fun SymptomItemView(
             modifier = Modifier.size(25.dp),
             contentScale = ContentScale.FillWidth
         )
-        Spacer(modifier = Modifier.width(2.dp)) // Add spacing between icon and text
+        Spacer(modifier = Modifier.width(4.dp)) // Add spacing between icon and text
         Text(
             text = symptomItem.title,
             fontSize = 13.sp,
@@ -260,15 +258,6 @@ private val previewMoodItems = listOf(
     MoodItem("Sad", R.drawable.sad,1)
     // Add more items as needed
 )
-//
-//private val previewSymptomItems = listOf(
-//    SymptomItem("Headache", R.drawable.ic_headache),
-//    SymptomItem("Nausea", R.drawable.ic_nausea)
-//    // Add more items as needed
-//)
-
-// Ensure these resources (e.g., R.drawable.ic_happy) are available in your project
-// or replace them with existing ones for the preview to work.
 
 @Preview(showBackground = true)
 @Composable

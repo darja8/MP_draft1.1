@@ -136,13 +136,13 @@ fun MoodAndSymptomsChart(moodAndSymptomsCounts: Map<String, Int>) {
 
             val labelPaint = android.graphics.Paint().apply {
                 color = onBackground.toArgb()
-                textSize = 30f
+                textSize = 40f
                 textAlign = android.graphics.Paint.Align.CENTER
             }
 
             val countPaint = android.graphics.Paint().apply {
                 color = onBackground.toArgb()
-                textSize = 24f
+                textSize = 30f
                 textAlign = android.graphics.Paint.Align.CENTER
             }
 
@@ -257,7 +257,7 @@ fun MoodChart(moodRatings: Map<LocalDate, Int>) {
         )
 
         drawYAxisLabels(1, 10, chartHeight, onBackground)
-        drawXAxisLabels(dates, chartWidth, chartHeight + 10.dp.toPx(), this, onBackground)
+        drawXAxisLabels(dates, chartWidth, chartHeight + 1.dp.toPx(), this, onBackground)
 
         if (moodRatings.isNotEmpty()) {
             sortedRatings.forEachIndexed { index, entry ->
@@ -292,7 +292,7 @@ fun DrawScope.drawYAxisLabels(start: Int, end: Int, chartHeight: Float, themeCol
 
     val yAxisPaint = android.graphics.Paint().apply {
         color = themeColor.toArgb()
-        textSize = 30f // Consider adjusting the text size if necessary
+        textSize = 40f // Consider adjusting the text size if necessary
         textAlign = android.graphics.Paint.Align.RIGHT // Text is right-aligned to the x-coordinate
         typeface = android.graphics.Typeface.create(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.BOLD)
     }
@@ -320,7 +320,7 @@ fun drawXAxisLabels(dates: List<LocalDate>, chartWidth: Float, startY: Float, sc
     val xStep = if (dates.size > 1) chartWidth / (dates.size - 1) else chartWidth
     val labelPaint = android.graphics.Paint().apply {
         color = themeColor.toArgb()
-        textSize = 30f
+        textSize = 35f
         textAlign = android.graphics.Paint.Align.CENTER // This ensures the text is centered at the calculated X position
     }
 

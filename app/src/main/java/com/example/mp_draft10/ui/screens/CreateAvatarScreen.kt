@@ -1,6 +1,7 @@
 package com.example.mp_draft10.ui.screens
 
 //import java.lang.reflect.Modifier
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,7 +10,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,9 +21,17 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,14 +42,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.example.mp_draft10.R
 import com.example.mp_draft10.database.AddNewUserViewModel
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateAvatarScreen( addNewUserViewModel: AddNewUserViewModel = hiltViewModel()) {
+fun CreateAvatarScreen( addNewUserViewModel: AddNewUserViewModel = hiltViewModel(),navController: NavHostController) {
 
     val avatarImages = mutableListOf(
         R.drawable.bee,
@@ -108,63 +118,62 @@ fun CreateAvatarScreen( addNewUserViewModel: AddNewUserViewModel = hiltViewModel
     val selectedAvatar = avatarImages[selectedAvatarIndex]
     val selectedColor = colors[selectedColorIndex]
 
-    Column(
-        modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Avatar preview with selected background color
-        Row {
-            Button(
-                onClick = {
-                    // Now, pass the selected indices or directly pass the selected items depending on what your save function requires
-                    addNewUserViewModel.saveUserAvatar(
-                        selectedColorIndex,
-                        selectedAvatarIndex
-                    )
+    Scaffold(
+        topBar = {
+            TopAppBar(title = { Text("Avatar") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.navigateUp() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 32.dp)
-            ) {
-                Text("Save Avatar")
-            }
-        }
-        Box(
-            modifier = Modifier
-                .size(130.dp)
-                .clip(CircleShape)
-                .background(selectedColor)
-                .padding(8.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(id = selectedAvatar),
-                contentDescription = "Selected Avatar",
-                modifier = Modifier
-                    .size(90.dp)
-                    .padding(5.dp)
+                actions = {
+                    Button(
+                        onClick = { addNewUserViewModel.saveUserAvatar(selectedColorIndex, selectedAvatarIndex) },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                    ) {
+                        Text("Save", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    }
+                }
             )
         }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(top = 70.dp)
+                .padding(start = 15.dp, end = 15.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(130.dp)
+                    .clip(CircleShape)
+                    .background(selectedColor)
+                    .padding(8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = selectedAvatar),
+                    contentDescription = "Selected Avatar",
+                    modifier = Modifier
+                        .size(90.dp)
+                        .padding(5.dp)
+                )
+            }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            "Choose your avatar",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(top = 8.dp)
-        )
-            // Avatar preview and other UI elements remain unchanged
-
-            // When displaying avatar options
+            Text(
+                "Create your avatar",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 8.dp)
+            )
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 60.dp), // Choose an appropriate minSize for your items
                 contentPadding = PaddingValues(all = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                // Display avatar options
                 itemsIndexed(avatarImages) { index, avatar ->
                     Box(
                         modifier = Modifier
@@ -204,8 +213,8 @@ fun CreateAvatarScreen( addNewUserViewModel: AddNewUserViewModel = hiltViewModel
                             .clip(CircleShape)
                             .background(color)
                             .border(
-                                2.dp,
-                                if (selectedColorIndex == index) MaterialTheme.colorScheme.onSurface else Color.Transparent,
+                                1.dp,
+                                if (selectedColorIndex == index) MaterialTheme.colorScheme.primary else Color.Transparent,
                                 CircleShape
                             )
                             .clickable { selectedColorIndex = index }
@@ -213,32 +222,8 @@ fun CreateAvatarScreen( addNewUserViewModel: AddNewUserViewModel = hiltViewModel
                     )
                 }
             }
+        }
     }
+
 }
 
-@Composable
-fun ColorBox(
-    color: Color,
-    selectedColor: Color?,
-    onColorSelected: (Color) -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .size(40.dp)
-            .clip(CircleShape)
-            .background(color)
-            .border(
-                width = 1.dp,
-                color = if (selectedColor == color) MaterialTheme.colorScheme.primary else Color.Transparent,
-                shape = CircleShape
-            )
-            .clickable { onColorSelected(color) }
-            .padding(8.dp)
-    )
-}
-
-@Preview(showBackground = true, name = "Create Avatar Screen Preview")
-@Composable
-fun CreateAvatarScreenPreview() {
-    CreateAvatarScreen()
-}

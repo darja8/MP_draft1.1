@@ -69,7 +69,7 @@ dependencies {
     implementation("com.google.firebase:firebase-auth:22.3.1")
     implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
     implementation("com.google.firebase:firebase-database:20.3.1")
-    implementation("com.google.firebase:firebase-firestore:24.10.3")
+    implementation("com.google.firebase:firebase-firestore:24.10.0")
     implementation("androidx.datastore:datastore-core:1.0.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     testImplementation("junit:junit:4.13.2")
@@ -99,6 +99,9 @@ dependencies {
     kapt("androidx.hilt:hilt-compiler:1.2.0")
     implementation("androidx.hilt:hilt-navigation-fragment:1.2.0")
     implementation ("androidx.hilt:hilt-navigation-compose:1.2.0")
+    kaptAndroidTest ("androidx.hilt:hilt-compiler:1.2.0")
+    androidTestImplementation ("com.google.dagger:hilt-android-testing:2.50")
+
 
     // Import the BoM for the Firebase platform
     implementation(platform("com.google.firebase:firebase-bom:32.7.3"))

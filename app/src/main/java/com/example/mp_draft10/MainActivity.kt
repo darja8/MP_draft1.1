@@ -98,7 +98,7 @@ fun NavigationAuthentication(
             SettingsScreen(navController = navController)
         }
         composable(route = AppRoutes.AvatarSetting.route){
-            CreateAvatarScreen()
+            CreateAvatarScreen(navController = navController)
         }
         composable("postDetail/{postId}") { backStackEntry ->
             val postId = backStackEntry.arguments?.getString("postId")

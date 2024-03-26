@@ -112,18 +112,22 @@ class PostViewModel : ViewModel() {
     }
 
     fun addReplyToComment(postId: String, commentId: String, newReply: ReplyComment) {
-        CoroutineScope(Dispatchers.IO).launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
-
                 val commentRef = db.collection("posts").document(postId)
                     .collection("comments").document(commentId)
 
-                commentRef.update("replies", FieldValue.arrayUnion(newReply))
-                    .await()
+                commentRef.update("replies", FieldValue.arrayUnion(newReply)).await()
+
+                // Assuming you have a method to fetch comments that updates LiveData/StateFlow
+                // Trigger UI update by fetching updated comments list
+                fetchCommentsForPost(postId)
 
             } catch (e: Exception) {
                 Log.e("AddReply", "Failed to add reply to comment: $e")
+                // Consider providing user feedback here
             }
         }
     }
+
 }

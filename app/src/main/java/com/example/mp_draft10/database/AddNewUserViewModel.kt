@@ -10,7 +10,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.example.mp_draft10.di.AppModule
 import com.example.mp_draft10.ui.screens.MoodData
 import com.google.firebase.auth.FirebaseAuth
@@ -18,8 +20,14 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import javax.inject.Inject
 import kotlin.random.Random
 
@@ -31,8 +39,39 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
     var userEmail by mutableStateOf("")
     var moodCounts = mutableStateOf<Map<String, Int>>(mapOf())
     var symptomCounts = mutableStateOf<Map<String, Int>>(mapOf())
-
+    private val _moodDates = MutableLiveData<List<LocalDate>>()
+    val moodDates: LiveData<List<LocalDate>> = _moodDates
     private val _moodAndSymptoms = MutableLiveData<List<String>>()
+    private val _datesWithData = MutableStateFlow<List<LocalDate>>(emptyList())
+    val datesWithData: StateFlow<List<LocalDate>> = _datesWithData.asStateFlow()
+
+    init {
+        fetchListOfDatesWithData()
+        listenForDateChanges()
+    }
+    private fun listenForDateChanges() {
+        val currentUser = FirebaseAuth.getInstance().currentUser ?: return
+        val userId = currentUser.uid
+        val db = FirebaseFirestore.getInstance()
+
+        db.collection("Users").document(userId).collection("Dates")
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    Log.w(TAG, "Listen failed.", e)
+                    return@addSnapshotListener
+                }
+
+                val updatedDates = snapshot?.documents?.mapNotNull { document ->
+                    try {
+                        LocalDate.parse(document.id, DateTimeFormatter.ISO_LOCAL_DATE)
+                    } catch (e: DateTimeParseException) {
+                        null
+                    }
+                } ?: emptyList()
+
+                _datesWithData.value = updatedDates
+            }
+    }
 
     fun addUserDetails(userName: String, userEmail: String) {
         val db = FirebaseFirestore.getInstance()
@@ -113,6 +152,25 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
         }
     }
 
+    fun deleteDateDocument(date: LocalDate) {
+        val db = FirebaseFirestore.getInstance()
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val userId = currentUser?.uid ?: run {
+            Log.e("DeleteDateDocument", "User ID is null or empty!")
+            return
+        }
+
+        // Reference to the specific date document inside the user's "Dates" collection
+        val dateDocRef = db.collection("Users").document(userId).collection("Dates").document(date.toString())
+
+        // Attempt to delete the document
+        dateDocRef.delete().addOnSuccessListener {
+            Log.d("DeleteDateDocument", "Document successfully deleted!")
+        }.addOnFailureListener { e ->
+            Log.e("DeleteDateDocument", "Error deleting document", e)
+        }
+    }
+
     suspend fun fetchMoodDataFromSpecificDay(date: LocalDate): MoodData? {
         val currentUser = FirebaseAuth.getInstance().currentUser ?: return null
         val userId = currentUser.uid
@@ -136,6 +194,29 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching mood data", e)
             null
+        }
+    }
+
+    private fun fetchListOfDatesWithData() {
+        viewModelScope.launch {
+            val currentUser = FirebaseAuth.getInstance().currentUser ?: return@launch
+            val userId = currentUser.uid
+            val db = FirebaseFirestore.getInstance()
+            val datesCollectionRef = db.collection("Users").document(userId).collection("Dates")
+
+            try {
+                val snapshot = datesCollectionRef.get().await()
+                val dates = snapshot.documents.mapNotNull { document ->
+                    try {
+                        LocalDate.parse(document.id, DateTimeFormatter.ISO_LOCAL_DATE)
+                    } catch (e: DateTimeParseException) {
+                        null
+                    }
+                }
+                _datesWithData.value = dates
+            } catch (e: Exception) {
+                Log.e("ViewModel", "Error fetching dates with data", e)
+            }
         }
     }
 
@@ -276,6 +357,5 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
                 onResult(null, null)
             }
     }
-
 }
 

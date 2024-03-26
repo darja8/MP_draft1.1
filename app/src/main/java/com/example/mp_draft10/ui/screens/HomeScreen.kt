@@ -1,24 +1,26 @@
 package drawable
 
 import android.annotation.SuppressLint
+import android.content.ContentValues.TAG
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.mp_draft10.database.AddNewUserViewModel
@@ -27,13 +29,17 @@ import com.example.mp_draft10.ui.components.MainScreenScaffold
 import com.example.mp_draft10.ui.components.MoodAndSymptomSquareView
 import com.example.mp_draft10.ui.components.MoodRatingSquareView
 import com.example.mp_draft10.ui.components.calendar.WeekCalendar
-import com.example.mp_draft10.ui.components.calendar.displayText
 import com.example.mp_draft10.ui.components.calendar.getWeekPageTitle
 import com.example.mp_draft10.ui.components.calendar.rememberFirstVisibleWeekAfterScroll
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.kizitonwose.calendar.compose.weekcalendar.rememberWeekCalendarState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 
 @Composable
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
@@ -45,33 +51,23 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
     var selectedMoods by remember { mutableStateOf<List<String>>(emptyList()) }
     var selectedSymptoms by remember { mutableStateOf<List<String>>(emptyList()) }
     var selectedDay by remember { mutableStateOf(LocalDate.now()) }
-    var selectedMoodRating by remember { mutableStateOf(0) }
-//    var isLoading by remember { mutableStateOf(true) } // Loading state
+    var selectedMoodRating by remember { mutableIntStateOf(0) }
 
     fun handleDaySelected(day: LocalDate) {
-        selectedDay = day // Update the selected day
+        selectedDay = day
+//        dayHasData = false
     }
 
-    // Update LaunchedEffect to manage the loading state
     LaunchedEffect(selectedDay) {
-//        isLoading = true // Start loading
         scope.launch {
             val moodData = addNewUserViewModel.fetchMoodDataFromSpecificDay(selectedDay)
             selectedMoods = moodData?.moodObjects ?: emptyList()
             selectedSymptoms = moodData?.symptomObjects ?: emptyList()
             selectedMoodRating = moodData?.moodRating ?: 0
-//            isLoading = false // Data fetched, stop loading
         }
     }
 
     MainScreenScaffold(navController = navController) {
-//        if (isLoading) {
-            // Display the loading indicator
-//            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-//                CircularProgressIndicator()
-//            }
-//        } else {
-            // Your existing LazyColumn and other UI elements
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -81,10 +77,8 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
                     onDaySelected = { day ->
                         handleDaySelected(day) // Update selected day and fetch mood data
                     },
-                    onSettingsClicked = {
-                        navController.navigate("settings") // Navigate to settings screen
-                    },
-                    navController = navController
+                    navController = navController,
+                    addNewUserViewModel = addNewUserViewModel
                 )
             }
 
@@ -114,7 +108,11 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
             item {
                 Button(
                     onClick = {
-                        addNewUserViewModel.saveMoodToFirestore(selectedDay, selectedMoods, selectedSymptoms, selectedMoodRating)
+                        if(selectedMoodRating == 0 && selectedSymptoms.isEmpty() && selectedMoods.isEmpty()){
+                            addNewUserViewModel.deleteDateDocument(selectedDay)
+                        }else{
+                            addNewUserViewModel.saveMoodToFirestore(selectedDay, selectedMoods, selectedSymptoms, selectedMoodRating)
+                        }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -128,12 +126,12 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
     }
 }
 
+@SuppressLint("UnrememberedMutableState")
 @Composable
 fun CalendarSlide(
     onDaySelected: (LocalDate) -> Unit,
-    onSettingsClicked: () -> Unit, // Callback for when the settings icon is clicked
-    addNewUserViewModel: AddNewUserViewModel = hiltViewModel(),
-    navController: NavHostController
+    navController: NavHostController,
+    addNewUserViewModel: AddNewUserViewModel
 ) {
     val currentDate = remember { LocalDate.now() }
     val startDate = remember { currentDate.minusDays(500) }
@@ -145,6 +143,13 @@ fun CalendarSlide(
         firstVisibleWeekDate = currentDate,
     )
     val visibleWeek = rememberFirstVisibleWeekAfterScroll(state)
+
+    val moodDates by addNewUserViewModel.moodDates.observeAsState(initial = emptyList())
+
+    // Check if the current day has mood data
+    val dayHasData by remember { mutableStateOf(currentDate) }
+    val textStyle = MaterialTheme.typography.bodyLarge
+
 
     Column(
         modifier = Modifier
@@ -159,7 +164,7 @@ fun CalendarSlide(
             modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
             state = state,
             dayContent = { day ->
-                Day(day.date, isSelected = selection == day.date) { clicked ->
+                Day(day.date, isSelected = selection == day.date, addNewUserViewModel) { clicked ->
                     if (selection != clicked) {
                         selection = clicked
                         onDaySelected(clicked) // Invoke the callback with the selected date
@@ -170,11 +175,40 @@ fun CalendarSlide(
     }
 }
 
-private val dateFormatter = DateTimeFormatter.ofPattern("dd")
+suspend fun hasSavedDataForDate(viewModelScope: CoroutineScope, date: LocalDate): Boolean {
+    val currentUser = FirebaseAuth.getInstance().currentUser ?: return false
+    val userId = currentUser.uid
+    val db = FirebaseFirestore.getInstance()
+
+    val datesCollectionRef = db.collection("Users").document(userId)
+        .collection("Dates")
+
+    return try {
+        // Launching the operation on the ViewModelScope
+        viewModelScope.async {
+            val querySnapshot = datesCollectionRef.get().await()
+            val dates = querySnapshot.documents.mapNotNull { document ->
+                try {
+                    LocalDate.parse(document.id)
+                } catch (e: DateTimeParseException) {
+                    null // If the document ID isn't a valid date, ignore this document
+                }
+            }
+            dates.contains(date)
+        }.await()
+    } catch (e: Exception) {
+        Log.e(TAG, "Error checking for saved data on date: $date", e)
+        false
+    }
+}
 
 
 @Composable
-private fun Day(date: LocalDate, isSelected: Boolean, onClick: (LocalDate) -> Unit) {
+private fun Day(date: LocalDate, isSelected: Boolean, addNewUserViewModel: AddNewUserViewModel, onClick: (LocalDate) -> Unit) {
+    val today = LocalDate.now()
+    val textStyle = MaterialTheme.typography.bodyLarge
+    val datesWithData by addNewUserViewModel.datesWithData.collectAsState()
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -187,30 +221,56 @@ private fun Day(date: LocalDate, isSelected: Boolean, onClick: (LocalDate) -> Un
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            Text(
-                text = date.dayOfWeek.displayText(),
-                fontSize = 12.sp,
-                color = Color.Black,
-                fontWeight = FontWeight.Light,
-            )
-            Text(
-                text = dateFormatter.format(date),
-                fontSize = 14.sp,
-                color = if (isSelected) Color.Black else Color.Black,
-                fontWeight = FontWeight.Bold,
+            Box(
+                modifier = Modifier
+                    .size(36.dp), // Ensure this is large enough to encompass the circle without altering the layout's size
+                contentAlignment = Alignment.Center
+            ) {
+                if (date == today) {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp) // Adjust size as needed
+                            .background(
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = CircleShape
+                            )
+                    )
+                }
+                Text(
+                    text = date.dayOfMonth.toString(),
+                    style = textStyle,
+                    color = when {
+                        date == today -> MaterialTheme.colorScheme.onPrimary
+                        isSelected -> MaterialTheme.colorScheme.primary
+                        else -> MaterialTheme.colorScheme.onBackground
+                    },
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+        }
+        if (date in datesWithData) {
+            Box(
+                modifier = Modifier
+                    .padding(bottom = 6.dp)
+                    .size(4.dp)
+                    .background(MaterialTheme.colorScheme.tertiary, CircleShape)
+                    .align(Alignment.BottomCenter)
             )
         }
         if (isSelected) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(5.dp)
+                    .height(2.dp)
                     .background(MaterialTheme.colorScheme.primary)
                     .align(Alignment.BottomCenter),
             )
         }
     }
 }
+
+
 @Composable
 fun CustomTopAppBar(
     titleText: String,
