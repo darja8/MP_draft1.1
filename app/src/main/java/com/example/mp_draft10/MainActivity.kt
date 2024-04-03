@@ -23,15 +23,17 @@ import com.example.mp_draft10.auth.SignInScreen
 import com.example.mp_draft10.auth.SignInViewModel
 import com.example.mp_draft10.auth.SignUpScreen
 import com.example.mp_draft10.auth.SignUpViewModel
+import com.example.mp_draft10.database.AddNewUserViewModel
+import com.example.mp_draft10.ui.moderator.ModeratorDashboard
 import com.example.mp_draft10.ui.screens.ChatScreen
 import com.example.mp_draft10.ui.screens.CreateAvatarScreen
 import com.example.mp_draft10.ui.screens.InsightsScreen
 import com.example.mp_draft10.ui.screens.PostDetailScreen
 import com.example.mp_draft10.ui.screens.SettingsScreen
+import com.example.mp_draft10.ui.screens.TodayScreen
 import com.example.mp_draft10.ui.theme.MP_draft10Theme
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
-import drawable.TodayScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -46,11 +48,14 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val signUpViewModel: SignUpViewModel = hiltViewModel()
                     val signInViewModel: SignInViewModel = hiltViewModel()
+                    val addNewUserViewModel: AddNewUserViewModel = hiltViewModel()
+
                     val navController = rememberNavController()
                     NavigationAuthentication(
                         navController = navController,
                         signUpViewModel = signUpViewModel,
-                        signInViewModel = signInViewModel
+                        signInViewModel = signInViewModel,
+                        addNewUserViewModel = addNewUserViewModel
                     )
                 }
             }
@@ -63,7 +68,8 @@ class MainActivity : ComponentActivity() {
 fun NavigationAuthentication(
     navController: NavHostController = rememberNavController(),
     signUpViewModel: SignUpViewModel,
-    signInViewModel: SignInViewModel
+    signInViewModel: SignInViewModel,
+    addNewUserViewModel: AddNewUserViewModel
 ) {
     val auth = FirebaseAuth.getInstance()
     val isUserAuthenticated = remember { mutableStateOf(auth.currentUser != null) }
@@ -79,7 +85,7 @@ fun NavigationAuthentication(
     }
 
     val startDestination = if (isUserAuthenticated.value) {
-        AppRoutes.TodayScreen.route
+            AppRoutes.TodayScreen.route
     } else {
         AppRoutes.SignIn.route
     }
@@ -103,7 +109,7 @@ fun NavigationAuthentication(
         composable("postDetail/{postId}") { backStackEntry ->
             val postId = backStackEntry.arguments?.getString("postId")
             if (postId != null) {
-                PostDetailScreen(postId = postId, navController = navController, postViewModel = viewModel())
+                PostDetailScreen(postId = postId, postViewModel = viewModel())
             }
         }
         composable(route = AppRoutes.TodayScreen.route){
@@ -115,13 +121,15 @@ fun NavigationAuthentication(
         composable(route = AppRoutes.HubScreen.route){
             ChatScreen(navController = navController)
         }
+        composable(route = AppRoutes.AddPostScreen.route){
+            ModeratorDashboard(navController = navController)
+        }
     }
 }
 
 sealed class AppRoutes(val route: String) {
     data object SignIn : AppRoutes("sign_in")
     data object SignUp : AppRoutes("sign_up")
-    data object Main : AppRoutes("main")
     data object Settings : AppRoutes("settings")
     data object PostDetail : AppRoutes("postDetail/{postId}") {
         fun createRoute(postId: String) = "postDetail/$postId"
@@ -130,6 +138,7 @@ sealed class AppRoutes(val route: String) {
     data object TodayScreen : AppRoutes ("today")
     data object InsightsScreen : AppRoutes ("insight")
     data object HubScreen : AppRoutes ("hub")
+    data object AddPostScreen: AppRoutes ("addpost")
 }
 
 data class BottomNavItem(val route: String, val icon: Int, val title: String)

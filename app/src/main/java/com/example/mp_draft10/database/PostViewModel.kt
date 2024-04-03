@@ -1,8 +1,9 @@
 package com.example.mp_draft10.database
 
+import android.app.Application
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mp_draft10.ui.screens.Comment
 import com.example.mp_draft10.ui.screens.Post
@@ -10,6 +11,7 @@ import com.example.mp_draft10.ui.screens.ReplyComment
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,10 +19,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-class PostViewModel : ViewModel() {
+@HiltViewModel
+class PostViewModel @Inject constructor(
+    private val application: Application
+    // Inject other dependencies here if needed
+) : AndroidViewModel(application) {
 
-    private val db = FirebaseFirestore.getInstance()
+    private var db = FirebaseFirestore.getInstance()
     private val _posts = MutableStateFlow<List<Post>>(emptyList())
     val posts: StateFlow<List<Post>> = _posts
     val postsLiveData = MutableLiveData<List<Post>>()
@@ -57,7 +64,7 @@ class PostViewModel : ViewModel() {
         }
     }
 
-    private fun fetchPostsFromFirestore() {
+    fun fetchPostsFromFirestore() {
         db.collection("posts")
             .addSnapshotListener { snapshot, e ->
                 if (e != null) {
@@ -119,8 +126,6 @@ class PostViewModel : ViewModel() {
 
                 commentRef.update("replies", FieldValue.arrayUnion(newReply)).await()
 
-                // Assuming you have a method to fetch comments that updates LiveData/StateFlow
-                // Trigger UI update by fetching updated comments list
                 fetchCommentsForPost(postId)
 
             } catch (e: Exception) {
@@ -130,4 +135,25 @@ class PostViewModel : ViewModel() {
         }
     }
 
+    fun removeComment(postId: String, commentId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // Path to the specific comment document
+                val commentRef = db.collection("posts").document(postId)
+                    .collection("comments").document(commentId)
+
+                // Delete the comment document
+                commentRef.delete().await()
+                 val updatedComments = _comments.value.filterNot { it.commentId == commentId }
+                _comments.value = updatedComments
+
+            } catch (e: Exception) {
+                Log.e("RemoveComment", "Failed to remove comment: $e")
+            }
+        }
+    }
+
+    fun setFirestoreInstance(firestore: FirebaseFirestore) {
+        db = firestore
+    }
 }

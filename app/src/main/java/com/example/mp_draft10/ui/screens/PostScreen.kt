@@ -24,6 +24,7 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.IconButton
@@ -41,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -48,10 +50,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import com.example.mp_draft10.database.AddNewUserViewModel
 import com.example.mp_draft10.database.PostViewModel
 import com.example.mp_draft10.ui.DisplaySavedAvatarAndColor
@@ -81,7 +81,7 @@ fun CommentTextField(
             .padding(16.dp),
         trailingIcon = {
             IconButton(onClick = {
-                if (!commentText.isBlank() && currentUser != null && postId != null) {
+                if (commentText.isNotBlank() && currentUser != null && postId != null) {
                     val newComment = Comment(
                         userId = currentUser.uid,
                         text = commentText,
@@ -98,10 +98,15 @@ fun CommentTextField(
 }
 
 @Composable
-fun PostDetailScreen(postId: String, navController: NavController, postViewModel: PostViewModel = viewModel()) {
+fun PostDetailScreen(postId: String, addNewUserViewModel: AddNewUserViewModel = viewModel(), postViewModel: PostViewModel = viewModel()) {
     var post by remember { mutableStateOf<Post?>(null) }
     val comments by postViewModel.comments.collectAsState()
     var isLoading by remember { mutableStateOf(true) }
+    var usertype by remember { mutableStateOf("") }
+
+    LaunchedEffect(key1 = null){
+        usertype = addNewUserViewModel.fetchUserType().toString()
+    }
 
     LaunchedEffect(postId) {
         isLoading = true
@@ -117,7 +122,17 @@ fun PostDetailScreen(postId: String, navController: NavController, postViewModel
             CircularProgressIndicator()
         }
     } else if (post != null) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        val gradient = Brush.verticalGradient(
+            colors = listOf(
+                MaterialTheme.colorScheme.background,
+                MaterialTheme.colorScheme.background,
+                MaterialTheme.colorScheme.secondaryContainer
+            )
+        )
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .background(brush = gradient)
+        ) {
             Column(modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = 60.dp)) {
@@ -133,13 +148,14 @@ fun PostDetailScreen(postId: String, navController: NavController, postViewModel
                             comment = comment,
                             viewModel = viewModel(),
                             postViewModel = postViewModel,
-                            postId = postId
+                            postId = postId,
+                            userType = usertype
                         )
                         Column (modifier = Modifier
                             .fillMaxWidth()
                             .wrapContentWidth(Alignment.End)){
                             comment.replies.forEach { reply ->
-                                ReplyBubble(reply = reply, viewModel = viewModel())
+                                ReplyBubble(reply = reply, viewModel = viewModel(), postViewModel,  userType = usertype)
                             }
                         }
 
@@ -160,7 +176,7 @@ fun PostDetailScreen(postId: String, navController: NavController, postViewModel
 }
 
 @Composable
-fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel, postViewModel: PostViewModel, postId: String) {
+fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel, postViewModel: PostViewModel, postId: String, userType: String) {
     var avatarImageIndex by remember { mutableStateOf<Int?>(null) }
     var backgroundColorIndex by remember { mutableStateOf<Int?>(null) }
     var isReplying by remember { mutableStateOf(false) } // State to manage reply mode
@@ -168,7 +184,6 @@ fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel, postViewMode
     val focusManager = LocalFocusManager.current // To manage focus
     val currentUser = FirebaseAuth.getInstance().currentUser
 
-    // This state and coroutine scope are used to request focus on the TextField when it becomes visible.
     val textFieldFocusRequester = remember { FocusRequester() }
     val coroutineScope = rememberCoroutineScope()
 
@@ -224,13 +239,23 @@ fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel, postViewMode
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
+                if (userType == "moderator") {
+                    IconButton(onClick = {
+                        postViewModel.removeComment(postId,comment.commentId)
+                    }) {
+                        Icon(imageVector = Icons.Filled.Delete, contentDescription = "Remove",tint = MaterialTheme.colorScheme.onBackground)
+                    }
+                } else {
+                    // Debug or remove this part in production
+//                    Text(text = "User type is not moderator: $userType")
+                }
             }
             // Conditionally display the TextField for reply
             if (isReplying) {
                 TextField(
                     value = replyText,
                     onValueChange = { newText ->
-                        replyText = newText // Update the reply text state with each change
+                        replyText = newText
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -245,13 +270,11 @@ fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel, postViewMode
                                     userId = currentUser.uid,
                                     text = replyText.trim(),
                                     timestamp = System.currentTimeMillis(),
-                                    // Ensure `commentId` is initialized correctly in `ReplyComment` if needed.
                                 )
                                 postViewModel.addReplyToComment(postId, comment.commentId, newReplyComment)
-                                replyText = "" // Resetting reply text
-                                focusManager.clearFocus() // Clearing focus to hide the keyboard
-                                isReplying = false // Hide the TextField by toggling `isReplying` to false
-                                // Optionally, show a toast or feedback message here
+                                replyText = ""
+                                focusManager.clearFocus()
+                                isReplying = false
                             }
                         }) {
                             Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "Send Reply",tint = MaterialTheme.colorScheme.onBackground)
@@ -264,11 +287,10 @@ fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel, postViewMode
 }
 
 @Composable
-fun ReplyBubble(reply: ReplyComment, viewModel: AddNewUserViewModel) {
+fun ReplyBubble(reply: ReplyComment, viewModel: AddNewUserViewModel,postViewModel: PostViewModel, userType: String) {
     var avatarImageIndex by remember { mutableStateOf<Int?>(null) }
     var backgroundColorIndex by remember { mutableStateOf<Int?>(null) }
 
-    val currentUser = FirebaseAuth.getInstance().currentUser
     LaunchedEffect(reply.userId) {
         viewModel.fetchAvatarIndicesById(reply.userId) { bgIndex, avatarIndex ->
             backgroundColorIndex = bgIndex
@@ -291,7 +313,11 @@ fun ReplyBubble(reply: ReplyComment, viewModel: AddNewUserViewModel) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if ((avatarImageIndex != null) && (backgroundColorIndex != null)) {
-                    DisplaySavedAvatarAndColor(avatarImageIndex.toString(), backgroundColorIndex.toString(), 30)
+                    DisplaySavedAvatarAndColor(
+                        avatarImageIndex.toString(),
+                        backgroundColorIndex.toString(),
+                        30
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
                 }
                 Text(
@@ -299,6 +325,20 @@ fun ReplyBubble(reply: ReplyComment, viewModel: AddNewUserViewModel) {
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Start
                 )
+                if (userType == "moderator") {
+                    IconButton(onClick = {
+//                        postViewModel.removeComment(postId, reply.replyId) // Adjust according to your actual function signature
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = "Remove",
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                } else {
+                    // Debug or remove this part in production
+                    Text(text = "User type is not moderator: $userType")
+                }
             }
         }
     }
@@ -344,15 +384,3 @@ fun PostDisplay(post: Post, modifier: Modifier = Modifier) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewPostDisplay() {
-    // Define a sample Post object
-    val samplePost = Post(
-        content = "Break up. How to deal with emotions"
-    )
-
-    MaterialTheme {
-        PostDisplay(post = samplePost, modifier = Modifier.padding(1.dp))
-    }
-}

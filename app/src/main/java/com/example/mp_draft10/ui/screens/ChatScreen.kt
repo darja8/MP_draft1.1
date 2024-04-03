@@ -72,10 +72,7 @@ fun ChatScreen(navController: NavHostController, postViewModel: PostViewModel = 
 fun PostCard(post: Post, navController: NavController) {
 
     val context = LocalContext.current
-
-    // Dynamically construct the resource name based on the post ID
     val imageName = "backgroundpost${post.id}"
-    // Fetch the resource ID
     val imageResId = context.resources.getIdentifier(imageName, "drawable", context.packageName)
 
     Card(
@@ -140,10 +137,3 @@ fun PostCard(post: Post, navController: NavController) {
         }
     }
 }
-
-
-//@Preview(showBackground = true)
-//@Composable
-//fun PreviewChatScreen() {
-//    ChatScreen()
-//}

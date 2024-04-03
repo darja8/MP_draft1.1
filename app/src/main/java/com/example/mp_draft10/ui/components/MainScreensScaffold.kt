@@ -22,19 +22,3 @@ fun MainScreenScaffold(
         }
     )
 }
-
-//NavHost(
-//            navController = navController,
-//            startDestination = AppRoutes.TodayScreen.route,
-//        ) {
-//            composable(AppRoutes.TodayScreen.route) {
-//                TodayScreen(navController, addNewUserViewModel = hiltViewModel())
-//            }
-//            // Define other destinations
-//            composable(AppRoutes.InsightsScreen.route) {
-//                InsightsScreen()
-//            }
-//            composable(AppRoutes.HubScreen.route){
-//                ChatScreen(navController = navController)
-//            }
-//        }

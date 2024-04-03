@@ -1,4 +1,4 @@
-package drawable
+package com.example.mp_draft10.ui.screens
 
 import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
@@ -16,7 +16,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -55,7 +54,6 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
 
     fun handleDaySelected(day: LocalDate) {
         selectedDay = day
-//        dayHasData = false
     }
 
     LaunchedEffect(selectedDay) {
@@ -87,7 +85,6 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
                     selectedMoodRating = selectedMoodRating,
                     onMoodSelected = { rating ->
                         selectedMoodRating = rating
-                        // Potentially save this selection
                     }
                 )
             }
@@ -97,11 +94,9 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
                     selectedSymptoms = selectedSymptoms,
                     onMoodsSelected = { moods ->
                         selectedMoods = moods
-                        // Potentially save these selections
                     },
                     onSymptomsSelected = { symptoms ->
                         selectedSymptoms = symptoms
-                        // Potentially save these selections
                     }
                 )
             }
@@ -121,7 +116,6 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
                     Text(text = "Save Mood and Symptoms", color = MaterialTheme.colorScheme.onPrimary)
                 }
             }
-//            }
         }
     }
 }
@@ -143,13 +137,6 @@ fun CalendarSlide(
         firstVisibleWeekDate = currentDate,
     )
     val visibleWeek = rememberFirstVisibleWeekAfterScroll(state)
-
-    val moodDates by addNewUserViewModel.moodDates.observeAsState(initial = emptyList())
-
-    // Check if the current day has mood data
-    val dayHasData by remember { mutableStateOf(currentDate) }
-    val textStyle = MaterialTheme.typography.bodyLarge
-
 
     Column(
         modifier = Modifier
@@ -191,7 +178,7 @@ suspend fun hasSavedDataForDate(viewModelScope: CoroutineScope, date: LocalDate)
                 try {
                     LocalDate.parse(document.id)
                 } catch (e: DateTimeParseException) {
-                    null // If the document ID isn't a valid date, ignore this document
+                    null
                 }
             }
             dates.contains(date)
@@ -223,13 +210,13 @@ private fun Day(date: LocalDate, isSelected: Boolean, addNewUserViewModel: AddNe
         ) {
             Box(
                 modifier = Modifier
-                    .size(36.dp), // Ensure this is large enough to encompass the circle without altering the layout's size
+                    .size(36.dp),
                 contentAlignment = Alignment.Center
             ) {
                 if (date == today) {
                     Box(
                         modifier = Modifier
-                            .size(32.dp) // Adjust size as needed
+                            .size(32.dp)
                             .background(
                                 color = MaterialTheme.colorScheme.primary,
                                 shape = CircleShape
@@ -283,7 +270,6 @@ fun CustomTopAppBar(
         val avatarImageString = addNewUserViewModel.fetchAvatarImageString() // This function now returns a String?
         val backgroundColorString = addNewUserViewModel.fetchAvatarBackgroundString() // This function now returns a String?
 
-        // Convert the fetched strings to integers. Use null if conversion is not possible
         avatarIndex = avatarImageString
         backgroundColorIndex = backgroundColorString
     }
@@ -292,9 +278,7 @@ fun CustomTopAppBar(
         title = { Text(text = titleText, color = MaterialTheme.colorScheme.onBackground) },
         backgroundColor = MaterialTheme.colorScheme.background,
         actions = {
-            // Place the settings IconButton here, inside the TopAppBar of the CalendarSlide
             IconButton(onClick = onSettingsClicked) {
-
                 DisplaySavedAvatarAndColor(avatarIndex,backgroundColorIndex,500)
             }
         }

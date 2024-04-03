@@ -307,8 +307,8 @@ fun DrawScope.drawYAxisLabels(start: Int, end: Int, chartHeight: Float, themeCol
 
         drawContext.canvas.nativeCanvas.drawText(
             "$i",
-            x, // This x-coordinate moves the labels to the left of the Y-axis.
-            y, // y-coordinate for the label position
+            x,
+            y,
             yAxisPaint
         )
     }
@@ -316,7 +316,6 @@ fun DrawScope.drawYAxisLabels(start: Int, end: Int, chartHeight: Float, themeCol
 
 fun drawXAxisLabels(dates: List<LocalDate>, chartWidth: Float, startY: Float, scope: DrawScope, themeColor: Color) {
     val dateFormatter = DateTimeFormatter.ofPattern("E", Locale.getDefault())
-    // Calculate the space available for each data point, considering one less gap than the number of points
     val xStep = if (dates.size > 1) chartWidth / (dates.size - 1) else chartWidth
     val labelPaint = android.graphics.Paint().apply {
         color = themeColor.toArgb()

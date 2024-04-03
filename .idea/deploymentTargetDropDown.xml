@@ -2,13 +2,22 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="CreateAvatarScreenPreview - Create Avatar Screen Preview">
+      <entry key="CheckCallDoc()">
+        <State />
+      </entry>
+      <entry key="PostViewModelTest">
+        <State />
+      </entry>
+      <entry key="addingCommentDisplaysItOnScreen()">
         <State />
       </entry>
       <entry key="app">
         <State />
       </entry>
-      <entry key="saveMoodButton_click_performsSaveAction()">
+      <entry key="testingDatabaseAddUser()">
+        <State />
+      </entry>
+      <entry key="testingFirebaseUserRepositoryAddUser()">
         <State />
       </entry>
     </value>

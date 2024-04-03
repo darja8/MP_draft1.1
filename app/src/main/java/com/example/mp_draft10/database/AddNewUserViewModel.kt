@@ -73,7 +73,7 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
             }
     }
 
-    fun addUserDetails(userName: String, userEmail: String) {
+    fun addUserDetails(userName: String, userEmail: String, userType: String) {
         val db = FirebaseFirestore.getInstance()
         val usersCollection = db.collection("Users")
 
@@ -97,7 +97,8 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
 
         val user = hashMapOf(
             "username" to userName,
-            "userEmail" to userEmail
+            "userEmail" to userEmail,
+            "usertype" to userType
         )
 
         // Set the document ID to the user's UID
@@ -111,6 +112,26 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
                 Log.w("AddUserDetails", "Error adding user details", e)
                 Toast.makeText(application, "Exception: $e", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    suspend fun fetchUserType(): String? {
+        val currentUser = FirebaseAuth.getInstance().currentUser ?: return null
+        val userId = currentUser.uid
+        val db = FirebaseFirestore.getInstance()
+        val usersCollection = db.collection("Users")
+
+        return try {
+            val documentSnapshot = usersCollection.document(userId).get().await()
+            if (documentSnapshot.exists()) {
+                documentSnapshot.getString("usertype") ?: "Unknown" // Return "Unknown" if userType is null
+            } else {
+                Log.e("FetchUserType", "No such user exists.")
+                "Unknown" // Define a default value for user type
+            }
+        } catch (exception: Exception) {
+            Log.e("FetchUserType", "Error fetching user type", exception)
+            "Unknown" // Return the default value in case of error
+        }
     }
 
     fun saveMoodToFirestore(date: LocalDate, moodObjects: List<String>, symptomObjects: List<String>, moodRating: Int) {
@@ -361,4 +382,3 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
             }
     }
 }
-

@@ -11,6 +11,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -20,21 +21,29 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.mp_draft10.AppRoutes
-import com.example.mp_draft10.auth.util.AuthViewModel
+import com.example.mp_draft10.database.AddNewUserViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(navController: NavHostController, authViewModel: AuthViewModel = viewModel()) {
+fun SettingsScreen(navController: NavHostController, addNewUserViewModel: AddNewUserViewModel = hiltViewModel()) {
     val context = LocalContext.current
+    var userType by remember { mutableStateOf("") }
+
+    LaunchedEffect(userType) {
+        userType = addNewUserViewModel.fetchUserType().toString()
+    }
 
     Scaffold(
         topBar = {
@@ -62,10 +71,23 @@ fun SettingsScreen(navController: NavHostController, authViewModel: AuthViewMode
                     Icon(
                         Icons.Filled.Edit,
                         contentDescription = "Set Avatar",
-                        // Apply tint if needed, for example, using MaterialTheme to keep the icon in line with your app's theme.
                     )
                 }
             )
+            if(userType == "moderator"){
+                ListItem(
+                    modifier = Modifier.clickable {
+                    navController.navigate(AppRoutes.AddPostScreen.route)  },
+                    headlineContent = { Text("Moderator Dashboard") },
+                    trailingContent = {
+                        Icon(
+                            Icons.Filled.Analytics,
+                            contentDescription = "Moderator Dashboard",
+                        )
+                    }
+                )
+            }
+
             Divider()
 
             ListItem(
@@ -106,14 +128,14 @@ private fun restartApp(context: android.content.Context) {
     Runtime.getRuntime().exit(0)
 }
 
-@Preview(showBackground = true)
-@Composable
-fun SettingsScreenPreview() {
-    // Mock NavHostController. In a real scenario, you might want to navigate between composables.
-    val navController = rememberNavController()
-
-    // Mock ViewModel. You might want to display specific UI states based on ViewModel data.
-    val mockAuthViewModel = AuthViewModel() // Ensure you have a parameterless constructor or create a mock instance appropriately.
-
-    SettingsScreen(navController = navController, authViewModel = mockAuthViewModel)
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun SettingsScreenPreview() {
+//    // Mock NavHostController. In a real scenario, you might want to navigate between composables.
+//    val navController = rememberNavController()
+//
+//    // Mock ViewModel. You might want to display specific UI states based on ViewModel data.
+//    val mockAuthViewModel = AuthViewModel() // Ensure you have a parameterless constructor or create a mock instance appropriately.
+//
+//    SettingsScreen(navController = navController, authViewModel = mockAuthViewModel)
+//}

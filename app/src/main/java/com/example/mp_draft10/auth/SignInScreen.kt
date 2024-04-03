@@ -1,11 +1,8 @@
 package com.example.mp_draft10.auth
-
-//import com.example.mp_draft10.ui.AppRoutes
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,15 +40,14 @@ import androidx.navigation.NavHostController
 import com.example.mp_draft10.AppRoutes
 import kotlinx.coroutines.launch
 
-
 @Composable
 fun SignInScreen(
     navController: NavHostController,
     viewModel: SignInViewModel = hiltViewModel(),
-    onSignInSuccess: (String) -> Unit = {}// Callback to return user email upon successful sign-in
 ){
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
+//    var userType by rememberSaveable { mutableStateOf("") }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val state = viewModel.signInState.collectAsState(initial = null)
@@ -89,10 +85,8 @@ fun SignInScreen(
                         Icons.Filled.Visibility
                     else Icons.Filled.VisibilityOff
 
-                    // Localized description for accessibility services
                     val description = if (passwordVisible) "Hide password" else "Show password"
 
-                    // Toggle button to hide or display password
                     IconButton(onClick = {passwordVisible = !passwordVisible}){
                         Icon(imageVector  = image, description)
                     }
@@ -116,19 +110,17 @@ fun SignInScreen(
         Spacer(modifier = Modifier.height(16.dp))
         Text(text = "Don't have an account? Sign up",
             modifier = Modifier.clickable { navController.navigate(AppRoutes.SignUp.route) })
-        Text(text = "or connect with")
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            IconButton(onClick = { /*TODO*/ }) {
 
-            }
-        }
-
-        LaunchedEffect(key1 = state.value?.isSuccess) {
-            scope.launch {
+        LaunchedEffect(key1 = state.value) {
+            state.value?.let { signInState ->
                 if (state.value?.isSuccess?.isNotEmpty() == true) {
-                    val success = state.value?.isSuccess
-                    Toast.makeText(context, "${success}", Toast.LENGTH_LONG).show()
-                    navController.navigate(AppRoutes.TodayScreen.route)
+                    Toast.makeText(context, "Login Successful", Toast.LENGTH_LONG).show()
+                    when (signInState.userType) {
+                        "moderator" -> navController.navigate(AppRoutes.AddPostScreen.route)
+                        else -> navController.navigate(AppRoutes.TodayScreen.route)
+                    }
+                } else if (signInState.isError != null) {
+                    Toast.makeText(context, signInState.isError, Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -137,7 +129,7 @@ fun SignInScreen(
             scope.launch {}
             if (state.value?.isError?.isNotEmpty() == true) {
                 val error = state.value?.isError
-                Toast.makeText(context, "${error}", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "$error", Toast.LENGTH_LONG).show()
             }
         }
     }

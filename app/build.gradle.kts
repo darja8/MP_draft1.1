@@ -6,6 +6,7 @@ plugins {
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -19,7 +20,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.example.mp_draft10.HiltTestRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -51,7 +52,13 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+        pickFirst("META-INF/LICENSE.md")
+        pickFirst("META-INF/LICENSE-notice.md")
+        pickFirst ("mockito-extensions/org.mockito.plugins.MockMaker")
+
+
     }
+
 }
 
 dependencies {
@@ -85,21 +92,18 @@ dependencies {
     implementation ("androidx.compose.runtime:runtime")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
 
-    implementation("com.google.dagger:hilt-android:2.50")
+    implementation("com.google.dagger:hilt-android:2.48.1")
     kapt("com.google.dagger:hilt-android-compiler:2.48.1")
     implementation("androidx.core:core-ktx:1.12.0")
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
-    annotationProcessor ("com.google.dagger:hilt-compiler:2.50")
+    annotationProcessor ("com.google.dagger:hilt-compiler:2.48.1")
 
-    implementation("com.google.dagger:hilt-android:2.50")
-    kapt("com.google.dagger:hilt-android-compiler:2.48.1")
     kapt("androidx.hilt:hilt-compiler:1.2.0")
     implementation("androidx.hilt:hilt-navigation-fragment:1.2.0")
     implementation ("androidx.hilt:hilt-navigation-compose:1.2.0")
     kaptAndroidTest ("androidx.hilt:hilt-compiler:1.2.0")
-    androidTestImplementation ("com.google.dagger:hilt-android-testing:2.50")
 
 
     // Import the BoM for the Firebase platform
@@ -113,7 +117,7 @@ dependencies {
     implementation ("com.google.firebase:firebase-auth:latest_version")
 
 // JUnit
-    testImplementation ("org.mockito:mockito-inline:3.11.2") // For final classes
+    testImplementation ("org.mockito:mockito-inline:4.0.0") // For final classes
 // Coroutines Test
     testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
 // Architecture Components
@@ -124,6 +128,22 @@ dependencies {
     androidTestImplementation ("androidx.test.ext:junit:1.1.5")
 //    androidTestImplementation ("dagger.hilt.android.testing:hilt-android-test:2.38.1")
 //    kaptAndroidTest ("dagger.hilt.android.compiler:hilt-compiler:2.38.1")
+
+    androidTestAnnotationProcessor ("com.google.dagger:hilt-android-compiler:2.48.1")
+
+    kaptTest("com.google.dagger:hilt-android-compiler:2.48.1")
+    kaptAndroidTest("com.google.dagger:hilt-android-compiler:2.48.1")
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.48.1")
+    androidTestImplementation ("com.google.dagger:hilt-android-testing:2.50")
+    kaptAndroidTest ("com.google.dagger:hilt-android-compiler:2.48.1")
+    testImplementation ("org.mockito:mockito-core:4.0.0")
+    androidTestImplementation ("org.mockito:mockito-android:4.0.0")
+    testImplementation ("io.mockk:mockk:1.13.4")
+    androidTestImplementation ("io.mockk:mockk-android:1.13.4")
+    testImplementation ("app.cash.turbine:turbine:1.0.0")
+    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
+    testImplementation ("org.mockito.kotlin:mockito-kotlin:4.0.0")
+    androidTestImplementation ("org.mockito:mockito-inline:4.0.0")
 
 }
 

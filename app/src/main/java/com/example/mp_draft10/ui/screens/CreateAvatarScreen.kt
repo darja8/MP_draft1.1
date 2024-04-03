@@ -34,7 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -82,7 +82,8 @@ fun CreateAvatarScreen( addNewUserViewModel: AddNewUserViewModel = hiltViewModel
         R.drawable.juice,
         R.drawable.meditation,
         R.drawable.pumpkin,
-        R.drawable.reindeer
+        R.drawable.reindeer,
+        R.drawable.gamecontroller
     )
     val colors = mutableListOf(
         Color(0xFFF0EEBB),
@@ -111,8 +112,8 @@ fun CreateAvatarScreen( addNewUserViewModel: AddNewUserViewModel = hiltViewModel
         Color(0xFFCBDFBA),
     )
 
-    var selectedAvatarIndex by remember { mutableStateOf(0) }
-    var selectedColorIndex by remember { mutableStateOf(0) }
+    var selectedAvatarIndex by remember { mutableIntStateOf(0) }
+    var selectedColorIndex by remember { mutableIntStateOf(0) }
 
     // Use indices to get the current selections
     val selectedAvatar = avatarImages[selectedAvatarIndex]
@@ -121,6 +122,7 @@ fun CreateAvatarScreen( addNewUserViewModel: AddNewUserViewModel = hiltViewModel
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("Avatar") },
+                modifier = Modifier.padding(end = 10.dp),
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -169,7 +171,7 @@ fun CreateAvatarScreen( addNewUserViewModel: AddNewUserViewModel = hiltViewModel
                 modifier = Modifier.padding(top = 8.dp)
             )
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 60.dp), // Choose an appropriate minSize for your items
+                columns = GridCells.Adaptive(minSize = 50.dp), // Choose an appropriate minSize for your items
                 contentPadding = PaddingValues(all = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -198,14 +200,6 @@ fun CreateAvatarScreen( addNewUserViewModel: AddNewUserViewModel = hiltViewModel
                     }
                 }
 
-                // Insert a spacer item between the avatars and colors
-                item {
-                    Spacer(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(32.dp)) // Adjust the height as needed to create space
-                }
-
-                // Display color options
                 itemsIndexed(colors) { index, color ->
                     Box(
                         modifier = Modifier

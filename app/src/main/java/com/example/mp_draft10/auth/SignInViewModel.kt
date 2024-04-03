@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class SignInViewModel @Inject constructor(private val repository: AuthRepository) : ViewModel() {
+open class SignInViewModel @Inject constructor(private val repository: AuthRepository) : ViewModel() {
 
     private val _signInState = Channel<SignInState>()
     val signInState = _signInState.receiveAsFlow()
@@ -22,7 +22,8 @@ class SignInViewModel @Inject constructor(private val repository: AuthRepository
             repository.loginUser(email, password).collect { result ->
                 when (result) {
                     is Resource.Success -> {
-                        _signInState.send(SignInState(isSuccess = "Sign in success"))
+                        val userType = repository.getUserType()
+                        _signInState.send(SignInState(isSuccess = "Sign in success", userType = userType))
                     }
                     is Resource.Loading -> {
                         _signInState.send(SignInState(isLoading = true))

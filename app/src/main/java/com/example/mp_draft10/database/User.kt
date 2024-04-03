@@ -11,5 +11,8 @@ data class User(
     @set:PropertyName("userEmail")
     var userEmail: String = "",
 
+    @get:PropertyName("userType")
+    @set:PropertyName("userType")
+    var userType: String = ""
 )
-{ constructor() : this("", "")}
+{ constructor() : this("", "", "")}

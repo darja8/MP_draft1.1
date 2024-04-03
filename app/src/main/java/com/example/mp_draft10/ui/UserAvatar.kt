@@ -52,7 +52,9 @@ fun DisplaySavedAvatarAndColor(
         R.drawable.juice,
         R.drawable.meditation,
         R.drawable.pumpkin,
-        R.drawable.reindeer
+        R.drawable.reindeer,
+        R.drawable.gamecontroller,
+        R.drawable.policebadge
     )
     val colors = mutableListOf(
         Color(0xFFF0EEBB),
@@ -79,6 +81,7 @@ fun DisplaySavedAvatarAndColor(
         Color(0xFFACD2B9),
         Color(0xFFB9D7B8),
         Color(0xFFCBDFBA),
+        Color(0xFFADFF00)
     )
 
     val avatarIndex = avatarImageString?.toIntOrNull()
@@ -102,4 +105,5 @@ fun DisplaySavedAvatarAndColor(
                 .padding(1.dp)
         )
     }
+
 }
