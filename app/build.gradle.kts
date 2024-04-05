@@ -144,6 +144,19 @@ dependencies {
     testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
     testImplementation ("org.mockito.kotlin:mockito-kotlin:4.0.0")
     androidTestImplementation ("org.mockito:mockito-inline:4.0.0")
+    testImplementation ("androidx.arch.core:core-testing:2.2.0")
+    testImplementation("android.arch.core:core-testing:2.0.0")
+    androidTestImplementation("android.arch.core:core-testing:2.0.0")
+
+    testImplementation ("junit:junit:4.13.2")
+    testImplementation ("org.mockito:mockito-core:4.0.0")
+    testImplementation ("org.mockito:mockito-inline:4.0.0")
+    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
+    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
+    testImplementation ("org.mockito:mockito-core:4.0.0")
+    testImplementation ("androidx.arch.core:core-testing:2.1.0")
+    androidTestImplementation ("androidx.arch.core:core-testing:2.2.0")
+    testImplementation("android.arch.core:core-testing:2.0.0")
 
 }
 

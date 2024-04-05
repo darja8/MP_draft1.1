@@ -5,9 +5,10 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.mp_draft10.ui.screens.Comment
-import com.example.mp_draft10.ui.screens.Post
-import com.example.mp_draft10.ui.screens.ReplyComment
+import com.example.mp_draft10.classes.Comment
+import com.example.mp_draft10.classes.Post
+import com.example.mp_draft10.classes.ReplyComment
+
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query

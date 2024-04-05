@@ -2,22 +2,22 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="CheckCallDoc()">
+      <entry key="addUserDetailsTest()">
         <State />
       </entry>
-      <entry key="PostViewModelTest">
-        <State />
-      </entry>
-      <entry key="addingCommentDisplaysItOnScreen()">
+      <entry key="addUserDetails_testUserCreation()">
         <State />
       </entry>
       <entry key="app">
         <State />
       </entry>
-      <entry key="testingDatabaseAddUser()">
+      <entry key="fetchPostsFromFirestoreTest()">
         <State />
       </entry>
-      <entry key="testingFirebaseUserRepositoryAddUser()">
+      <entry key="testAddPost()">
+        <State />
+      </entry>
+      <entry key="testingAddUser()">
         <State />
       </entry>
     </value>

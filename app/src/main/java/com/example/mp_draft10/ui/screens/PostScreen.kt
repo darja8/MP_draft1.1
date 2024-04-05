@@ -52,6 +52,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mp_draft10.classes.Comment
+import com.example.mp_draft10.classes.Post
+import com.example.mp_draft10.classes.ReplyComment
 import com.example.mp_draft10.database.AddNewUserViewModel
 import com.example.mp_draft10.database.PostViewModel
 import com.example.mp_draft10.ui.DisplaySavedAvatarAndColor
@@ -199,8 +202,7 @@ fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel, postViewMode
             .fillMaxWidth()
             .padding(8.dp),
         shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
         ) {
         Column {
             Row(
@@ -287,7 +289,7 @@ fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel, postViewMode
 }
 
 @Composable
-fun ReplyBubble(reply: ReplyComment, viewModel: AddNewUserViewModel,postViewModel: PostViewModel, userType: String) {
+fun ReplyBubble(reply: ReplyComment, viewModel: AddNewUserViewModel, postViewModel: PostViewModel, userType: String) {
     var avatarImageIndex by remember { mutableStateOf<Int?>(null) }
     var backgroundColorIndex by remember { mutableStateOf<Int?>(null) }
 
@@ -335,9 +337,6 @@ fun ReplyBubble(reply: ReplyComment, viewModel: AddNewUserViewModel,postViewMode
                             tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
-                } else {
-                    // Debug or remove this part in production
-                    Text(text = "User type is not moderator: $userType")
                 }
             }
         }

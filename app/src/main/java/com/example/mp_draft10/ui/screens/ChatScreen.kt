@@ -43,6 +43,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.mp_draft10.AppRoutes
 import com.example.mp_draft10.R
+import com.example.mp_draft10.classes.Post
 import com.example.mp_draft10.database.PostViewModel
 import com.example.mp_draft10.ui.components.MainScreenScaffold
 

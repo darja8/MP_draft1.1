@@ -3,6 +3,8 @@ package com.example.mp_draft10.ui.screens
 import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -35,17 +37,34 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.mp_draft10.database.AddNewUserViewModel
 import com.example.mp_draft10.ui.components.MainScreenScaffold
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-data class MoodData(
-    val date: LocalDate,
-    val moodRating: Int,
-    val moodObjects: List<String>,
-    val symptomObjects: List<String>
-)
 
+@Composable
+fun AverageMoodRatingForPast30Day(
+    addNewUserViewModel: AddNewUserViewModel = viewModel()
+){
+    var moodRatingAverage by remember { mutableStateOf<Map<LocalDate, Int>>(emptyMap()) }
+    LaunchedEffect(Unit) {
+        moodRatingAverage = addNewUserViewModel.fetchMoodRatingsForPast30Days()
+    }
+
+    var numberOfRatings = 0
+    var total = 0
+    var averageRating = 0
+
+    for (item in moodRatingAverage){
+        total =+ item.value
+        numberOfRatings =+ 1
+    }
+
+    averageRating = total / numberOfRatings
+}
+
+@SuppressLint("MutableCollectionMutableState")
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun InsightsScreen(
@@ -54,13 +73,32 @@ fun InsightsScreen(
 ) {
     var moodRatingsMap by remember { mutableStateOf<Map<LocalDate, Int>>(emptyMap()) }
     var moodAndSymptomsList by remember { mutableStateOf<List<String>>(emptyList()) }
+    var moodRatingAverage by remember { mutableStateOf<Map<LocalDate, Int>>(emptyMap()) }
 
     LaunchedEffect(key1 = "moodRatings") {
         moodRatingsMap = addNewUserViewModel.fetchMoodRatingsForPast7Days()
     }
 
     LaunchedEffect(Unit) {
+        moodRatingAverage = addNewUserViewModel.fetchMoodRatingsForPast30Days()
+    }
+
+    LaunchedEffect(Unit) {
         moodAndSymptomsList = addNewUserViewModel.fetchMoodAndSymptomsForPast30Days()
+//        moodRatingAverage = addNewUserViewModel.fetchMoodRatingsForPast30Days()
+    }
+    var numberOfRatings = 0
+    var total = 0
+
+    for (item in moodRatingAverage.values){
+        total += item
+        numberOfRatings += 1
+    }
+
+    var averageRating = 0f // Use 'f' to denote Float
+
+    if (numberOfRatings != 0) {
+        averageRating = total.toFloat() / numberOfRatings // Convert total to Float before division
     }
 
     val listForChart = countOccurrencesInList(moodAndSymptomsList)
@@ -87,14 +125,16 @@ fun InsightsScreen(
                         .fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
+                    AnimatedNumberText(averageRating)
+//                    val formattedAverage = String.format("%.2f", averageRating)
+//                    Text(text = formattedAverage)
                     Text(
                         text = "Mood Ratings for Past 7 Days",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground
                     )
 
-                    MoodChart(moodRatingsMap)
+//                    MoodChart(moodRatingsMap)
 
                     Text(
                         text = "5 most logged Moods and Symptoms for past 30 days",
@@ -102,7 +142,7 @@ fun InsightsScreen(
                         color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.padding(bottom = 16.dp) // Adds some space between the text and the chart or "no data" message
                     )
-                    MoodAndSymptomsChart(listForChart)
+//                    MoodAndSymptomsChart(listForChart)
                 }
             }
         }
@@ -364,6 +404,29 @@ fun InsightsScreenPreview() {
 
             MoodChart(moodRatings = mockData)
         }
+}
+
+@Composable
+fun AnimatedNumberText(targetValue: Float, animationDuration: Int = 1000) {
+    // Remember and initialize an Animatable Float value starting from 0f
+    val animatedValue = remember { Animatable(0f) }
+
+    // Animate to the targetValue when this composable enters or recomposes
+    LaunchedEffect(targetValue) {
+        // Launch the animation to the targetValue
+        launch {
+            animatedValue.animateTo(
+                targetValue = targetValue,
+                animationSpec = tween(durationMillis = animationDuration)
+            )
+        }
+    }
+
+    // Get the current value of the animation to display it
+    val animatedNumber by animatedValue.asState()
+
+    // Display the animated value with two decimal places
+    Text(text = String.format("%.2f", animatedNumber))
 }
 
 @Preview(showBackground = true)

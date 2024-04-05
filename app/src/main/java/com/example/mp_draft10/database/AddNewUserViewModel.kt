@@ -13,8 +13,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.mp_draft10.classes.MoodData
 import com.example.mp_draft10.di.AppModule
-import com.example.mp_draft10.ui.screens.MoodData
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
@@ -280,6 +280,34 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
         val db = FirebaseFirestore.getInstance()
         val endDate = LocalDate.now()
         val startDate = endDate.minusDays(6)
+        val moodRatingsMap = mutableMapOf<LocalDate, Int>()
+
+        var currentDate = startDate
+        while (!currentDate.isAfter(endDate)) {
+            val dateString = currentDate.toString()
+            val docRef = db.collection("Users").document(userId)
+                .collection("Dates").document(dateString)
+
+            try {
+                val snapshot = docRef.get().await()
+                if (snapshot.exists()) {
+                    val moodRating = snapshot.getLong("moodRating")?.toInt() ?: 0
+                    moodRatingsMap[currentDate] = moodRating
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error fetching mood data for $currentDate", e)
+            }
+            currentDate = currentDate.plusDays(1)
+        }
+        return moodRatingsMap
+    }
+
+    suspend fun fetchMoodRatingsForPast30Days(): Map<LocalDate, Int> {
+        val currentUser = FirebaseAuth.getInstance().currentUser ?: return emptyMap()
+        val userId = currentUser.uid
+        val db = FirebaseFirestore.getInstance()
+        val endDate = LocalDate.now()
+        val startDate = endDate.minusDays(29) // Fetch data for the past 30 days, including today
         val moodRatingsMap = mutableMapOf<LocalDate, Int>()
 
         var currentDate = startDate
