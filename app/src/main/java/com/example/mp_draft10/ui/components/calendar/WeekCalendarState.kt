@@ -1,4 +1,4 @@
-package com.kizitonwose.calendar.compose.weekcalendar
+package com.example.mp_draft10.ui.components.calendar
 
 import android.util.Log
 import androidx.compose.foundation.MutatePriority
@@ -16,17 +16,6 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import com.example.mp_draft10.ui.components.calendar.DataStoreCalendar
-import com.example.mp_draft10.ui.components.calendar.DataStoreCalendar.*
-import com.example.mp_draft10.ui.components.calendar.VisibleItemState
-import com.example.mp_draft10.ui.components.calendar.Week
-import com.example.mp_draft10.ui.components.calendar.WeekCalendarLayoutInfo
-import com.example.mp_draft10.ui.components.calendar.atStartOfMonth
-import com.example.mp_draft10.ui.components.calendar.firstDayOfWeekFromLocale
-import com.example.mp_draft10.ui.components.calendar.getWeekCalendarAdjustedRange
-import com.example.mp_draft10.ui.components.calendar.getWeekCalendarData
-import com.example.mp_draft10.ui.components.calendar.getWeekIndex
-import com.example.mp_draft10.ui.components.calendar.getWeekIndicesCount
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth

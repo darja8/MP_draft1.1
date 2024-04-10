@@ -22,7 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.example.mp_draft10.database.AddNewUserViewModel
+import com.example.mp_draft10.firebase.database.AddNewUserViewModel
 import com.example.mp_draft10.ui.DisplaySavedAvatarAndColor
 import com.example.mp_draft10.ui.components.MainScreenScaffold
 import com.example.mp_draft10.ui.components.MoodAndSymptomSquareView
@@ -30,9 +30,9 @@ import com.example.mp_draft10.ui.components.MoodRatingSquareView
 import com.example.mp_draft10.ui.components.calendar.WeekCalendar
 import com.example.mp_draft10.ui.components.calendar.getWeekPageTitle
 import com.example.mp_draft10.ui.components.calendar.rememberFirstVisibleWeekAfterScroll
+import com.example.mp_draft10.ui.components.calendar.rememberWeekCalendarState
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.kizitonwose.calendar.compose.weekcalendar.rememberWeekCalendarState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch

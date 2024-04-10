@@ -2,6 +2,7 @@ package com.example.mp_draft10.database
 
 import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.example.mp_draft10.firebase.database.AddNewUserViewModel
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.firebase.auth.FirebaseAuth

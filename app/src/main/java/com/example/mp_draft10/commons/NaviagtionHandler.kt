@@ -12,9 +12,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.mp_draft10.data.entities.MappedImageItemModel
-import com.example.mp_draft10.searchImage.ImageDetailScreen
-import com.example.mp_draft10.searchImage.ImageSearchViewModel
-import com.example.mp_draft10.searchImage.ImageSearchWithDetailTwoPane
+import com.example.mp_draft10.ui.moderator.searchImage.ImageDetailScreen
+import com.example.mp_draft10.ui.moderator.searchImage.ImageSearchViewModel
+import com.example.mp_draft10.ui.moderator.searchImage.ImageSearchWithDetailTwoPane
 
 
 @Composable

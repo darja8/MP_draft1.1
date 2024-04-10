@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.mp_draft10.database.AddNewUserViewModel
+import com.example.mp_draft10.firebase.database.AddNewUserViewModel
 import com.example.mp_draft10.ui.components.MainScreenScaffold
 import kotlinx.coroutines.launch
 import java.time.LocalDate

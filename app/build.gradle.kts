@@ -13,7 +13,6 @@ plugins {
 android {
     namespace = "com.example.mp_draft10"
     compileSdk = 34
-
     defaultConfig {
         applicationId = "com.example.mp_draft10"
         minSdk = 27
@@ -154,9 +153,9 @@ dependencies {
     testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
     testImplementation ("org.mockito.kotlin:mockito-kotlin:4.0.0")
     androidTestImplementation ("org.mockito:mockito-inline:4.0.0")
-    testImplementation ("androidx.arch.core:core-testing:2.2.0")
-    testImplementation("android.arch.core:core-testing:2.0.0")
-    androidTestImplementation("android.arch.core:core-testing:2.0.0")
+//    testImplementation ("androidx.arch.core:core-testing:2.2.0")
+    testImplementation("android.arch.core:core-testing:1.1.1")
+    androidTestImplementation("android.arch.core:core-testing:1.1.1")
 
     testImplementation ("junit:junit:4.13.2")
     testImplementation ("org.mockito:mockito-core:4.0.0")
@@ -164,9 +163,8 @@ dependencies {
     testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
     testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
     testImplementation ("org.mockito:mockito-core:4.0.0")
-    testImplementation ("androidx.arch.core:core-testing:2.1.0")
+    testImplementation ("androidx.arch.core:core-testing:2.2.0")
     androidTestImplementation ("androidx.arch.core:core-testing:2.2.0")
-    testImplementation("android.arch.core:core-testing:2.0.0")
     implementation ("com.google.code.gson:gson:2.10.1")
 
 // Retrofit
@@ -193,6 +191,12 @@ dependencies {
     implementation ("com.squareup.moshi:moshi-kotlin:1.12.0")
     kapt ("com.squareup.moshi:moshi-kotlin-codegen:1.12.0")
     implementation ("com.squareup.retrofit2:converter-moshi:2.9.0")
+    testImplementation ("com.google.truth:truth:1.1.3")
+    implementation ("com.squareup.moshi:moshi-kotlin:1.12.0")
+
+    implementation ("com.squareup.moshi:moshi:1.12.0")
+    implementation ("com.squareup.moshi:moshi-kotlin:1.12.0")
+    implementation ("org.jetbrains.kotlin:kotlin-reflect:1.9.20")
 }
 
 kapt {

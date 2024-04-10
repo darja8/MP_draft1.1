@@ -53,8 +53,8 @@ import androidx.navigation.NavHostController
 import com.example.mp_draft10.AppRoutes
 import com.example.mp_draft10.R
 import com.example.mp_draft10.classes.Post
-import com.example.mp_draft10.database.AddNewUserViewModel
-import com.example.mp_draft10.database.PostViewModel
+import com.example.mp_draft10.firebase.database.AddNewUserViewModel
+import com.example.mp_draft10.firebase.database.PostViewModel
 import com.example.mp_draft10.ui.components.MainScreenScaffold
 import com.google.firebase.auth.FirebaseAuth
 
@@ -79,7 +79,7 @@ fun ChatScreen(
         navController = navController,
         fab = if (showFab) {
             {
-                FloatingActionButton(onClick = { navController.navigate(AppRoutes.SearchImage.route) }) {
+                FloatingActionButton(onClick = { navController.navigate(AppRoutes.AddPostScreen.route) }) {
                     Icon(Icons.Filled.Add, contentDescription = "Add")
                 }
             }

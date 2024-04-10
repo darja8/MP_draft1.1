@@ -5,7 +5,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
-import com.kizitonwose.calendar.compose.weekcalendar.WeekCalendarState
 import kotlinx.coroutines.flow.filter
 import java.time.DayOfWeek
 import java.time.Month

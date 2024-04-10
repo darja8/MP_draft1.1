@@ -1,7 +1,7 @@
 package com.example.mp_draft10.usecases
 
 import com.example.mp_draft10.data.entities.MappedImageItemModel
-import com.example.mp_draft10.repository.ImageSearchRepository
+import com.example.mp_draft10.pixabayAPI.repository.ImageSearchRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

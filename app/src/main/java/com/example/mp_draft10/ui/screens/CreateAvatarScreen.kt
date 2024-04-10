@@ -46,12 +46,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.mp_draft10.R
-import com.example.mp_draft10.database.AddNewUserViewModel
+import com.example.mp_draft10.firebase.database.AddNewUserViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateAvatarScreen( addNewUserViewModel: AddNewUserViewModel = hiltViewModel(),navController: NavHostController) {
+fun CreateAvatarScreen(addNewUserViewModel: AddNewUserViewModel = hiltViewModel(), navController: NavHostController) {
 
     val avatarImages = mutableListOf(
         R.drawable.bee,

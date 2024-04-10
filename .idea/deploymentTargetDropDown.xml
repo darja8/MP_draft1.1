@@ -2,22 +2,7 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="ImageScreenPreview">
-        <State />
-      </entry>
-      <entry key="SearchScreenPreview">
-        <State />
-      </entry>
       <entry key="app">
-        <State />
-      </entry>
-      <entry key="fetchPostsFromFirestoreTest()">
-        <State />
-      </entry>
-      <entry key="testAddPost()">
-        <State />
-      </entry>
-      <entry key="testingAddUser()">
         <State />
       </entry>
     </value>

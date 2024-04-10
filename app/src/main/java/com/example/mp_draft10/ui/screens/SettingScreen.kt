@@ -32,7 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.mp_draft10.AppRoutes
-import com.example.mp_draft10.database.AddNewUserViewModel
+import com.example.mp_draft10.firebase.database.AddNewUserViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)

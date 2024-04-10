@@ -2,15 +2,15 @@ package com.example.mp_draft10.di
 
 import android.content.Context
 import com.example.mp_draft10.BuildConfig
-import com.example.mp_draft10.auth.AuthRepository
-import com.example.mp_draft10.auth.AuthRepositoryImpl
-import com.example.mp_draft10.auth.util.ApplicationFirebaseAuth
 import com.example.mp_draft10.commons.Network
 import com.example.mp_draft10.commons.NetworkConnectivity
-import com.example.mp_draft10.database.DatabaseRepository
-import com.example.mp_draft10.database.DatabaseRepositoryImpl
-import com.example.mp_draft10.remote.ApiService
-import com.example.mp_draft10.repository.NetworkDataSource
+import com.example.mp_draft10.firebase.auth.AuthRepository
+import com.example.mp_draft10.firebase.auth.AuthRepositoryImpl
+import com.example.mp_draft10.firebase.auth.util.ApplicationFirebaseAuth
+import com.example.mp_draft10.firebase.database.DatabaseRepository
+import com.example.mp_draft10.firebase.database.DatabaseRepositoryImpl
+import com.example.mp_draft10.pixabayAPI.remote.ApiService
+import com.example.mp_draft10.pixabayAPI.repository.NetworkDataSource
 import com.google.firebase.auth.FirebaseAuth
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory

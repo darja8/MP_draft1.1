@@ -2,7 +2,7 @@ package com.example.mp_draft10
 
 //import com.google.firebase.auth.AuthResult
 import android.app.Application
-import com.example.mp_draft10.database.PostViewModel
+import com.example.mp_draft10.firebase.database.PostViewModel
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

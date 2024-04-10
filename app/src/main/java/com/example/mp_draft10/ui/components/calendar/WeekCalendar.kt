@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import com.example.mp_draft10.ui.components.calendar.CalendarDefaults.flingBehaviors
-import com.kizitonwose.calendar.compose.weekcalendar.WeekCalendarState
 
 @Composable
 internal fun WeekCalendarImpl(

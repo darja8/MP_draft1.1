@@ -1,7 +1,7 @@
 package com.example.mp_draft10.di
 
-import com.example.mp_draft10.repository.ImageSearchRepository
-import com.example.mp_draft10.repository.ImageSearchRepositoryImpl
+import com.example.mp_draft10.pixabayAPI.repository.ImageSearchRepository
+import com.example.mp_draft10.pixabayAPI.repository.ImageSearchRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

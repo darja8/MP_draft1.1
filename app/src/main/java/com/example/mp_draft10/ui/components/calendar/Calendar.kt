@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.kizitonwose.calendar.compose.weekcalendar.WeekCalendarState
-import com.kizitonwose.calendar.compose.weekcalendar.rememberWeekCalendarState
 
 
 @Composable

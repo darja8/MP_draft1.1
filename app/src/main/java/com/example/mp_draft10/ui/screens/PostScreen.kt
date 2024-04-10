@@ -54,8 +54,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mp_draft10.classes.Comment
 import com.example.mp_draft10.classes.Post
 import com.example.mp_draft10.classes.ReplyComment
-import com.example.mp_draft10.database.AddNewUserViewModel
-import com.example.mp_draft10.database.PostViewModel
+import com.example.mp_draft10.firebase.database.AddNewUserViewModel
+import com.example.mp_draft10.firebase.database.PostViewModel
 import com.example.mp_draft10.ui.DisplaySavedAvatarAndColor
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay

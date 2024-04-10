@@ -1,5 +1,7 @@
 package com.example.mp_draft10.auth
 
+import com.example.mp_draft10.firebase.auth.AuthRepository
+import com.example.mp_draft10.firebase.auth.SignUpViewModel
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
