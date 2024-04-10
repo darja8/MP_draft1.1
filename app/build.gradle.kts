@@ -7,6 +7,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
     id("dagger.hilt.android.plugin")
+    id("kotlin-parcelize")
 }
 
 android {
@@ -20,11 +21,17 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "com.example.mp_draft10.HiltTestRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
+        android.buildFeatures.buildConfig = true
+        val apiKey = properties["API_KEY"]?.toString() ?: "\"\""
+
+        buildConfigField("String", "API_KEY", apiKey)
+        // Define BASE_URL as a string literal here
+        buildConfigField("String", "BASE_URL", "\"https://pixabay.com/api/\"")
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
     }
+
 
     buildTypes {
         release {
@@ -79,6 +86,9 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore:24.10.0")
     implementation("androidx.datastore:datastore-core:1.0.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.paging:paging-common-android:3.3.0-beta01")
+    implementation("androidx.compose.material3:material3-window-size-class-android:1.2.1")
+    implementation("androidx.compose.material3:material3-android:1.2.1")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -157,7 +167,32 @@ dependencies {
     testImplementation ("androidx.arch.core:core-testing:2.1.0")
     androidTestImplementation ("androidx.arch.core:core-testing:2.2.0")
     testImplementation("android.arch.core:core-testing:2.0.0")
+    implementation ("com.google.code.gson:gson:2.10.1")
 
+// Retrofit
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-moshi:2.9.0")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.9.2")
+    // Gson converter for Retrofit
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
+    implementation ("androidx.recyclerview:recyclerview:1.3.2")
+    implementation ("io.coil-kt:coil-compose:1.4.0")
+    implementation ("com.squareup.moshi:moshi:1.12.0")
+    implementation ("com.squareup.moshi:moshi-kotlin:1.12.0")
+    kapt ("com.squareup.moshi:moshi-kotlin-codegen:1.12.0")
+    implementation ("io.coil-kt:coil-compose:2.4.0")
+    implementation ("com.squareup.okhttp3:okhttp:4.11.0")
+
+    implementation ("androidx.compose.ui:ui:latest-compose-ui-version")
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.9.3")
+
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.moshi:moshi:1.12.0")
+    implementation ("com.squareup.moshi:moshi-kotlin:1.12.0")
+    kapt ("com.squareup.moshi:moshi-kotlin-codegen:1.12.0")
+    implementation ("com.squareup.retrofit2:converter-moshi:2.9.0")
 }
 
 kapt {

@@ -2,10 +2,10 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="addUserDetailsTest()">
+      <entry key="ImageScreenPreview">
         <State />
       </entry>
-      <entry key="addUserDetails_testUserCreation()">
+      <entry key="SearchScreenPreview">
         <State />
       </entry>
       <entry key="app">

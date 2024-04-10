@@ -9,6 +9,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,6 +34,7 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.mp_draft10.database.AddNewUserViewModel
@@ -42,27 +44,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-
-@Composable
-fun AverageMoodRatingForPast30Day(
-    addNewUserViewModel: AddNewUserViewModel = viewModel()
-){
-    var moodRatingAverage by remember { mutableStateOf<Map<LocalDate, Int>>(emptyMap()) }
-    LaunchedEffect(Unit) {
-        moodRatingAverage = addNewUserViewModel.fetchMoodRatingsForPast30Days()
-    }
-
-    var numberOfRatings = 0
-    var total = 0
-    var averageRating = 0
-
-    for (item in moodRatingAverage){
-        total =+ item.value
-        numberOfRatings =+ 1
-    }
-
-    averageRating = total / numberOfRatings
-}
 
 @SuppressLint("MutableCollectionMutableState")
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
@@ -116,32 +97,29 @@ fun InsightsScreen(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp),
+                    .height(200.dp),
                 shape = RoundedCornerShape(16.dp) // This applies rounded corners to the Card
             ) {
                 Column(
                     modifier = Modifier
-                        .padding(top = 16.dp) // Adjust this value to increase/decrease padding from the top inside the Card
+                        .background(color = MaterialTheme.colorScheme.inversePrimary)
+                        .fillMaxHeight()
                         .fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
                     AnimatedNumberText(averageRating)
 //                    val formattedAverage = String.format("%.2f", averageRating)
 //                    Text(text = formattedAverage)
-                    Text(
-                        text = "Mood Ratings for Past 7 Days",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-
+//
 //                    MoodChart(moodRatingsMap)
-
-                    Text(
-                        text = "5 most logged Moods and Symptoms for past 30 days",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.padding(bottom = 16.dp) // Adds some space between the text and the chart or "no data" message
-                    )
+//
+//                    Text(
+//                        text = "5 most logged Moods and Symptoms for past 30 days",
+//                        style = MaterialTheme.typography.bodyMedium,
+//                        color = MaterialTheme.colorScheme.onBackground,
+//                        modifier = Modifier.padding(bottom = 16.dp) // Adds some space between the text and the chart or "no data" message
+//                    )
 //                    MoodAndSymptomsChart(listForChart)
                 }
             }
@@ -426,7 +404,8 @@ fun AnimatedNumberText(targetValue: Float, animationDuration: Int = 1000) {
     val animatedNumber by animatedValue.asState()
 
     // Display the animated value with two decimal places
-    Text(text = String.format("%.2f", animatedNumber))
+    Text(text = "Average mood rating for past 7 days", color = Color.White)
+    Text(text = String.format("%.2f", animatedNumber), color = Color.White, fontSize = 45.sp)
 }
 
 @Preview(showBackground = true)

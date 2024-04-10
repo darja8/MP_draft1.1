@@ -1,5 +1,6 @@
 package com.example.mp_draft10
 
+import SearchScreen
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -23,8 +24,10 @@ import com.example.mp_draft10.auth.SignInScreen
 import com.example.mp_draft10.auth.SignInViewModel
 import com.example.mp_draft10.auth.SignUpScreen
 import com.example.mp_draft10.auth.SignUpViewModel
-import com.example.mp_draft10.database.AddNewUserViewModel
-import com.example.mp_draft10.ui.moderator.ModeratorDashboard
+import com.example.mp_draft10.data.entities.MappedImageItemModel
+import com.example.mp_draft10.searchImage.ImageDetailScreen
+import com.example.mp_draft10.searchImage.ImageSearchViewModel
+import com.example.mp_draft10.ui.moderator.AddNewPostScreen
 import com.example.mp_draft10.ui.screens.ChatScreen
 import com.example.mp_draft10.ui.screens.CreateAvatarScreen
 import com.example.mp_draft10.ui.screens.InsightsScreen
@@ -48,14 +51,14 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val signUpViewModel: SignUpViewModel = hiltViewModel()
                     val signInViewModel: SignInViewModel = hiltViewModel()
-                    val addNewUserViewModel: AddNewUserViewModel = hiltViewModel()
+                    val viewModel: ImageSearchViewModel = hiltViewModel()
 
                     val navController = rememberNavController()
                     NavigationAuthentication(
                         navController = navController,
                         signUpViewModel = signUpViewModel,
                         signInViewModel = signInViewModel,
-                        addNewUserViewModel = addNewUserViewModel
+                        viewModel = viewModel
                     )
                 }
             }
@@ -69,7 +72,7 @@ fun NavigationAuthentication(
     navController: NavHostController = rememberNavController(),
     signUpViewModel: SignUpViewModel,
     signInViewModel: SignInViewModel,
-    addNewUserViewModel: AddNewUserViewModel
+    viewModel: ImageSearchViewModel,
 ) {
     val auth = FirebaseAuth.getInstance()
     val isUserAuthenticated = remember { mutableStateOf(auth.currentUser != null) }
@@ -122,7 +125,25 @@ fun NavigationAuthentication(
             ChatScreen(navController = navController)
         }
         composable(route = AppRoutes.AddPostScreen.route){
-            ModeratorDashboard(navController = navController)
+            AddNewPostScreen(navController = navController)
+        }
+        composable(AppRoutes.SearchImage.route) {
+            SearchScreen(viewModel, onImageClicked = { imageItem ->
+                navController.currentBackStackEntry?.savedStateHandle?.set(
+                    key = "imageItem",
+                    value = imageItem
+                )
+                navController.navigate(AppRoutes.Details.route)
+            })
+        }
+        composable(AppRoutes.Details.route) {
+            val result =
+                navController.previousBackStackEntry?.savedStateHandle?.get<MappedImageItemModel>("imageItem")
+            result?.let { it1 ->
+                ImageDetailScreen(result = it1) {
+                    navController.navigateUp()
+                }
+            }
         }
     }
 }
@@ -139,6 +160,8 @@ sealed class AppRoutes(val route: String) {
     data object InsightsScreen : AppRoutes ("insight")
     data object HubScreen : AppRoutes ("hub")
     data object AddPostScreen: AppRoutes ("addpost")
+    data object SearchImage: AppRoutes ("search_image")
+    data object Details : AppRoutes("details")
 }
 
 data class BottomNavItem(val route: String, val icon: Int, val title: String)

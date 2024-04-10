@@ -1,6 +1,7 @@
 package com.example.mp_draft10.ui.screens
 //import androidx.compose.material.Icon
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -19,14 +20,22 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,23 +53,48 @@ import androidx.navigation.NavHostController
 import com.example.mp_draft10.AppRoutes
 import com.example.mp_draft10.R
 import com.example.mp_draft10.classes.Post
+import com.example.mp_draft10.database.AddNewUserViewModel
 import com.example.mp_draft10.database.PostViewModel
 import com.example.mp_draft10.ui.components.MainScreenScaffold
+import com.google.firebase.auth.FirebaseAuth
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
-fun ChatScreen(navController: NavHostController, postViewModel: PostViewModel = viewModel()) {
-
+fun ChatScreen(
+    navController: NavHostController,
+    postViewModel: PostViewModel = viewModel(),
+    addNewUserViewModel: AddNewUserViewModel = viewModel()
+) {
     val posts by postViewModel.posts.collectAsState()
-    MainScreenScaffold(navController = navController)
+    var usertype by remember { mutableStateOf("") }
+
+    // Diagnostic log to verify userType is fetched correctly
+    LaunchedEffect(key1 = null) {
+        usertype = addNewUserViewModel.fetchUserType().toString()
+        Log.d("ChatScreen", "User type: $usertype")
+    }
+
+    val showFab = usertype == "moderator"
+    MainScreenScaffold(
+        navController = navController,
+        fab = if (showFab) {
+            {
+                FloatingActionButton(onClick = { navController.navigate(AppRoutes.SearchImage.route) }) {
+                    Icon(Icons.Filled.Add, contentDescription = "Add")
+                }
+            }
+        } else null,
+    )
     {
         LazyColumn(
-            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(posts) { post ->
-                PostCard(post = post, navController)
+                PostCard(post = post, navController, postViewModel, addNewUserViewModel)
             }
             item{
                 Spacer(modifier = Modifier.padding(20.dp))
@@ -70,12 +104,13 @@ fun ChatScreen(navController: NavHostController, postViewModel: PostViewModel = 
 }
 
 @Composable
-fun PostCard(post: Post, navController: NavController) {
+fun PostCard(post: Post, navController: NavController, postViewModel: PostViewModel, addNewUserViewModel: AddNewUserViewModel) {
 
     val context = LocalContext.current
     val imageName = "backgroundpost${post.id}"
     val imageResId = context.resources.getIdentifier(imageName, "drawable", context.packageName)
-
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    val isLiked = remember { mutableStateOf(post.likes.contains(currentUser?.uid)) }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -128,12 +163,19 @@ fun PostCard(post: Post, navController: NavController) {
                     }
                 )
                 Spacer(modifier = Modifier.width(24.dp))
+                IconButton(onClick = {
+                    currentUser?.uid?.let { userId ->
+                        isLiked.value = !isLiked.value // Toggle locally for immediate UI update
+                        postViewModel.toggleLikePost(post.id, userId)
+                    }
+                }) {
                 Icon(
                     imageVector = ImageVector.vectorResource(id = R.drawable.heart),
                     contentDescription = "Likes",
                     modifier = Modifier.clickable { /* Handle like icon click */ },
-                    tint = MaterialTheme.colorScheme.tertiary
-                )
+                    tint = MaterialTheme.colorScheme.tertiary,
+
+                )}
             }
         }
     }

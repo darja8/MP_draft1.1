@@ -42,7 +42,7 @@ fun BottomNavigationBar(navController: NavController) {
                 label = {
                     Text(
                         text = item.title,
-                        color = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer else Color.Gray // Match icon color
+                        color = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer else Color.Gray
                     )
                 },
                 selected = isSelected,

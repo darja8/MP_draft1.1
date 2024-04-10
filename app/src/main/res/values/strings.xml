@@ -1,8 +1,11 @@
 <resources>
     <string name="app_name">MP_draft1.0</string>
-    <string name="id1">id1</string>
-    <string name="id2">id2</string>
-    <string name="id3">id3</string>
     <string name="thumbup">thumb up</string>
     <string name="thumbdown">thumb down</string>
+    <string name="label_search">Search Image</string>
+    <string name="error_action">OK</string>
+    <string name="error_title">Whoop\n</string>
+    <string name="cd_clear_search">Clear Search Text</string>
+    <string name="label_download_image">Download Image</string>
+    <string name="label_image_likes">%s, Image Likes</string>
 </resources>

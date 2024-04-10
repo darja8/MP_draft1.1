@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
@@ -61,7 +60,6 @@ import com.example.mp_draft10.ui.DisplaySavedAvatarAndColor
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
 
 @Composable
 fun CommentTextField(
@@ -154,14 +152,6 @@ fun PostDetailScreen(postId: String, addNewUserViewModel: AddNewUserViewModel = 
                             postId = postId,
                             userType = usertype
                         )
-                        Column (modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentWidth(Alignment.End)){
-                            comment.replies.forEach { reply ->
-                                ReplyBubble(reply = reply, viewModel = viewModel(), postViewModel,  userType = usertype)
-                            }
-                        }
-
                     }
                 }
             }
@@ -208,7 +198,7 @@ fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel, postViewMode
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp, horizontal = 12.dp),
+                    .padding(vertical = 4.dp, horizontal = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (avatarImageIndex != null && backgroundColorIndex != null) {
@@ -241,18 +231,14 @@ fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel, postViewMode
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
-                if (userType == "moderator") {
+                if ((userType == "moderator") || (currentUser?.uid == comment.userId)) {
                     IconButton(onClick = {
-                        postViewModel.removeComment(postId,comment.commentId)
+                        postViewModel.removeComment(postId, comment.commentId)
                     }) {
-                        Icon(imageVector = Icons.Filled.Delete, contentDescription = "Remove",tint = MaterialTheme.colorScheme.onBackground)
+                        Icon(imageVector = Icons.Filled.Delete, contentDescription = "Remove", tint = MaterialTheme.colorScheme.onBackground)
                     }
-                } else {
-                    // Debug or remove this part in production
-//                    Text(text = "User type is not moderator: $userType")
                 }
             }
-            // Conditionally display the TextField for reply
             if (isReplying) {
                 TextField(
                     value = replyText,
@@ -286,12 +272,36 @@ fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel, postViewMode
             }
         }
     }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.End
+    ) {
+        comment.replies.forEach { reply ->
+            ReplyBubble(
+                reply = reply,
+                viewModel = viewModel,
+                postViewModel = postViewModel,
+                userType = userType,
+                postId = postId,
+                commentId = comment.commentId
+            )
+        }
+    }
 }
 
 @Composable
-fun ReplyBubble(reply: ReplyComment, viewModel: AddNewUserViewModel, postViewModel: PostViewModel, userType: String) {
+fun ReplyBubble(
+    reply: ReplyComment,
+    viewModel: AddNewUserViewModel,
+    postViewModel: PostViewModel,
+    userType: String,
+    postId: String,
+    commentId: String
+){
     var avatarImageIndex by remember { mutableStateOf<Int?>(null) }
     var backgroundColorIndex by remember { mutableStateOf<Int?>(null) }
+    val currentUser = FirebaseAuth.getInstance().currentUser
 
     LaunchedEffect(reply.userId) {
         viewModel.fetchAvatarIndicesById(reply.userId) { bgIndex, avatarIndex ->
@@ -299,7 +309,6 @@ fun ReplyBubble(reply: ReplyComment, viewModel: AddNewUserViewModel, postViewMod
             avatarImageIndex = avatarIndex
         }
     }
-
     Card(
         modifier = Modifier
             .fillMaxWidth(0.9f)
@@ -311,7 +320,7 @@ fun ReplyBubble(reply: ReplyComment, viewModel: AddNewUserViewModel, postViewMod
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp, horizontal = 12.dp),
+                    .padding(vertical = 4.dp, horizontal = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if ((avatarImageIndex != null) && (backgroundColorIndex != null)) {
@@ -325,11 +334,12 @@ fun ReplyBubble(reply: ReplyComment, viewModel: AddNewUserViewModel, postViewMod
                 Text(
                     text = reply.text,
                     style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Start
                 )
-                if (userType == "moderator") {
+                if (userType == "moderator" || currentUser?.uid == reply.userId) {
                     IconButton(onClick = {
-//                        postViewModel.removeComment(postId, reply.replyId) // Adjust according to your actual function signature
+                        postViewModel.removeReplyFromComment(postId,commentId,reply.replyId)
                     }) {
                         Icon(
                             imageVector = Icons.Filled.Delete,
@@ -382,4 +392,3 @@ fun PostDisplay(post: Post, modifier: Modifier = Modifier) {
         }
     }
 }
-
