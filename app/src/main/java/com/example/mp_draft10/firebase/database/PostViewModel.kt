@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
 import java.util.UUID
 import javax.inject.Inject
 
@@ -30,11 +29,13 @@ class PostViewModel @Inject constructor(
 
     private var db = FirebaseFirestore.getInstance()
     private val _posts = MutableStateFlow<List<Post>>(emptyList())
-    val posts: StateFlow<List<Post>> = _posts
+    val posts: StateFlow<List<Post>> = _posts.asStateFlow()
     val postsLiveData = MutableLiveData<List<Post>>()
     private val _comments = MutableStateFlow<List<Comment>>(emptyList())
     val comments: StateFlow<List<Comment>> = _comments.asStateFlow()
     val usernames = MutableLiveData<Map<String, String>>(emptyMap())
+    private val _post = MutableStateFlow<Post?>(null)
+    val post: StateFlow<Post?> = _post.asStateFlow()
 
     init {
         fetchPostsFromFirestore()
@@ -108,16 +109,19 @@ class PostViewModel @Inject constructor(
         }
     }
 
-
-    suspend fun fetchPostById(postId: String): Post? {
-        // Fetch the post from Firestore and convert it to a Post object
-        return try {
-            val docSnapshot = FirebaseFirestore.getInstance().collection("posts").document(postId).get().await()
-            docSnapshot.toObject(Post::class.java)
-        } catch (e: Exception) {
-            null // Handle exception appropriately
-        }
+    fun fetchAllPosts() {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("posts")
+            .get()
+            .addOnSuccessListener { result ->
+                val fetchedPosts = result.toObjects(Post::class.java)
+                _posts.value = fetchedPosts // Update the mutable flow
+            }
+            .addOnFailureListener { exception ->
+                Log.e("PostViewModel", "Error fetching posts: ", exception)
+            }
     }
+
 
     fun addReplyToComment(postId: String, commentId: String, newReply: ReplyComment) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -202,29 +206,36 @@ class PostViewModel @Inject constructor(
             }
         }
     }
-
-    fun addPost(content: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                // Create a new post object with the content. Leave the ID empty as Firestore generates it.
-                val newPost = Post(content = content)
-
-                // Add the new post to the 'posts' collection. Firestore generates the ID.
-                val documentReference = db.collection("posts").add(newPost).await()
-
-                // Optionally, update the post object with the generated ID if needed elsewhere
-                val postId = documentReference.id
-                db.collection("posts").document(postId).update("id", postId).await()
-
-                withContext(Dispatchers.Main) {
-                    // Update UI or notify user of success, if necessary
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    // Handle error: update UI or notify user
-                    Log.e("AddPost", "Error adding post: ", e)
+    fun fetchPostById(postId: String, onComplete: (Post?) -> Unit) {
+        FirebaseFirestore.getInstance().collection("posts").document(postId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val post = document.toObject(Post::class.java)
+                    _post.value = post
+                    onComplete(post)
+                } else {
+                    onComplete(null)
                 }
             }
+            .addOnFailureListener {
+                onComplete(null)
+            }
+    }
+    fun savePostToFirestore(post: Post) {
+        val db = FirebaseFirestore.getInstance()
+
+        // If post.id is empty, a new document will be created. Otherwise, it updates the existing document with that ID.
+        val documentReference = if (post.id.isEmpty()) {
+            db.collection("posts").document() // Create a new document with a generated ID
+        } else {
+            db.collection("posts").document(post.id) // Use the existing ID
         }
+
+        post.id = documentReference.id // Update the post's ID with the document's ID (important for new documents)
+
+        documentReference.set(post)
+            .addOnSuccessListener { Log.d("Firestore", "Post successfully written!") }
+            .addOnFailureListener { e -> Log.w("Firestore", "Error writing post", e) }
     }
 }

@@ -88,11 +88,13 @@ dependencies {
     implementation("androidx.paging:paging-common-android:3.3.0-beta01")
     implementation("androidx.compose.material3:material3-window-size-class-android:1.2.1")
     implementation("androidx.compose.material3:material3-android:1.2.1")
+
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     implementation ("androidx.compose.material:material:1.6.3")
@@ -176,7 +178,6 @@ dependencies {
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
     implementation ("androidx.recyclerview:recyclerview:1.3.2")
-    implementation ("io.coil-kt:coil-compose:1.4.0")
     implementation ("com.squareup.moshi:moshi:1.12.0")
     implementation ("com.squareup.moshi:moshi-kotlin:1.12.0")
     kapt ("com.squareup.moshi:moshi-kotlin-codegen:1.12.0")
@@ -197,6 +198,9 @@ dependencies {
     implementation ("com.squareup.moshi:moshi:1.12.0")
     implementation ("com.squareup.moshi:moshi-kotlin:1.12.0")
     implementation ("org.jetbrains.kotlin:kotlin-reflect:1.9.20")
+
+    implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
+
 }
 
 kapt {

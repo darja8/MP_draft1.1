@@ -3,15 +3,13 @@ package com.example.mp_draft10.ui.screens
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -42,7 +40,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -50,6 +47,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.mp_draft10.AppRoutes
 import com.example.mp_draft10.R
 import com.example.mp_draft10.classes.Post
@@ -65,11 +64,13 @@ fun ChatScreen(
     postViewModel: PostViewModel = viewModel(),
     addNewUserViewModel: AddNewUserViewModel = viewModel()
 ) {
+
     val posts by postViewModel.posts.collectAsState()
     var usertype by remember { mutableStateOf("") }
 
     // Diagnostic log to verify userType is fetched correctly
-    LaunchedEffect(key1 = null) {
+    LaunchedEffect(key1 = true) {
+        postViewModel.fetchAllPosts()
         usertype = addNewUserViewModel.fetchUserType().toString()
         Log.d("ChatScreen", "User type: $usertype")
     }
@@ -97,7 +98,7 @@ fun ChatScreen(
                 PostCard(post = post, navController, postViewModel, addNewUserViewModel)
             }
             item{
-                Spacer(modifier = Modifier.padding(20.dp))
+                Spacer(modifier = Modifier.padding(24.dp))
             }
         }
     }
@@ -106,76 +107,77 @@ fun ChatScreen(
 @Composable
 fun PostCard(post: Post, navController: NavController, postViewModel: PostViewModel, addNewUserViewModel: AddNewUserViewModel) {
 
-    val context = LocalContext.current
-    val imageName = "backgroundpost${post.id}"
-    val imageResId = context.resources.getIdentifier(imageName, "drawable", context.packageName)
     val currentUser = FirebaseAuth.getInstance().currentUser
+    val userId = currentUser?.uid
     val isLiked = remember { mutableStateOf(post.likes.contains(currentUser?.uid)) }
+    val isLikedColor = if (isLiked.value) Color.Red else Color.White
+
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .height(150.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-        shape = RoundedCornerShape(16.dp) // Adjust the corner size for rounded corners
+        shape = RoundedCornerShape(16.dp)
     ) {
-        Box {
-            if (imageResId != 0) {
-                Image(
-                    painter = painterResource(id = imageResId),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.matchParentSize()
-                )
-                // Overlay Box for the foggy effect
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .background(Color.White.copy(alpha = 0.8f))
-                )
-            }
-            Column(
+        Box(modifier = Modifier
+            .fillMaxHeight()
+            .fillMaxWidth()) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(post.imageUrl)
+                    .crossfade(true)
+                    .error(R.drawable.backgroundpost1)
+                    .build(),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.matchParentSize()
+            )
+            // Overlay for readability
+            Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(10.dp)
-                    .align(Alignment.TopCenter),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = post.content,
-                    style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
+                    .matchParentSize()
+                    .background(Color.Black.copy(alpha = 0.6f))
+
+            )
+            // Text centered at the top
+            Text(
+                text = post.content,
+                style = MaterialTheme.typography.headlineMedium,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold,
+                color = Color.White, // Ensure text color contrasts with the dark fade
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+            )
+            // Icons at the bottom-left corner
             Row(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .padding(10.dp)
             ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.comment_text_outline),
-                    contentDescription = "Comments",
-                    modifier = Modifier.clickable {
-                        navController.navigate(AppRoutes.PostDetail.createRoute(post.id))
-                    }
-                )
-                Spacer(modifier = Modifier.width(24.dp))
+                IconButton(onClick = {navController.navigate(AppRoutes.PostDetail.createRoute(post.id)) }) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.comment_text_outline),
+                        contentDescription = "Comments",
+                        tint = Color.White
+                    )
+                }
+                Spacer(modifier = Modifier.width(14.dp))
                 IconButton(onClick = {
                     currentUser?.uid?.let { userId ->
                         isLiked.value = !isLiked.value // Toggle locally for immediate UI update
                         postViewModel.toggleLikePost(post.id, userId)
                     }
                 }) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.heart),
-                    contentDescription = "Likes",
-                    modifier = Modifier.clickable { /* Handle like icon click */ },
-                    tint = MaterialTheme.colorScheme.tertiary,
-
-                )}
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.heart),
+                        contentDescription = "Likes",
+                        tint = isLikedColor,
+                    )
+                }
             }
         }
     }

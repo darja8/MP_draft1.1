@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
@@ -41,16 +40,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.example.mp_draft10.R
 import com.example.mp_draft10.classes.Comment
 import com.example.mp_draft10.classes.Post
 import com.example.mp_draft10.classes.ReplyComment
@@ -104,18 +108,18 @@ fun PostDetailScreen(postId: String, addNewUserViewModel: AddNewUserViewModel = 
     val comments by postViewModel.comments.collectAsState()
     var isLoading by remember { mutableStateOf(true) }
     var usertype by remember { mutableStateOf("") }
-
-    LaunchedEffect(key1 = null){
-        usertype = addNewUserViewModel.fetchUserType().toString()
-    }
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    val isLiked = remember(post) { mutableStateOf(post?.likes?.contains(FirebaseAuth.getInstance().currentUser?.uid) ?: false) }
+    val isLikedColor = if (isLiked.value) Color.Red else Color.White // Using Gray as default
 
     LaunchedEffect(postId) {
         isLoading = true
         postViewModel.fetchCommentsForPost(postId)
-        postViewModel.fetchPostById(postId)?.let {
-            post = it
+        postViewModel.fetchPostById(postId) { fetchedPost ->
+            post = fetchedPost
+            isLoading = false
         }
-        isLoading = false
+        usertype = addNewUserViewModel.fetchUserType().toString()
     }
 
     if (isLoading) {
@@ -123,36 +127,68 @@ fun PostDetailScreen(postId: String, addNewUserViewModel: AddNewUserViewModel = 
             CircularProgressIndicator()
         }
     } else if (post != null) {
-        val gradient = Brush.verticalGradient(
-            colors = listOf(
-                MaterialTheme.colorScheme.background,
-                MaterialTheme.colorScheme.background,
-                MaterialTheme.colorScheme.secondaryContainer
-            )
-        )
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .background(brush = gradient)
-        ) {
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 60.dp)) {
-                post?.let {
-                    PostDisplay(it, modifier = Modifier.padding(8.dp))
-                }
+        Box(modifier = Modifier.fillMaxSize()) {
+            post!!.imageUrl?.let { imageUrl ->
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(imageUrl)
+                        .crossfade(true)
+                        .error(R.drawable.backgroundpost1)
+                        .build(),
+                    contentDescription = "Post Image",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentScale = ContentScale.Crop
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .background(Color.Black.copy(alpha = 0.6f))
 
-                Divider()
-
-                LazyColumn {
-                    items(comments) { comment ->
-                        CommentBubble(
-                            comment = comment,
-                            viewModel = viewModel(),
-                            postViewModel = postViewModel,
-                            postId = postId,
-                            userType = usertype
+                )
+                Text(
+                    text = post!!.content,
+                    style = MaterialTheme.typography.headlineMedium,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                )
+                Spacer(modifier = Modifier.width(14.dp))
+                Box(modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(top = 130.dp)
+                    .padding(16.dp)) {
+                    IconButton(onClick = {
+                        currentUser?.uid?.let { userId ->
+                            if (isLiked != null) {
+                                isLiked.value = !isLiked.value
+                            } // Toggle the like state
+                            postViewModel.toggleLikePost(postId, userId)
+                        }
+                    }) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.heart),
+                            contentDescription = "Likes",
+                            tint = isLikedColor,
                         )
                     }
+                }
+            }
+
+            LazyColumn(modifier = Modifier.padding(top = 200.dp)) {
+                items(comments) { comment ->
+                    CommentBubble(
+                        comment = comment,
+                        viewModel = viewModel(),
+                        postViewModel = postViewModel,
+                        postId = postId,
+                        userType = usertype
+                    )
                 }
             }
             CommentTextField(
@@ -167,6 +203,7 @@ fun PostDetailScreen(postId: String, addNewUserViewModel: AddNewUserViewModel = 
         Text("Post not found", modifier = Modifier.padding(16.dp))
     }
 }
+
 
 @Composable
 fun CommentBubble(comment: Comment, viewModel: AddNewUserViewModel, postViewModel: PostViewModel, postId: String, userType: String) {

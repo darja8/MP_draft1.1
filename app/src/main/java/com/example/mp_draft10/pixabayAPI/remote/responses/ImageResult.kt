@@ -24,6 +24,5 @@ data class ImageResult (
     val userImageURL: String,
     val views: Int,
     val webformatHeight: Int
-
 )
 

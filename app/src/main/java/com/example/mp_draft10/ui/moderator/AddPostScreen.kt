@@ -1,6 +1,7 @@
 package com.example.mp_draft10.ui.moderator
 
 import SearchScreen
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -32,8 +33,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.example.mp_draft10.classes.Post
 import com.example.mp_draft10.data.entities.MappedImageItemModel
 import com.example.mp_draft10.firebase.database.PostViewModel
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
@@ -61,7 +64,8 @@ fun AddNewPostScreen(navController: NavHostController, postViewModel: PostViewMo
     ) {
         Column(modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)) {
+            .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween) {
 
             if (selectedImageItem != null){
                 selectedImageItem?.let { imageItem ->
@@ -86,13 +90,28 @@ fun AddNewPostScreen(navController: NavHostController, postViewModel: PostViewMo
             ) {
                 Text("Add Image")
             }
-
+            Spacer(Modifier.weight(1f))
             Button(
                 onClick = {
-                    // Save the post logic here
-                    if (postText.isNotBlank()) {
-                        postViewModel.addPost(postText)
-                        navController.popBackStack()
+                    if (postText.isNotBlank() && selectedImageItem != null) {
+
+                        val currentUser = FirebaseAuth.getInstance().currentUser
+                        val userId = currentUser?.uid
+
+                        val post = selectedImageItem!!.largeImageURL?.let {
+                            Post(
+                                content = postText,
+                                imageUrl = it,
+                                imageId = selectedImageItem!!.previewURL.toString(), // Assuming `selectedImageItem` has an ID property
+                                userId = userId.toString()
+                            )
+                        }
+                        if (post != null) {
+                            postViewModel.savePostToFirestore(post)
+                        }
+                        coroutineScope.launch {
+                            navController.popBackStack()
+                        }
                     }
                 },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -108,7 +127,8 @@ fun ImagePreviewSection(item: MappedImageItemModel) {
     Box(modifier = Modifier
         .fillMaxWidth()
         .height(200.dp)
-        .padding(8.dp)) {
+        .padding(8.dp))
+        {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(item.largeImageURL)
