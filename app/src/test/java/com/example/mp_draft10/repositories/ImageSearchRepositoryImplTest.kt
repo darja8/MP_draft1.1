@@ -1,6 +1,8 @@
 package com.example.mp_draft10.repositories
 
 import com.example.mp_draft10.data.SamplePixabayProvider
+import com.example.mp_draft10.data.SamplePixabayProvider.convertJsonToModel
+import com.example.mp_draft10.data.entities.toImageModel
 import com.example.mp_draft10.pixabayAPI.remote.ApiService
 import com.example.mp_draft10.pixabayAPI.repository.ImageSearchRepositoryImpl
 import com.example.mp_draft10.pixabayAPI.repository.NetworkDataSource
@@ -24,10 +26,14 @@ import java.util.concurrent.TimeUnit
 class ImageSearchRepositoryImplTest {
 
     private val mockWebServer = MockWebServer()
-    val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+
+    val moshi = Moshi.Builder()
+        .add(KotlinJsonAdapterFactory())
+        .build()
 
     private lateinit var repository: ImageSearchRepositoryImpl
     private lateinit var dataSource: NetworkDataSource
+
 
     private val client = OkHttpClient.Builder()
         .connectTimeout(1, TimeUnit.SECONDS)
@@ -53,25 +59,20 @@ class ImageSearchRepositoryImplTest {
         mockWebServer.shutdown()
     }
 
-//    @Test
-//    fun `successfully fetches album list returns success response`() = runTest {
-//        // Setup MockWebServer response
-//        mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody(SamplePixabayProvider.jsonResponse))
-//
-//        // Attempt to fetch data
-//        val response = repository.fetchSearchData("apple")
-//
-//        // Assert that response is not null
-//        assertThat(response).isNotNull()
-//
-//        // Deserialize the expected JSON response for comparison
-//        val moshi: Moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
-//        val jsonAdapter: JsonAdapter<PixabayResponse> = moshi.adapter(PixabayResponse::class.java)
-//        val expectedResponse: PixabayResponse? = jsonAdapter.fromJson(SamplePixabayProvider.jsonResponse)
-//
-//        // Compare expected and actual results
-//        assertThat(response?.hits).isEqualTo(expectedResponse?.hits)
-//    }
+    @Test
+    fun `successfully fetches album list return success response`() = runTest {
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(200)
+                .setBody(SamplePixabayProvider.jsonResponse)
+        )
+
+        val response = repository.fetchSearchData("apple")
+        Truth.assertThat(response).isNotNull()
+
+        val expected = convertJsonToModel(SamplePixabayProvider.jsonResponse).hits.map { it.toImageModel() }
+        Truth.assertThat(response).isEqualTo(expected)
+    }
 
 
     @Test(expected = IllegalStateException::class)

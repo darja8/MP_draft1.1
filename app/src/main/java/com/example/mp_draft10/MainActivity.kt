@@ -1,5 +1,6 @@
 package com.example.mp_draft10
 
+import AddNewArticleScreen
 import SearchScreen
 import android.os.Build
 import android.os.Bundle
@@ -145,6 +146,9 @@ fun NavigationAuthentication(
                 }
             }
         }
+        composable(AppRoutes.AddArticleScreen.route){
+            AddNewArticleScreen()
+        }
     }
 }
 
@@ -159,9 +163,10 @@ sealed class AppRoutes(val route: String) {
     data object TodayScreen : AppRoutes ("today")
     data object InsightsScreen : AppRoutes ("insight")
     data object HubScreen : AppRoutes ("hub")
-    data object AddPostScreen: AppRoutes ("addpost")
+    data object AddPostScreen: AppRoutes ("add_post")
     data object SearchImage: AppRoutes ("search_image")
     data object Details : AppRoutes("details")
+    data object AddArticleScreen: AppRoutes("add_article")
 }
 
 data class BottomNavItem(val route: String, val icon: Int, val title: String)

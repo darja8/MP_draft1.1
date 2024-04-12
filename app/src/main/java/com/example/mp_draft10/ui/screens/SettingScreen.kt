@@ -11,6 +11,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.mp_draft10.AppRoutes
@@ -75,14 +77,27 @@ fun SettingsScreen(navController: NavHostController, addNewUserViewModel: AddNew
                 }
             )
             if(userType == "moderator"){
+                Text(text = "Moderator Options", Modifier.align(Alignment.Start).padding(start = 15.dp))
+                Divider()
                 ListItem(
                     modifier = Modifier.clickable {
                     navController.navigate(AppRoutes.AddPostScreen.route)  },
-                    headlineContent = { Text("Moderator Dashboard") },
+                    headlineContent = { Text("Create post") },
                     trailingContent = {
                         Icon(
                             Icons.Filled.Analytics,
-                            contentDescription = "Moderator Dashboard",
+                            contentDescription = "Add post",
+                        )
+                    }
+                )
+                ListItem(
+                    modifier = Modifier.clickable {
+                        navController.navigate(AppRoutes.AddArticleScreen.route)  },
+                    headlineContent = { Text("Add Article") },
+                    trailingContent = {
+                        Icon(
+                            Icons.AutoMirrored.Filled.MenuBook,
+                            contentDescription = "Create Article",
                         )
                     }
                 )
@@ -92,18 +107,11 @@ fun SettingsScreen(navController: NavHostController, addNewUserViewModel: AddNew
 
             ListItem(
                 modifier = Modifier.clickable {
-                    // Sign out from Firebase Auth
                     FirebaseAuth.getInstance().signOut()
 
-                    // Navigate to Sign In screen immediately after signing out
                     navController.navigate(AppRoutes.SignIn.route) {
-                        // Clear back stack to prevent going back to authenticated screens
                         popUpTo(AppRoutes.SignIn.route) { inclusive = true }
                     }
-
-                    // Consider calling restartApp(context) here only if necessary
-                    // You might delay this operation or ensure it navigates to SignIn route upon restart
-                    // Example: restartApp(context)
                 },
                 headlineContent = { Text("Log Out", color = MaterialTheme.colorScheme.error) },
                 trailingContent = {

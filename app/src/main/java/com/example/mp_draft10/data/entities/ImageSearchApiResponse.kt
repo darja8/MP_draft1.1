@@ -3,8 +3,8 @@ package com.example.mp_draft10.data.entities
 import android.os.Parcel
 import android.os.Parcelable
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import kotlinx.parcelize.Parceler
-
 
 data class PixabayResponse(
 

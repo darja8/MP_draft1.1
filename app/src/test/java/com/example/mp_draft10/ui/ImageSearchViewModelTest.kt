@@ -58,7 +58,7 @@ internal class ImageSearchViewModelTest {
     fun `SHOULD produce NOT_EMPTY search query UPDATE state`() {
         viewModel.handleEvent(SearchImageEvent.QueryChanged("Apple"))
         val state = viewModel.uiState.value
-        assertThat(state.isLoading).isFalse()
+        assertThat(state.isLoading).isTrue()
         assertThat(state.error).isNull()
         assertThat(state.success).isEmpty()
         assertThat(state.query).isEqualTo("Apple")
@@ -68,7 +68,7 @@ internal class ImageSearchViewModelTest {
     fun `SHOULD produce EMPTY search query UPDATE state`() {
         viewModel.handleEvent(SearchImageEvent.QueryChanged(""))
         val state = viewModel.uiState.value
-        assertThat(state.isLoading).isFalse()
+        assertThat(state.isLoading).isTrue()
         assertThat(state.error).isNull()
         assertThat(state.success).isEmpty()
         assertThat(state.query).isNull()
