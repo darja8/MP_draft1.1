@@ -1,9 +1,7 @@
-package com.example.mp_draft10.firebase.database
+package com.example.mp_draft10
 
-//import com.example.mp_draft10.model.MoodRating
-//import com.example.mp_draft10.model.MoodRating.*
 import android.app.Application
-import android.content.ContentValues.TAG
+import android.content.ContentValues
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.getValue
@@ -32,7 +30,7 @@ import javax.inject.Inject
 import kotlin.random.Random
 
 @HiltViewModel
-class AddNewUserViewModel @Inject constructor(private val application: Application): AndroidViewModel(application = application) {
+class MockAddNewUserViewModel @Inject constructor(private val application: Application): AndroidViewModel(application = application) {
 
     val repository = AppModule.providesDatabaseRepositoryImpl()
     var userName by  mutableStateOf("")
@@ -58,7 +56,7 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
         db.collection("Users").document(userId).collection("Dates")
             .addSnapshotListener { snapshot, e ->
                 if (e != null) {
-                    Log.w(TAG, "Listen failed.", e)
+                    Log.w(ContentValues.TAG, "Listen failed.", e)
                     return@addSnapshotListener
                 }
 
@@ -160,16 +158,16 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
                 .set(data)
                 .addOnSuccessListener {
                     // Handle success
-                    Log.d(TAG, "Mood saved successfully!")
+                    Log.d(ContentValues.TAG, "Mood saved successfully!")
                     Toast.makeText(application, "Saved successfully!", Toast.LENGTH_SHORT).show()
                 }.addOnFailureListener { e ->
                     // Handle failure
-                    Log.e(TAG, "Error saving mood", e)
+                    Log.e(ContentValues.TAG, "Error saving mood", e)
                     Toast.makeText(application, "Failed to save mood", Toast.LENGTH_SHORT).show()
                 }
         } else {
             // Handle case where userEmail is null or empty
-            Log.e(TAG, "User email is null or empty!")
+            Log.e(ContentValues.TAG, "User email is null or empty!")
             Toast.makeText(application, "User email is null or empty!", Toast.LENGTH_SHORT).show()
         }
     }
@@ -215,7 +213,7 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
                 MoodData(date = date, moodRating = 0, moodObjects = emptyList(), symptomObjects = emptyList())
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error fetching mood data", e)
+            Log.e(ContentValues.TAG, "Error fetching mood data", e)
             null
         }
     }
@@ -296,7 +294,7 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
                     moodRatingsMap[currentDate] = moodRating
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error fetching mood data for $currentDate", e)
+                Log.e(ContentValues.TAG, "Error fetching mood data for $currentDate", e)
             }
             currentDate = currentDate.plusDays(1)
         }
@@ -324,7 +322,7 @@ class AddNewUserViewModel @Inject constructor(private val application: Applicati
                     moodRatingsMap[currentDate] = moodRating
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error fetching mood data for $currentDate", e)
+                Log.e(ContentValues.TAG, "Error fetching mood data for $currentDate", e)
             }
             currentDate = currentDate.plusDays(1)
         }
