@@ -5,5 +5,7 @@ data class Article (
     val articleId: String = "",
     val articleText: String = "",
     val tags: List<ArticleTag> = emptyList(),
-    val imageId: String = ""
+    val imageId: String = "",
+    val titleColor: String = "",
+    val backgroundColor: String = ""
 )
