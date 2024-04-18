@@ -3,6 +3,7 @@ package com.example.mp_draft10.firebase.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mp_draft10.firebase.auth.util.Resource
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -34,5 +35,16 @@ open class SignInViewModel @Inject constructor(private val repository: AuthRepos
                 }
             }
         }
+    }
+    fun sendPasswordResetEmail(email: String) {
+        val auth = FirebaseAuth.getInstance()
+        auth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+//                    _signInState.send() = SignInState(isSuccess = "Reset link sent to your email")
+                } else {
+//                    _signInState.value = SignInState(isError = "Failed to send reset email: ${task.exception?.message}")
+                }
+            }
     }
 }

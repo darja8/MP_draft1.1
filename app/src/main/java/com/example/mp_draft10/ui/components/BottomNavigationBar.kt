@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.mp_draft10.AppRoutes
@@ -25,7 +26,8 @@ fun BottomNavigationBar(navController: NavController) {
         BottomNavItem(AppRoutes.HubScreen.route, R.drawable.comment_text_outline, "Hub")
     )
     BottomNavigation(
-        backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
+        elevation = 10.dp,
+        backgroundColor = MaterialTheme.colorScheme.background,
     ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
@@ -36,13 +38,13 @@ fun BottomNavigationBar(navController: NavController) {
                     Icon(
                         painter = painterResource(id = item.icon),
                         contentDescription = item.title,
-                        tint = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer else Color.Gray
+                        tint = if (isSelected) MaterialTheme.colorScheme.primary else Color.Gray
                     )
                 },
                 label = {
                     Text(
                         text = item.title,
-                        color = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer else Color.Gray
+                        color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Gray
                     )
                 },
                 selected = isSelected,

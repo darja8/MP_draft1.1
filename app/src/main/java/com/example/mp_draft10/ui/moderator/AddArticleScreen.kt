@@ -1,4 +1,5 @@
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,11 +20,13 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.LocalTextStyle
+import androidx.compose.material.Switch
+import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ColorLens
@@ -37,9 +40,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,12 +71,15 @@ fun AddNewArticleScreen(articleViewModel: ArticleViewModel = hiltViewModel()) {
     var articleTitle by remember { mutableStateOf("") }
     val imageId by remember { mutableStateOf("") }
     val selectedTags = remember { mutableStateListOf<String>() }  // Active tags selected by the user
-    var selectedImageId by remember { mutableStateOf<Int?>(null) }
+//    var selectedImageId by remember { mutableStateOf<Int?>(null) }
     var textColor by remember { mutableStateOf(Color.Black) }
     var cardBackgroundColor by remember { mutableStateOf(Color.White) }
     var showTextColorPicker by remember { mutableStateOf(false) }
     var showBackgroundColorPicker by remember { mutableStateOf(false) }
     var previewTextColor by remember { mutableStateOf(Color.Black) }
+    var selectedTextColorIndex by remember { mutableIntStateOf(0) }
+    var selectedImageIndex by remember { mutableStateOf<Int?>(null) }
+    var isDailyArticle by rememberSaveable { mutableStateOf(false) }
 
     LazyColumn(
         modifier = Modifier
@@ -90,15 +98,18 @@ fun AddNewArticleScreen(articleViewModel: ArticleViewModel = hiltViewModel()) {
                     .wrapContentWidth(),
             ) {
                 Box {
-                    selectedImageId?.let {
-                        Image(
-                            painter = painterResource(id = it),
-                            contentDescription = "Selected Article Image",
-                            modifier = Modifier
-                                .fillMaxSize(),
-                            contentScale = ContentScale.FillWidth,
-                            alignment = Alignment.BottomCenter
-                        )
+                    // Use selectedImageIndex to retrieve the image resource ID from articleImages
+                    selectedImageIndex?.let { index ->
+                        val imageResId = articleImages.getOrNull(index)  // Safely retrieve the image ID using the index
+                        imageResId?.let {
+                            Image(
+                                painter = painterResource(id = it),
+                                contentDescription = "Selected Article Image",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.FillWidth,
+                                alignment = Alignment.BottomCenter
+                            )
+                        }
                     }
                     if (articleTitle.isNotEmpty()) {
                         Text(
@@ -107,7 +118,7 @@ fun AddNewArticleScreen(articleViewModel: ArticleViewModel = hiltViewModel()) {
                             modifier = Modifier
                                 .align(Alignment.TopCenter)
                                 .padding(8.dp),
-                            )
+                        )
                     }
                 }
             }
@@ -125,9 +136,9 @@ fun AddNewArticleScreen(articleViewModel: ArticleViewModel = hiltViewModel()) {
                 TextField(
                     value = articleTitle,
                     onValueChange = { articleTitle = it },
-                    modifier = Modifier.weight(1f),  // This makes the TextField expand to take up most of the space
+                    modifier = Modifier.weight(1f),
                     placeholder = { Text("Article Title") },
-                    textStyle = LocalTextStyle.current.copy(color = textColor)  // Apply the selected text color
+                    textStyle = LocalTextStyle.current.copy(color = textColor)
                 )
 
                 IconButton(onClick = { showTextColorPicker = true }) {
@@ -142,8 +153,9 @@ fun AddNewArticleScreen(articleViewModel: ArticleViewModel = hiltViewModel()) {
             ColorPickerDialog(
                 showDialog = showTextColorPicker,
                 onDismiss = { showTextColorPicker = false },
-                onSelectColor = { color ->
-                    previewTextColor = color
+                onSelectColor = { index ->
+                    previewTextColor = textColorList[index]
+                    selectedTextColorIndex = index
                 }
             )
         }
@@ -159,20 +171,36 @@ fun AddNewArticleScreen(articleViewModel: ArticleViewModel = hiltViewModel()) {
                 placeholder = { Text("Enter article content here") }
             )
         }
-
         item {
-            Text(text = "Select Tags")
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(8.dp)
-            ) {
-                articleTags.forEach { tag ->
-                    ArticleTagView(tagName = tag.tagName, isSelected = selectedTags.contains(tag.tagName)) { tagName ->
-                        if (selectedTags.contains(tagName)) {
-                            selectedTags.remove(tagName)
-                        } else if (selectedTags.size < 3) {
-                            selectedTags.add(tagName)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Is this a daily article?")
+                Switch(
+                    checked = isDailyArticle,
+                    onCheckedChange = {
+                        Log.d("SwitchCheck", "Before change: $isDailyArticle to $it")
+                        isDailyArticle = it
+                        Log.d("SwitchCheck", "After change: $isDailyArticle")
+                    },
+                    colors = SwitchDefaults.colors(checkedThumbColor = MaterialTheme.colorScheme.primary)
+                )
+            }
+        }
+
+        if (!isDailyArticle) {
+            item {
+                Text(text = "Select Tags")
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    articleTags.forEach { tag ->
+                        ArticleTagView(tagName = tag.tagName, isSelected = selectedTags.contains(tag.tagName)) { tagName ->
+                            if (selectedTags.contains(tagName)) {
+                                selectedTags.remove(tagName)
+                            } else if (selectedTags.size < 3) {
+                                selectedTags.add(tagName)
+                            }
                         }
                     }
                 }
@@ -181,24 +209,28 @@ fun AddNewArticleScreen(articleViewModel: ArticleViewModel = hiltViewModel()) {
 
         item {
             Text(text = "Select Image")
-            ImageSelectionRow(articleImages, selectedImageId) { imageId ->
-                selectedImageId = imageId
+            ImageSelectionRow(articleImages, selectedImageIndex) { imageId ->
+                selectedImageIndex = imageId
             }
         }
 
         item {
             Button(
                 onClick = {
-                    // Create an Article object
-                    val newArticle = Article(
-                        articleTitle = articleTitle,
-                        articleId = FirebaseFirestore.getInstance().collection("articles").document().id,
-                        articleText = articleText,
-                        tags = selectedTags.map { ArticleTag(it) },  // Correctly referencing the selectedTags for ArticleTag conversion
-                        imageId = imageId
-                    )
-                    // Save the article
-                    articleViewModel.saveArticle(newArticle)
+                    // Check if an image index is selected
+                    selectedImageIndex?.let { index ->
+                        val newArticle = Article(
+                            articleTitle = articleTitle,
+                            articleId = FirebaseFirestore.getInstance().collection("articles").document().id,
+                            articleText = articleText,
+                            tags = selectedTags.map { ArticleTag(it) },
+                            imageId = index,
+                            titleColor = selectedTextColorIndex,
+                            isDailyArticle = isDailyArticle
+                        )
+                        // Save the article
+                        articleViewModel.saveArticle(newArticle)
+                    }
                 },
             ) {
                 Text("Add Article")
@@ -214,7 +246,7 @@ fun ArticleTagView(tagName: String, isSelected: Boolean, onTagSelected: (String)
         color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
         modifier = Modifier
             .clickable { onTagSelected(tagName) }
-            .padding(8.dp)
+            .padding(4.dp)
     ) {
         Text(
             text = tagName,
@@ -228,7 +260,7 @@ fun ArticleTagView(tagName: String, isSelected: Boolean, onTagSelected: (String)
 @Composable
 fun ImageSelectionRow(
     imageList: List<Int>,
-    selectedImageId: Int?,
+    selectedImageIndex: Int?,
     onImageSelected: (Int) -> Unit
 ) {
     Row(
@@ -236,10 +268,10 @@ fun ImageSelectionRow(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.horizontalScroll(rememberScrollState())
     ) {
-        imageList.forEach { imageId ->
+        imageList.forEachIndexed { index, imageId ->
             val painter = painterResource(id = imageId)
-            ImageItem(painter, imageId == selectedImageId) {
-                onImageSelected(imageId)
+            ImageItem(painter, selectedImageIndex == index) {
+                onImageSelected(index)  // Pass the index instead of the imageId
             }
         }
     }
@@ -268,7 +300,7 @@ fun ImageItem(
 }
 
 @Composable
-fun ColorPickerDialog(showDialog: Boolean, onDismiss: () -> Unit, onSelectColor: (Color) -> Unit) {
+fun ColorPickerDialog(showDialog: Boolean, onDismiss: () -> Unit, onSelectColor: (Int) -> Unit) {
     if (showDialog) {
         AlertDialog(
             onDismissRequest = onDismiss,
@@ -282,14 +314,14 @@ fun ColorPickerDialog(showDialog: Boolean, onDismiss: () -> Unit, onSelectColor:
                         .fillMaxWidth()
                         .padding(16.dp)
                 ) {
-                    items(textColorList) { color ->
+                    itemsIndexed(textColorList) { index, color ->
                         Box(
                             modifier = Modifier
                                 .size(40.dp)
-                                .padding(4.dp)  // Padding between items
+                                .padding(4.dp)
                                 .background(color)
                                 .clickable {
-                                    onSelectColor(color)
+                                    onSelectColor(index)
                                     onDismiss()
                                 }
                         )

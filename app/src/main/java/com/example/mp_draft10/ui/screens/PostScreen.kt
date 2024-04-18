@@ -1,4 +1,5 @@
 package com.example.mp_draft10.ui.screens
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,14 +21,19 @@ import androidx.compose.material.Icon
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -52,6 +58,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.mp_draft10.R
@@ -102,8 +109,10 @@ fun CommentTextField(
     )
 }
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PostDetailScreen(postId: String, addNewUserViewModel: AddNewUserViewModel = viewModel(), postViewModel: PostViewModel = viewModel()) {
+fun PostDetailScreen(postId: String, navHostController: NavHostController, addNewUserViewModel: AddNewUserViewModel = viewModel(), postViewModel: PostViewModel = viewModel()) {
     var post by remember { mutableStateOf<Post?>(null) }
     val comments by postViewModel.comments.collectAsState()
     var isLoading by remember { mutableStateOf(true) }
@@ -121,13 +130,27 @@ fun PostDetailScreen(postId: String, addNewUserViewModel: AddNewUserViewModel = 
         }
         usertype = addNewUserViewModel.fetchUserType().toString()
     }
-
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(post?.content ?: "Loading Article...") },
+                navigationIcon = {
+                    IconButton(onClick = { navHostController.navigateUp() }) {
+                        androidx.compose.material3.Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                colors = TopAppBarDefaults.smallTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
+            )
+        }
+    ) { paddingValues ->
     if (isLoading) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
             CircularProgressIndicator()
         }
     } else if (post != null) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize().padding(top = 64.dp)) {
             post!!.imageUrl?.let { imageUrl ->
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
@@ -201,6 +224,7 @@ fun PostDetailScreen(postId: String, addNewUserViewModel: AddNewUserViewModel = 
         }
     } else {
         Text("Post not found", modifier = Modifier.padding(16.dp))
+    }
     }
 }
 

@@ -65,17 +65,20 @@ fun SettingsScreen(navController: NavHostController, addNewUserViewModel: AddNew
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            ListItem(
-                modifier = Modifier.clickable {
-                    navController.navigate(AppRoutes.AvatarSetting.route)  },
-                headlineContent = { Text("Set Avatar") },
-                trailingContent = {
-                    Icon(
-                        Icons.Filled.Edit,
-                        contentDescription = "Set Avatar",
-                    )
-                }
-            )
+            if (userType != "moderator"){
+                ListItem(
+                    modifier = Modifier.clickable {
+                        navController.navigate(AppRoutes.AvatarSetting.route)  },
+                    headlineContent = { Text("Set Avatar") },
+                    trailingContent = {
+                        Icon(
+                            Icons.Filled.Edit,
+                            contentDescription = "Set Avatar",
+                        )
+                    }
+                )
+            }
+
             if(userType == "moderator"){
                 Text(text = "Moderator Options", Modifier.align(Alignment.Start).padding(start = 15.dp))
                 Divider()

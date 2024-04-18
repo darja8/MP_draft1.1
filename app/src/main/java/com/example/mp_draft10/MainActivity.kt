@@ -22,6 +22,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.mp_draft10.data.entities.MappedImageItemModel
+import com.example.mp_draft10.firebase.auth.ResetPasswordScreen
 import com.example.mp_draft10.firebase.auth.SignInScreen
 import com.example.mp_draft10.firebase.auth.SignInViewModel
 import com.example.mp_draft10.firebase.auth.SignUpScreen
@@ -29,6 +30,7 @@ import com.example.mp_draft10.firebase.auth.SignUpViewModel
 import com.example.mp_draft10.ui.moderator.AddNewPostScreen
 import com.example.mp_draft10.ui.moderator.searchImage.ImageDetailScreen
 import com.example.mp_draft10.ui.moderator.searchImage.ImageSearchViewModel
+import com.example.mp_draft10.ui.screens.ArticleScreen
 import com.example.mp_draft10.ui.screens.ChatScreen
 import com.example.mp_draft10.ui.screens.CreateAvatarScreen
 import com.example.mp_draft10.ui.screens.InsightsScreen
@@ -113,7 +115,7 @@ fun NavigationAuthentication(
         composable("postDetail/{postId}") { backStackEntry ->
             val postId = backStackEntry.arguments?.getString("postId")
             if (postId != null) {
-                PostDetailScreen(postId = postId, postViewModel = viewModel())
+                PostDetailScreen(postId = postId,navController, postViewModel = viewModel())
             }
         }
         composable(route = AppRoutes.TodayScreen.route){
@@ -149,12 +151,22 @@ fun NavigationAuthentication(
         composable(AppRoutes.AddArticleScreen.route){
             AddNewArticleScreen()
         }
+        composable(AppRoutes.ArticleScreen.route){ backStackEntry ->
+            val articleId = backStackEntry.arguments?.getString("articleId")
+            if (articleId != null) {
+                ArticleScreen(articleId, navController)
+            }
+        }
+        composable(AppRoutes.ResetPasswordScreen.route){
+            ResetPasswordScreen(navController, signInViewModel)
+        }
     }
 }
 
 sealed class AppRoutes(val route: String) {
     data object SignIn : AppRoutes("sign_in")
     data object SignUp : AppRoutes("sign_up")
+    data object ResetPasswordScreen: AppRoutes("resetPassword")
     data object Settings : AppRoutes("settings")
     data object PostDetail : AppRoutes("postDetail/{postId}") {
         fun createRoute(postId: String) = "postDetail/$postId"
@@ -167,6 +179,8 @@ sealed class AppRoutes(val route: String) {
     data object SearchImage: AppRoutes ("search_image")
     data object Details : AppRoutes("details")
     data object AddArticleScreen: AppRoutes("add_article")
+    data object ArticleScreen: AppRoutes ("article/{articleId}"){
+        fun createRoute(articleId: String) = "article/$articleId"}
 }
 
 data class BottomNavItem(val route: String, val icon: Int, val title: String)

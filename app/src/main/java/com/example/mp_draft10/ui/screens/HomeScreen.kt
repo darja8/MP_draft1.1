@@ -40,21 +40,16 @@ import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
 
+@SuppressLint("ResourceType")
 @Composable
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-@SuppressLint("ResourceType")
 fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUserViewModel = hiltViewModel()) {
     val scope = rememberCoroutineScope()
 
-    // Store selected moods and symptoms
     var selectedMoods by remember { mutableStateOf<List<String>>(emptyList()) }
     var selectedSymptoms by remember { mutableStateOf<List<String>>(emptyList()) }
     var selectedDay by remember { mutableStateOf(LocalDate.now()) }
-    var selectedMoodRating by remember { mutableIntStateOf(0) }
-
-    fun handleDaySelected(day: LocalDate) {
-        selectedDay = day
-    }
+    var selectedMoodRating by remember { mutableStateOf(0) }
 
     LaunchedEffect(selectedDay) {
         scope.launch {
@@ -66,14 +61,13 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
     }
 
     MainScreenScaffold(navController = navController) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        ) {
             item {
                 CalendarSlide(
                     onDaySelected = { day ->
-                        handleDaySelected(day) // Update selected day and fetch mood data
+                        selectedDay = day // Update selected day and fetch mood data
                     },
                     navController = navController,
                     addNewUserViewModel = addNewUserViewModel
@@ -105,7 +99,7 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
                     onClick = {
                         if(selectedMoodRating == 0 && selectedSymptoms.isEmpty() && selectedMoods.isEmpty()){
                             addNewUserViewModel.deleteDateDocument(selectedDay)
-                        }else{
+                        } else {
                             addNewUserViewModel.saveMoodToFirestore(selectedDay, selectedMoods, selectedSymptoms, selectedMoodRating)
                         }
                     },
@@ -119,6 +113,7 @@ fun TodayScreen(navController: NavHostController, addNewUserViewModel: AddNewUse
         }
     }
 }
+
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
