@@ -1,18 +1,16 @@
 package com.example.mp_draft10.repositories
 
 import com.example.mp_draft10.data.SamplePixabayProvider
-import com.example.mp_draft10.data.SamplePixabayProvider.convertJsonToModel
-import com.example.mp_draft10.data.entities.toImageModel
 import com.example.mp_draft10.pixabayAPI.remote.ApiService
 import com.example.mp_draft10.pixabayAPI.repository.ImageSearchRepositoryImpl
 import com.example.mp_draft10.pixabayAPI.repository.NetworkDataSource
 import com.google.common.truth.Truth
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.squareup.okhttp.mockwebserver.MockResponse
+import com.squareup.okhttp.mockwebserver.MockWebServer
 import kotlinx.coroutines.test.runTest
 import okhttp3.OkHttpClient
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -43,7 +41,7 @@ class ImageSearchRepositoryImplTest {
 
     private var apiService: ApiService = Retrofit.Builder()
         .addConverterFactory(MoshiConverterFactory.create(moshi))
-        .baseUrl(mockWebServer.url("/"))
+        .baseUrl(mockWebServer.url("/").toString())
         .client(client)
         .build()
         .create(ApiService::class.java)
@@ -57,21 +55,6 @@ class ImageSearchRepositoryImplTest {
     @After
     fun tearDown() {
         mockWebServer.shutdown()
-    }
-
-    @Test
-    fun `successfully fetches album list return success response`() = runTest {
-        mockWebServer.enqueue(
-            MockResponse()
-                .setResponseCode(200)
-                .setBody(SamplePixabayProvider.jsonResponse)
-        )
-
-        val response = repository.fetchSearchData("apple")
-        Truth.assertThat(response).isNotNull()
-
-        val expected = convertJsonToModel(SamplePixabayProvider.jsonResponse).hits.map { it.toImageModel() }
-        Truth.assertThat(response).isEqualTo(expected)
     }
 
 

@@ -93,4 +93,19 @@ class ArticleViewModel @Inject constructor(
             }
     }
 
+    fun removeArticle(articleId: String) {
+        val db = FirebaseFirestore.getInstance()
+
+        // Reference to the article document
+        val articleRef = db.collection("articles").document(articleId)
+
+        articleRef.delete()
+            .addOnSuccessListener {
+                Log.d("ArticleViewModel", "Article successfully removed")
+            }
+            .addOnFailureListener { exception ->
+                Log.e("ArticleViewModel", "Error removing article: ${exception.message}")
+            }
+    }
+
 }

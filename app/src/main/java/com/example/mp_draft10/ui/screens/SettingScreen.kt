@@ -29,7 +29,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -40,7 +39,6 @@ import com.google.firebase.auth.FirebaseAuth
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(navController: NavHostController, addNewUserViewModel: AddNewUserViewModel = hiltViewModel()) {
-    val context = LocalContext.current
     var userType by remember { mutableStateOf("") }
 
     LaunchedEffect(userType) {
@@ -80,7 +78,10 @@ fun SettingsScreen(navController: NavHostController, addNewUserViewModel: AddNew
             }
 
             if(userType == "moderator"){
-                Text(text = "Moderator Options", Modifier.align(Alignment.Start).padding(start = 15.dp))
+                Text(text = "Moderator Options",
+                    Modifier
+                        .align(Alignment.Start)
+                        .padding(start = 15.dp))
                 Divider()
                 ListItem(
                     modifier = Modifier.clickable {

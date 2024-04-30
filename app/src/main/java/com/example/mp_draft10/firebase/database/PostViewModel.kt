@@ -238,4 +238,37 @@ class PostViewModel @Inject constructor(
             .addOnSuccessListener { Log.d("Firestore", "Post successfully written!") }
             .addOnFailureListener { e -> Log.w("Firestore", "Error writing post", e) }
     }
+
+    fun removePost(postId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val postRef = db.collection("posts").document(postId)
+                val commentsRef = postRef.collection("comments")
+
+                // Fetch and delete all comments associated with the post
+                val batchSize = 10  // Set an appropriate batch size for your needs
+                var deletedCount: Int
+                do {
+                    // Retrieve a batch of comments
+                    val snapshot = commentsRef.limit(batchSize.toLong()).get().await()
+                    deletedCount = snapshot.size()
+                    snapshot.documents.forEach { document ->
+                        document.reference.delete().await()  // Delete each comment
+                    }
+                } while (deletedCount >= batchSize)  // Continue if there were enough comments to possibly fill another batch
+
+                // After deleting the comments, delete the post document
+                postRef.delete().await()
+
+                // Update the local UI state to reflect the removal
+                val updatedPosts = _posts.value.filterNot { it.id == postId }
+                _posts.value = updatedPosts
+
+                Log.d("RemovePost", "Post and all associated comments successfully removed")
+            } catch (e: Exception) {
+                Log.e("RemovePost", "Failed to remove post and comments: $e")
+            }
+        }
+    }
+
 }

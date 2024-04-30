@@ -18,6 +18,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -56,7 +60,7 @@ import com.google.firebase.auth.FirebaseAuth
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
-fun ChatScreen(
+fun HubScreen(
     navController: NavHostController,
     postViewModel: PostViewModel = viewModel(),
     addNewUserViewModel: AddNewUserViewModel = viewModel()
@@ -69,7 +73,7 @@ fun ChatScreen(
     LaunchedEffect(key1 = true) {
         postViewModel.fetchAllPosts()
         usertype = addNewUserViewModel.fetchUserType().toString()
-        Log.d("ChatScreen", "User type: $usertype")
+        Log.d("HubScreen", "User type: $usertype")
     }
 
     MainScreenScaffold(
@@ -84,23 +88,23 @@ fun ChatScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(posts) { post ->
-                PostCard(post = post, navController, postViewModel, addNewUserViewModel)
+                PostCard(post = post, navController, postViewModel, usertype)
             }
-            item{
+            item {
                 Spacer(modifier = Modifier.padding(24.dp))
             }
         }
     }
 }
 
-@Composable
-fun PostCard(post: Post, navController: NavController, postViewModel: PostViewModel, addNewUserViewModel: AddNewUserViewModel) {
 
+@Composable
+fun PostCard(post: Post, navController: NavController, postViewModel: PostViewModel, userType: String) {
     val currentUser = FirebaseAuth.getInstance().currentUser
     val userId = currentUser?.uid
     val isLiked = remember { mutableStateOf(post.likes.contains(currentUser?.uid)) }
     val isLikedColor = if (isLiked.value) Color.Red else Color.White
-
+    var showDialog by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
@@ -123,31 +127,27 @@ fun PostCard(post: Post, navController: NavController, postViewModel: PostViewMo
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.matchParentSize()
             )
-            // Overlay for readability
             Box(
                 modifier = Modifier
                     .matchParentSize()
                     .background(Color.Black.copy(alpha = 0.6f))
-
             )
-            // Text centered at the top
             Text(
                 text = post.content,
                 style = MaterialTheme.typography.headlineMedium,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
-                color = Color.White, // Ensure text color contrasts with the dark fade
+                color = Color.White,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .padding(top = 16.dp, start = 16.dp, end = 16.dp)
             )
-            // Icons at the bottom-left corner
             Row(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .padding(10.dp)
             ) {
-                IconButton(onClick = {navController.navigate(AppRoutes.PostDetail.createRoute(post.id)) }) {
+                IconButton(onClick = { navController.navigate(AppRoutes.PostDetail.createRoute(post.id)) }) {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.comment_text_outline),
                         contentDescription = "Comments",
@@ -157,7 +157,7 @@ fun PostCard(post: Post, navController: NavController, postViewModel: PostViewMo
                 Spacer(modifier = Modifier.width(14.dp))
                 IconButton(onClick = {
                     currentUser?.uid?.let { userId ->
-                        isLiked.value = !isLiked.value // Toggle locally for immediate UI update
+                        isLiked.value = !isLiked.value
                         postViewModel.toggleLikePost(post.id, userId)
                     }
                 }) {
@@ -167,7 +167,38 @@ fun PostCard(post: Post, navController: NavController, postViewModel: PostViewMo
                         tint = isLikedColor,
                     )
                 }
+                if (userType == "moderator") {
+                    IconButton(
+                        onClick = { showDialog = true },
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete Post",
+                            tint = Color.White
+                        )
+                    }
+                }
             }
         }
+    }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text(text = "Confirm Delete") },
+            text = { Text(text = "Are you sure you want to delete this post? This action cannot be undone.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog = false
+                        postViewModel.removePost(post.id)
+                    }
+                ) { Text("Delete") }
+            },
+            dismissButton = {
+                Button(onClick = { showDialog = false }) { Text("Cancel") }
+            }
+        )
     }
 }

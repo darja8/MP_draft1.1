@@ -1,9 +1,9 @@
 package com.example.mp_draft10.classes
 
 data class Article (
-    val articleTitle: String = "",
+    var articleTitle: String = "",
     val articleId: String = "",
-    val articleText: String = "",
+    var articleText: String = "",
     val tags: List<ArticleTag> = emptyList(),
     val imageId: Int = 0,
     val titleColor: Int = 0,

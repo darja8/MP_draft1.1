@@ -31,8 +31,8 @@ import com.example.mp_draft10.ui.moderator.AddNewPostScreen
 import com.example.mp_draft10.ui.moderator.searchImage.ImageDetailScreen
 import com.example.mp_draft10.ui.moderator.searchImage.ImageSearchViewModel
 import com.example.mp_draft10.ui.screens.ArticleScreen
-import com.example.mp_draft10.ui.screens.ChatScreen
 import com.example.mp_draft10.ui.screens.CreateAvatarScreen
+import com.example.mp_draft10.ui.screens.HubScreen
 import com.example.mp_draft10.ui.screens.InsightsScreen
 import com.example.mp_draft10.ui.screens.PostDetailScreen
 import com.example.mp_draft10.ui.screens.SettingsScreen
@@ -125,7 +125,7 @@ fun NavigationAuthentication(
             InsightsScreen(navController = navController)
         }
         composable(route = AppRoutes.HubScreen.route){
-            ChatScreen(navController = navController)
+            HubScreen(navController = navController)
         }
         composable(route = AppRoutes.AddPostScreen.route){
             AddNewPostScreen(navController = navController)
