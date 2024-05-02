@@ -2,14 +2,23 @@ package com.example.mp_draft10.ui
 
 import com.example.mp_draft10.classes.ArticleTag
 
+/**
+ * Tags used for Article
+ */
+
 val articleTags = mutableListOf(
-    ArticleTag("Happiness"),
-    ArticleTag("Anxiety"),
-    ArticleTag("Depression"),
-    ArticleTag("Loneliness"),
+    ArticleTag("Happy"),
+    ArticleTag("Anxious"),
+    ArticleTag("Depressed"),
+    ArticleTag("Lonely"),
     ArticleTag("Meditation"),
-    ArticleTag("Sadness"),
+    ArticleTag("Sad"),
     ArticleTag("Sleep"),
+    ArticleTag("Excited"),
+    ArticleTag("Upset"),
+    ArticleTag("Dizziness"),
+    ArticleTag("Nausea"),
+    ArticleTag("Abdominal Pain"),
 
     ArticleTag("Animals"),
     ArticleTag("Sport"),

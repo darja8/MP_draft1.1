@@ -100,7 +100,7 @@ sealed class Destinations(val path: String, val icon: ImageVector? = null) {
 }*/
 
 /*
-val dummyImageItem = ImageItem(
+val dummyImageItem = com.example.mp_draft10.ui.moderator.ImageItem(
     webformatHeight = 426,
     imageWidth = 4752,
     previewHeight = 99,

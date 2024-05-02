@@ -1,5 +1,6 @@
 package com.example.mp_draft10.ui.screens
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -65,6 +66,7 @@ import com.example.mp_draft10.R
 import com.example.mp_draft10.classes.Comment
 import com.example.mp_draft10.classes.Post
 import com.example.mp_draft10.classes.ReplyComment
+import com.example.mp_draft10.commons.disallowedWords
 import com.example.mp_draft10.firebase.database.AddNewUserViewModel
 import com.example.mp_draft10.firebase.database.PostViewModel
 import com.example.mp_draft10.ui.DisplaySavedAvatarAndColor
@@ -106,19 +108,24 @@ fun CommentTextField(
     var commentText by remember { mutableStateOf("") }
     val currentUser = FirebaseAuth.getInstance().currentUser
 
+    fun containsDisallowedWords(text: String): Boolean {
+        val words = text.split("\\s+".toRegex()).map { it.trim().toLowerCase() }
+        return words.any { it in disallowedWords }
+    }
+
     TextField(
         value = commentText,
         onValueChange = { commentText = it },
         placeholder = { Text("Write a comment...") },
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Send),
         singleLine = true,
-        colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.Transparent),
+        colors = TextFieldDefaults.textFieldColors(backgroundColor = MaterialTheme.colorScheme.background),
         modifier = modifier
             .fillMaxWidth()
             .padding(16.dp),
         trailingIcon = {
             IconButton(onClick = {
-                if (commentText.isNotBlank() && currentUser != null && postId != null) {
+                if (commentText.isNotBlank() && currentUser != null && postId != null && !containsDisallowedWords(commentText)) {
                     val newComment = Comment(
                         userId = currentUser.uid,
                         text = commentText,
@@ -126,6 +133,8 @@ fun CommentTextField(
                     )
                     postViewModel.addCommentToPost(postId, newComment)
                     commentText = ""
+                } else {
+                    Log.d("CommentInput", "Disallowed content detected.")
                 }
             }) {
                 Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "Send Comment", tint = MaterialTheme.colorScheme.onBackground)

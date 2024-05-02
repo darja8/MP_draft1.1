@@ -21,7 +21,7 @@ data class MappedImageItemModel(
 
 
 /*
-fun ImageItem.toImageModel() = MappedImageItemModel(
+fun com.example.mp_draft10.ui.moderator.ImageItem.toImageModel() = MappedImageItemModel(
     imageId = id?.toLong() ?: -1,
     user = user ?: "",
     url = previewURL ?: "",

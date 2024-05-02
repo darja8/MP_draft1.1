@@ -16,6 +16,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.mp_draft10.R
 
+/**
+ * List of all available avatars
+ * all images have been downloaded from https://www.freepik.com/author/freepik/icons/kawaii-lineal-color_47?t=f&page=39#uuid=dcc1052a-f393-4054-8a4e-159b3e2908bb
+ *
+ */
 @Composable
 fun DisplaySavedAvatarAndColor(
     avatarImageString: String?,

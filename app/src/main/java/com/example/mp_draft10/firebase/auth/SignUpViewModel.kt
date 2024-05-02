@@ -9,6 +9,10 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * ViewModel to register a user
+ */
+
 @HiltViewModel
 class SignUpViewModel @Inject constructor(private val repository: AuthRepository) : ViewModel() {
 

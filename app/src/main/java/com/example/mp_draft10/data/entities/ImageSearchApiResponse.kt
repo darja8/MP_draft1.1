@@ -161,7 +161,7 @@ data class ImageItem(
 
 
 
-fun ImageItem.toImageModel() = ImageModel(
+fun com.example.mp_draft10.ui.moderator.ImageItem.toImageModel() = ImageModel(
 	imageId = id?.toLong() ?: -1,
 	userName = user ?: "",
 	url = previewURL ?: "",

@@ -51,6 +51,10 @@ import com.example.mp_draft10.documents.termsAndConditions
 import com.example.mp_draft10.firebase.database.AddNewUserViewModel
 import kotlinx.coroutines.launch
 
+/**
+ * Screen to allow the user to sign up and create a new account
+ */
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SignUpScreen(

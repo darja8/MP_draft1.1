@@ -41,6 +41,10 @@ import androidx.navigation.NavHostController
 import com.example.mp_draft10.AppRoutes
 import kotlinx.coroutines.launch
 
+/**
+ * Screen to allow the user to sign in
+ */
+
 @Composable
 fun SignInScreen(
     navController: NavHostController,

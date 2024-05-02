@@ -1,7 +1,4 @@
 package com.example.mp_draft10.firebase.database
-
-//import com.example.mp_draft10.model.MoodRating
-//import com.example.mp_draft10.model.MoodRating.*
 import android.app.Application
 import android.content.ContentValues.TAG
 import android.util.Log
@@ -30,6 +27,30 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import javax.inject.Inject
 import kotlin.random.Random
+
+/**
+ * The AddNewUserViewModel extends AndroidViewModel and is designed for handling user-specific
+ * data operations in a Firebase Firestore database. It manages user data interactions such as
+ * adding user details, fetching and updating mood and symptom records, and maintaining user-specific
+ * settings like avatar and color indices.
+ *
+ * Key functionalities include:
+ * - Adding new user details to Firestore and setting unique identifiers for user documents.
+ * - Fetching user types and specific mood data for given dates.
+ * - Managing user avatar details, including saving and fetching avatar images and colors.
+ * - Keeping track of mood and symptom entries over various periods (e.g., last 30 days), providing
+ *   essential data for user analytics and health monitoring.
+ * - Real-time updating of date lists that have associated data, facilitating responsive user interfaces
+ *   for data selection and viewing.
+ *
+ * This ViewModel utilizes dependency injection via Hilt for robustness and ease of testing, ensuring
+ * that all database interactions are managed within the ViewModel scope, promoting a clean architecture
+ * and separation of concerns within the application.
+ *
+ * @author Daria Skrzypczak
+ * @version 1.0
+ */
+
 
 @HiltViewModel
 class AddNewUserViewModel @Inject constructor(private val application: Application): AndroidViewModel(application = application) {

@@ -27,7 +27,7 @@ sealed class SearchImageEvent {
     class UpdateCurrentItem(val item: MappedImageItemModel) :
         SearchImageEvent()
 
-   /* class UpdateCurrentImageNode(val imageItem: ImageItem) :
+   /* class UpdateCurrentImageNode(val imageItem: com.example.mp_draft10.ui.moderator.ImageItem) :
         ImageSearchEvent()*/
 
 }

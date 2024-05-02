@@ -43,6 +43,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.mp_draft10.AppRoutes
 import com.example.mp_draft10.classes.Article
+import com.example.mp_draft10.classes.MoodData
 import com.example.mp_draft10.firebase.database.AddNewUserViewModel
 import com.example.mp_draft10.firebase.database.ArticleViewModel
 import com.example.mp_draft10.ui.articleImages
@@ -89,12 +90,20 @@ fun InsightsScreen(
     var articlesList by remember { mutableStateOf<List<Article>>(emptyList()) }
     var dailyArticlesList by remember { mutableStateOf<List<Article>>(emptyList()) }
     var nonDailyArticlesList by remember { mutableStateOf<List<Article>>(emptyList()) }
+    var moodDataToday by remember { mutableStateOf<MoodData?>(null) }
+    var filteredNonDailyArticles by remember { mutableStateOf<List<Article>>(emptyList()) }
 
     LaunchedEffect(key1 = Unit) {
+        moodDataToday = addNewUserViewModel.fetchMoodDataFromSpecificDay(LocalDate.now())
+
         articleViewModel.fetchAndCategorizeArticles(
             onSuccess = { daily, nonDaily ->
                 dailyArticlesList = daily
                 nonDailyArticlesList = nonDaily
+                moodDataToday?.let { mood ->
+                    // Ensure filtering happens after both mood data and article lists are updated
+                    filteredNonDailyArticles = filterArticlesByMood(nonDaily, mood)
+                }
             },
             onError = { exception ->
                 println("Error retrieving articles: ${exception.message}")
@@ -102,12 +111,19 @@ fun InsightsScreen(
         )
     }
 
+
     LaunchedEffect(key1 = "moodRatings") {
         moodRatingsMap = addNewUserViewModel.fetchMoodRatingsForPast7Days()
     }
 
     LaunchedEffect(Unit) {
         moodRatingAverage = addNewUserViewModel.fetchMoodRatingsForPast30Days()
+    }
+
+    LaunchedEffect(moodDataToday) {
+        moodDataToday?.let { mood ->
+            filteredNonDailyArticles = filterArticlesByMood(nonDailyArticlesList, mood)
+        }
     }
 
     var numberOfRatings = 0
@@ -156,10 +172,13 @@ fun InsightsScreen(
                 }
             }
             item{
-                Text("Non-Daily Articles", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                ArticlesList(nonDailyArticlesList, navController)
+                if (filteredNonDailyArticles.isNotEmpty()){
+                    Text("Just for you", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    ArticlesList(filteredNonDailyArticles, navController)
+                }
                 Text("Daily Articles", fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 ArticlesList(dailyArticlesList, navController)
+
             }
         }
     }
@@ -231,6 +250,14 @@ fun ArticleCard(article: Article, navController: NavHostController) {
                         .padding(8.dp),
                 )
             }
+        }
+    }
+}
+
+fun filterArticlesByMood(articles: List<Article>, mood: MoodData): List<Article> {
+    return articles.filter { article ->
+        article.tags.any { tag ->
+            mood.moodObjects.contains(tag.tagName)
         }
     }
 }

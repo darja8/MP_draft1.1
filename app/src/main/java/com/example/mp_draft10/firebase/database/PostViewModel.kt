@@ -3,7 +3,6 @@ package com.example.mp_draft10.firebase.database
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.mp_draft10.classes.Comment
 import com.example.mp_draft10.classes.Post
@@ -22,6 +21,18 @@ import kotlinx.coroutines.tasks.await
 import java.util.UUID
 import javax.inject.Inject
 
+/**
+ * The PostViewModel manages all data interactions related to posts, comments, and replies within the application.
+ * It facilitates the fetching, adding, updating, and deleting of post-related data from Firebase Firestore.
+ * Key functionalities include:
+ * - Fetching posts and comments from Firestore and maintaining them in real-time.
+ * - Adding new posts, comments, and replies, ensuring that each entry is correctly linked to its respective post or comment.
+ * - Removing posts, comments, and individual replies, handling cleanup of associated data efficiently.
+ * - Updating the likes for posts and managing user interactions dynamically.
+ * This ViewModel leverages Kotlin Coroutines for asynchronous tasks, ensuring operations are performed efficiently off the UI thread.
+ */
+
+
 @HiltViewModel
 class PostViewModel @Inject constructor(
     private val application: Application
@@ -30,12 +41,9 @@ class PostViewModel @Inject constructor(
     private var db = FirebaseFirestore.getInstance()
     private val _posts = MutableStateFlow<List<Post>>(emptyList())
     val posts: StateFlow<List<Post>> = _posts.asStateFlow()
-    val postsLiveData = MutableLiveData<List<Post>>()
     private val _comments = MutableStateFlow<List<Comment>>(emptyList())
     val comments: StateFlow<List<Comment>> = _comments.asStateFlow()
-    val usernames = MutableLiveData<Map<String, String>>(emptyMap())
     private val _post = MutableStateFlow<Post?>(null)
-    val post: StateFlow<Post?> = _post.asStateFlow()
 
     init {
         fetchPostsFromFirestore()

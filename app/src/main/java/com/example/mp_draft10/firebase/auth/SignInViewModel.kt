@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * Sign in ViewModel do allow user sign in
+ */
 
 @HiltViewModel
 open class SignInViewModel @Inject constructor(private val repository: AuthRepository) : ViewModel() {

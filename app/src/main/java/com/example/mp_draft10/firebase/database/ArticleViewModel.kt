@@ -9,6 +9,19 @@ import com.google.firebase.firestore.Source
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
+/**
+ * The ArticleViewModel class is responsible for managing article-related data operations with Firestore.
+ * It provides functionality to save, retrieve, and delete articles, as well as categorize them into daily and non-daily articles.
+ * Key operations include:
+ * - Saving articles to Firestore, either creating new entries or updating existing ones based on a unique article ID.
+ * - Retrieving all articles from Firestore, with additional handling to fetch articles based on their publication status (daily or non-daily).
+ * - Fetching a single article by ID, useful for detailed article views.
+ * - Removing articles by ID, supporting content management needs.
+ * This ViewModel uses Hilt for dependency injection, ensuring that Firestore instances are efficiently managed and the Android lifecycle is respected.
+ */
+
+
+
 @HiltViewModel
 class ArticleViewModel @Inject constructor(
     private val application: Application

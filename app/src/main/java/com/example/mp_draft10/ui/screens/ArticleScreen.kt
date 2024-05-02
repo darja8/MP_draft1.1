@@ -29,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -148,7 +149,6 @@ fun ArticleScreen(articleId: String, navController: NavHostController, articleVi
                     Button(
                         onClick = {
                             isEditing = false
-                            // Update article with new text and title, and save it
                             val updatedArticle = article.copy(articleTitle = title, articleText = text)
                             articleViewModel.saveArticle(updatedArticle)
                         }
@@ -160,11 +160,13 @@ fun ArticleScreen(articleId: String, navController: NavHostController, articleVi
                         Text(
                             text = it.articleTitle,
                             style = MaterialTheme.typography.headlineMedium,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(bottom = 8.dp),
+                            color = MaterialTheme.colorScheme.primary
                         )
                         Text(
                             text = it.articleText,
-                            style = MaterialTheme.typography.bodyLarge
+                            style = MaterialTheme.typography.headlineSmall
                         )
                     } ?: Text("Loading article...")
                 }

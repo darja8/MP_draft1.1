@@ -2,6 +2,10 @@ package com.example.mp_draft10.ui
 
 import androidx.compose.ui.graphics.Color
 
+/**
+ * Lists of colors used for Avatar background and Article Text color
+ */
+
 val colorList = mutableListOf(
     Color(0xFFF0EEBB),
     Color(0xFFF1E3B7),

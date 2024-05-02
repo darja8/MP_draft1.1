@@ -2,6 +2,10 @@ package com.example.mp_draft10.ui
 import androidx.annotation.DrawableRes
 import com.example.mp_draft10.R
 
+/**
+ * List of Moods used on home screen
+ */
+
 val moodItems = mutableListOf(
     MoodItem("Anxious", R.drawable.anxious,6),
     MoodItem("Happy", R.drawable.happy,7),

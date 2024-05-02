@@ -2,6 +2,11 @@ package com.example.mp_draft10.ui
 
 import com.example.mp_draft10.R
 
+/**
+ * Lists of images used for Article creation
+ *
+ */
+
 val articleImages = listOf(
     R.drawable.article_backpacker,
     R.drawable.article_bath,

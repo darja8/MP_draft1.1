@@ -1,6 +1,5 @@
 package com.example.mp_draft10
 
-import AddNewArticleScreen
 import SearchScreen
 import android.os.Build
 import android.os.Bundle
@@ -27,6 +26,7 @@ import com.example.mp_draft10.firebase.auth.SignInScreen
 import com.example.mp_draft10.firebase.auth.SignInViewModel
 import com.example.mp_draft10.firebase.auth.SignUpScreen
 import com.example.mp_draft10.firebase.auth.SignUpViewModel
+import com.example.mp_draft10.ui.moderator.AddNewArticleScreen
 import com.example.mp_draft10.ui.moderator.AddNewPostScreen
 import com.example.mp_draft10.ui.moderator.searchImage.ImageDetailScreen
 import com.example.mp_draft10.ui.moderator.searchImage.ImageSearchViewModel
@@ -149,7 +149,7 @@ fun NavigationAuthentication(
             }
         }
         composable(AppRoutes.AddArticleScreen.route){
-            AddNewArticleScreen()
+            AddNewArticleScreen(navController)
         }
         composable(AppRoutes.ArticleScreen.route){ backStackEntry ->
             val articleId = backStackEntry.arguments?.getString("articleId")
