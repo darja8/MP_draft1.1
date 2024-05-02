@@ -40,6 +40,30 @@ import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
 
+/**
+ * This Composable function, TodayScreen, serves as the main interface for users to log and track their mood and symptoms on a daily basis.
+ * Utilizing Jetpack Compose for the UI and Firebase for backend operations.
+ *
+ * Features:
+ * - Provides an interactive calendar allowing users to select a specific day for mood and symptom tracking.
+ * - Users can log their mood rating, and select moods and symptoms from a predefined list.
+ * - All entries can be saved or deleted in Firestore based on user interaction.
+ * - Uses NavHostController for navigating between screens and utilizes ViewModel for managing UI-related data in a lifecycle-conscious way.
+ *
+ * Requirements:
+ * - Android OS 'UPSIDE_DOWN_CAKE' (update this with the actual minimum SDK version required).
+ * - Proper initialization of Firebase services and ensuring the application is connected to the correct Firebase project.
+ * - The application should handle different user roles and permissions correctly, ensuring data privacy and security.
+ *
+ * The screen is designed to be user-friendly, providing clear visual feedback and interactive elements to enhance user engagement
+ * and facilitate easy tracking of personal mood and health data. This screen is a critical component of the app’s health tracking features.
+ *
+ * @author Daria Skrzypczak (jus27)
+ * @version 1.0
+ */
+
+
+
 @SuppressLint("ResourceType")
 @Composable
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)

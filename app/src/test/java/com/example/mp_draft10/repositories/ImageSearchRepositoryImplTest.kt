@@ -59,7 +59,7 @@ class ImageSearchRepositoryImplTest {
 
 
     @Test(expected = IllegalStateException::class)
-    fun `successfully fetches album list return empty list success response`() = runTest {
+    fun successfullyFetchAlbum() = runTest {
         mockWebServer.enqueue(
             MockResponse()
                 .setResponseCode(200)
@@ -71,7 +71,7 @@ class ImageSearchRepositoryImplTest {
     }
 
     @Test(expected = retrofit2.HttpException::class)
-    fun `error occured while fetching return error response`() = runTest {
+    fun errorOccurredWhileFetching() = runTest {
         mockWebServer.enqueue(
             MockResponse()
                 .setResponseCode(500)

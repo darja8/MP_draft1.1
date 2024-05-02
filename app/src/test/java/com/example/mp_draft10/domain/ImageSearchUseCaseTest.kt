@@ -48,7 +48,7 @@ internal class ImageSearchUseCaseTest {
 
 
     @Test
-    fun `SHOULD get list of pixabay image list data WHEN fetchSearchData called`() = runTest {
+    fun fetchSearchDataNoImageList() = runTest {
         whenever(repository.fetchSearchData(any())).doSuspendableAnswer { SamplePixabayProvider.returnMappedResponse() }
 
         val useCase = ImageSearchUseCase(repository)
@@ -60,7 +60,7 @@ internal class ImageSearchUseCaseTest {
 
 
     @Test
-    fun `SHOULD produce EXCEPTION WHEN fetchSearchData called`() = runTest {
+    fun fetchSearchDataException() = runTest {
 
         lenient().`when`(repository.fetchSearchData(any()))
             .doThrow(IllegalStateException("Empty product list"))

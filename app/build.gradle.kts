@@ -14,6 +14,11 @@ android {
     namespace = "com.example.mp_draft10"
     compileSdk = 34
     defaultConfig {
+
+        ndk {
+            abiFilters.add("armeabi-v7a, arm64-v8a, x86, x86_64")
+        }
+
         applicationId = "com.example.mp_draft10"
         minSdk = 27
         targetSdk = 34
@@ -64,6 +69,7 @@ android {
 
 
     }
+
 
 }
 
@@ -135,6 +141,16 @@ dependencies {
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
     testImplementation("com.google.truth:truth:1.1.3")
     testImplementation("com.squareup.okhttp:mockwebserver:2.7.0")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.6.7")
+    implementation(platform("androidx.compose:compose-bom:2023.08.00"))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.3.0-beta02")
+
+
+
+
+
+
 
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

@@ -1,6 +1,29 @@
 package com.example.mp_draft10.ui.screens
 
-//import java.lang.reflect.Modifier
+/**
+ * This Composable function, CreateAvatarScreen, facilitates the creation and customization of user avatars
+ * using Jetpack Compose for the UI. The function allows users to select from a predefined list of avatar images and background colors.
+ *
+ * Features:
+ * - Users can choose an avatar image from a grid of options.
+ * - Users can select a background color for their avatar from a sequential color grid.
+ * - The avatar and its background color are displayed at the top of the screen within a circular frame.
+ * - Users can save their avatar customization, which is handled by the AddNewUserViewModel.
+ * - Utilizes Hilt for dependency injection to manage the instance of AddNewUserViewModel.
+ * - Uses NavHostController for navigation actions, including a button to navigate back.
+ *
+ * Requirements:
+ * - The application must include all drawable resources and ensure accurate color definitions are provided in the theme.
+ * - Ensure Material3 API compatibility and handle any deprecation or version-specific features carefully.
+ *
+ * The screen leverages modern UI development techniques with responsive and aesthetically pleasing design elements,
+ * providing an engaging and intuitive user experience.
+ *
+ * @author Daria Skrzypczak (jus27)
+ * @version 1.0
+ */
+
+
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

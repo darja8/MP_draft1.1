@@ -1,5 +1,4 @@
 package com.example.mp_draft10.ui.screens
-//import androidx.compose.material.Icon
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -57,6 +56,31 @@ import com.example.mp_draft10.firebase.database.AddNewUserViewModel
 import com.example.mp_draft10.firebase.database.PostViewModel
 import com.example.mp_draft10.ui.components.MainScreenScaffold
 import com.google.firebase.auth.FirebaseAuth
+
+/**
+ * This Composable function, HubScreen, developed with Jetpack Compose. It serves as the main hub for
+ * displaying and interacting with user-generated posts. The screen utilizes Firebase for backend operations, including fetching,
+ * liking, and deleting posts based on user roles.
+ *
+ * Features:
+ * - Displays a scrollable list of posts fetched from Firebase, where each post is represented in a visually appealing card format.
+ * - Supports interactive elements like liking a post and navigating to a detailed view of the post.
+ * - Allows users with 'moderator' privileges to delete posts.
+ * - Employs ViewModel to manage the state and operations related to posts and user interactions.
+ * - Uses NavHostController for navigating between different composables/screens within the app.
+ *
+ * Requirements:
+ * - Ensure that Firebase is correctly initialized and configured to handle real-time data operations.
+ * - The application must handle user authentication state changes and permissions effectively to display appropriate UI elements.
+ * - Adheres to Android's latest UI design principles using Material Design 3 components for a consistent and modern user interface.
+ *
+ * The screen is designed to be intuitive and user-friendly, providing essential functionalities such as post management and real-time
+ * interactions, making it a central feature of the social aspect of the app.
+ *
+ * @author Daria Skrzypczak (jus27)
+ * @version 1.0
+ */
+
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable

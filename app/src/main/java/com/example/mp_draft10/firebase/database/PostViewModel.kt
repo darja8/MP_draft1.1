@@ -225,7 +225,6 @@ class PostViewModel @Inject constructor(
     fun savePostToFirestore(post: Post) {
         val db = FirebaseFirestore.getInstance()
 
-        // If post.id is empty, a new document will be created. Otherwise, it updates the existing document with that ID.
         val documentReference = if (post.id.isEmpty()) {
             db.collection("posts").document() // Create a new document with a generated ID
         } else {

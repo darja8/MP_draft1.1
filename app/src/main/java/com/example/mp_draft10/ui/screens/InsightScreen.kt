@@ -51,6 +51,29 @@ import com.example.mp_draft10.ui.textColorList
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
+/**
+ * The InsightsScreen Composable function is designed to provide users with an analytical view of their mood trends
+ * over different time frames and to display categorized articles, built with Jetpack Compose.
+ * It uses Firebase for real-time data fetching and updates, and Hilt for dependency injection.
+ *
+ * Features:
+ * - Dynamically displays an animated average mood rating based on the last 30 days' mood data.
+ * - Lists articles categorized into 'Daily' and 'Non-Daily' for easy navigation and reading.
+ * - Allows users to view detailed articles by tapping on individual cards in a horizontally scrollable row.
+ * - Integrates ViewModel to manage the retrieval and updating of mood data and articles, ensuring UI consistency and reliability.
+ *
+ * Requirements:
+ * - Android OS 'UPSIDE_DOWN_CAKE' or newer is required due to specific API usages.
+ * - Firebase setup must be correctly configured to handle data retrieval and updates securely and efficiently.
+ * - Ensure that all network operations are performed asynchronously to maintain UI responsiveness and prevent blocking the main thread.
+ *
+ * The screen is structured to foster user engagement through interactive elements and visually appealing content presentation,
+ * enhancing the user experience by providing useful insights and relevant reading materials.
+ *
+ * @author Daria Skrzypczak (jus27)
+ * @version 1.0
+ */
+
 
 @SuppressLint("MutableCollectionMutableState")
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)

@@ -36,6 +36,31 @@ import com.example.mp_draft10.AppRoutes
 import com.example.mp_draft10.firebase.database.AddNewUserViewModel
 import com.google.firebase.auth.FirebaseAuth
 
+/**
+ * The SettingsScreen Composable function provides a settings menu for users to customize various aspects of their experience
+ * within the application built with Jetpack Compose. It is designed to offer different settings options based on the user's role,
+ * including exclusive moderator capabilities such as creating posts and articles. Firebase Authentication is used for user management.
+ *
+ * Features:
+ * - Displays user-specific settings, including options to set or update avatars and, for moderators, to add posts and articles.
+ * - Provides a log out option that signs the user out of the application and redirects them to the sign-in screen.
+ * - Utilizes a clean and accessible UI with clear navigation cues and interactive list items for better user engagement.
+ * - Leverages ViewModel to fetch user-specific settings and roles, enhancing the dynamic capabilities of the screen.
+ * - Navigation is managed via NavHostController, allowing for effective user flow and back navigation within the app.
+ *
+ * Requirements:
+ * - Firebase setup must be correctly configured to manage user authentication and role management efficiently.
+ * - The application should ensure that all user interactions are handled securely, maintaining data privacy and integrity.
+ * - All navigational and interactive elements should be tested for accessibility and ease of use to accommodate a broad user base.
+ *
+ * This screen is pivotal in enhancing user satisfaction and personalization of the app by allowing users to configure settings
+ * according to their preferences and roles, thereby making it a vital component of the application's user experience strategy.
+ *
+ * @author Daria Skrzypczak (jus27)
+ * @version 1.0
+ */
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(navController: NavHostController, addNewUserViewModel: AddNewUserViewModel = hiltViewModel()) {

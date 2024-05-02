@@ -36,6 +36,25 @@ import com.example.mp_draft10.classes.Article
 import com.example.mp_draft10.firebase.database.AddNewUserViewModel
 import com.example.mp_draft10.firebase.database.ArticleViewModel
 
+/**
+ * This Composable function, ArticleScreen, is designed for the display and editing of article content within an Android app
+ * utilizing Jetpack Compose for the UI and integrating with Firebase for backend operations.
+ *
+ * Features:
+ * - Displays details of an article identified by 'articleId'.
+ * - Allows users with 'moderator' role to edit or delete the article.
+ * - Utilizes ViewModel architecture to handle data operations such as fetching and updating articles.
+ * - Uses Hilt for dependency injection to retrieve instances of ArticleViewModel and AddNewUserViewModel.
+ * - Navigation is managed via NavHostController, allowing users to navigate back or perform other navigation actions.
+ *
+ * This screen dynamically updates its state based on user interactions and data changes fetched from the backend.
+ * It includes editable text fields when in 'edit mode', a dropdown menu for moderation actions, and real-time data fetching and updating.
+ *
+ * @author Daria Skrzypczak (jus27)
+ * @version 1.0
+ */
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable

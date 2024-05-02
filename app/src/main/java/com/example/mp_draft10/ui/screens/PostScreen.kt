@@ -72,6 +72,31 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/**
+ * The PostDetailScreen Composable function is designed for a detailed view of a specific post within the application
+ * using Jetpack Compose. This screen allows users to view, interact with, and manage content such as comments and replies
+ * on posts. It integrates Firebase for backend data handling, ensuring real-time updates and interactions.
+ *
+ * Features:
+ * - Displays detailed information about a post including its image and content.
+ * - Users can like the post, and view, add, and delete comments and replies, with additional moderation features for users with 'moderator' rights.
+ * - Utilizes a dynamic UI to handle various states like loading, content display, and error messages efficiently.
+ * - Leverages ViewModel to manage UI-related data and operations in a lifecycle-conscious way, enhancing performance and maintainability.
+ * - Navigation is managed via NavHostController, allowing for seamless user navigation within the application.
+ *
+ * Requirements:
+ * - Proper initialization and configuration of Firebase to manage authentication and database operations.
+ * - The application must handle network states and user interactions gracefully, providing feedback such as progress indicators and informative messages.
+ * - Ensure all interactive elements like buttons and text fields are accessible and provide clear, concise feedback to actions.
+ *
+ * This screen is crafted to provide an engaging and smooth user experience, promoting user interaction through comments and social engagement features,
+ * making it a crucial component of the social aspects of the app.
+ *
+ * @author Daria Skrzypczak (jus27)
+ * @version 1.0
+ */
+
+
 @Composable
 fun CommentTextField(
     modifier: Modifier = Modifier,
